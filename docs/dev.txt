@@ -1,0 +1,316 @@
+ppmdevの仕様書
+===============================================================================
+
+ppmではPPxのJavaScriptの使用ライブラリによるコードの互換性を維持するため、
+TypeScriptで記述したコードをBabelでES3相当のJavaScriptにトランスパイルし
+Rollupでバンドルしている。
+Babelは構文解析を主とし、Polyfillは必要最低限にとどめている。
+npm workaspace上で実行され、テストにはJestを採用している。
+
+基本的にはESNEXTで記述して必要なものだけ自分でPolyfillを用意する。
+EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScriptでも使えるように
+考慮してプログラムしなければならない。
+
+また、TypeScript上でPPxオブジェクトを実行することはできないため、PPx側で実行
+する際には開発用にトランスパイルしたコードを用いる。
+
+トランスパイルしたコードはUTF-8(BOM)で出力される。
+
+===============================================================================
+ワークスペースの仕様
+
+・ワークスペース全体のルートディレクトリは"ppmdev"。スコープ名は"@ppmdev"。
+  プラグインのワークスペース名は"@ppmdev/<plugin-name>"となる。
+
+・設定ファイル類は自由に編集してかまわない。
+  "tsconfigs"ディレクトリ配下の"base.json"はワークスペース全体のtsconfig.jsonの
+  共通設定になる。
+
+・開発するプラグインは"ppmdev/packages/<plugin-name>/"に配置する。
+・ソースコードは"ppmdev/packages/<plugin-name>/src/"に配置する。
+・ワークスペースへの追加は、
+  ワークスペースのルートから"npm init --scope ppmdev -w packages/<plugin-name>"
+  を実行し、その後package.jsonに_package_merge.jsonをマージする。
+
+・プラグインで使用するnpmパッケージを追加したいときは、プラグインのルート上で
+  "npm install -w @ppmdev/<plugin-name> <package-name>"を実行する。
+
+・Jestのテストコードはソースコードのあるディレクトリを基準に、
+  "./__test__/**.test.ts"に配置する。
+・"@ppmdev/modules/ppx"をimportする場合は環境変数"PPX_DIR"を事前に登録しておく。
+  詳細はmodules.txtのppx.tsの項目を参照。
+・"@ppmdev/modules/io"は"jest.mock('@ppmdev/modules/io')"でモッキングできる。
+・PPxScriptModuleではexport文を扱えないため、実装用ファイルを出力するときは
+  export文をコメントアウトすること。
+
+・標準のnpm scriptは以下になる。
+	ts		tsc --noEmit true --skipLibCheck true
+	deno		deno run --no-check --allow-all --unstable
+	build		ppmbuild
+	build:prod	set NODE_ENV=Production&&ppmbuild -- src
+	version		ppmversion
+	test		jest
+
+	・ts-nodeが遅いので確認用にdenoをセットしている。
+	  ts-nodeを使う場合は"npx ts-node"を直接実行する。
+	・denoで確認する場合は、import文にパスエイリアスは使えず、
+	  拡張子を省略できない。@scopeは使える。
+
+	・"build"は"src"ディレクトリ以下のファイルを一つ指定できる。
+	  対象ファイルの指定方法は"src/"からの相対パスとする。
+	  "npm run build index.ts", "npm run build lib/library.ts"
+	・"build"は"dev","dist"両方へ出力する。
+	・"build:prod"は"src"配下の全スクリプトを対象に"dist"へ出力する。
+	・ディレクトリ名"mod/"配下のスクリプトは出力対象外。
+	・"_"で始まるエントリは出力対象外。
+	  "__test__/", "_noOutput.ts"
+	・"cv8/"を含むパスからは"cv8/"が省かれて出力される。
+	  "src/lib/cv8/someLibrary.ts" -> "dist/lib/someLibrary.js"
+
+	・"version"は、"./install"と"./package.json"内のバージョン表記を更新します。
+	  [current: <version>]は"./install"があればorigin/main:installを、なければ
+	  origin/main:package.jsonを参照します。
+	  空文字、現在のバージョンより低い値のときは中止します。
+
+	・"test"をworkaspaceで実行すると、Jest側でエラーを発生させた時にnpmの
+	  エラーメッセージも表示されてしまうため"npx jest"を直接実行して回避する。
+	・"npx jest"は、workspaceのルートから実行する。
+	・単一のファイルに対して実行したいときは、
+	  "npx jest --testMatch **/<filename>.test.ts"とする。
+
+・ビルドしたコードは"dev/"以下に開発用、"dist/"以下に実装用が出力される。
+・ビルドした開発用コードの先頭に、import文が追加されているときはES3では使えない
+  コードが含まれている、または重複した呼び出し元を解決できなかった可能性がある。
+・実装用のコードは圧縮される。
+
+・ppmが用意しているModule、Parser、Polyfillを利用できる。
+
+・TypeScriptでは以下の型情報を参照できる。
+  Windows-Script-Host, Activex-Scripting, Activex-Adodb, PPx-Script, Jest
+
+===============================================================================
+バージョンの表記規則
+
+プラグインのバージョンは、"メジャー.マイナー.パッチ"の順に記述する
+"パッチ"は表記上、省略できるが内部では"00"と解釈される
+
+例)
+	1.2 => 10200
+	1.2.3 => 10203
+	1.20.30 => 12030
+
+===============================================================================
+開発環境と新規プラグインのセットアップ
+
+nodejsが必須。
+
+1. "ppmdev"を任意のディレクトリに配置する
+2. "ppmdev"に移動し、シェルから"npm install"を実行する
+3. "_newproject"ディレクトリを"packages"配下にコピーする
+4. "3."でコピーしたディレクトリ名を開発するプラグイン名にリネームする
+5. "npm init --scope ppmdev -w packages/<plugin-name>"を実行する
+
+===============================================================================
+スクリプトの記述ルール
+
+JScript.dll,JScript9.dll,chakra.dll,ppxcv8.dllのすべてで使えない関数・記述は
+使わない。若しくはinstallファイルの"SCRIPTTYPE_PERMISSION"で特定のdllに限定する。
+
+"WScript.CreateObject"、"ActiveXObject"はchakra.dll,ppxcv8.dllでは使えない。
+代わりにPPx.CreateObjectを使用する。ただし、ppxcv8.dllでPPx.CreateObjectを利用
+する場合に、一部のオプションが設定できない(エラーになる)ことを確認している。
+※ADODB.Streamの"Type","LineSeparator"などのプロパティ値、メソッドのオプション
+
+"Enumerator"はchakra.dllでは使えない。ppxcv8.dllでも使えないが、for ofで
+コレクションを取得できるため実際に代替手段がないのはchakra.dllのみとなる。
+ppmでは、JScript.dllと他dllの互換性を保てない場合にVBScriptで代用しているが、
+ppxcv8.dllはvbsファイルを読めないので専用のjsファイルを書く必要がある。
+要するに"Enumerator"を使う必要がある場合は、
+	JScript.dll,JScript9.dll,chakra.dll用のvbsファイル"dist/lib/xxx.vbs"
+	ppxcv8.dll用の"dist/lib/xxx.js"
+を"PPx.ScripEngineName"の値で分岐し、同等の引数を渡し、戻り値を返すようにしている。
+あるディレクトリ配下のパスを取得する手段としては、上述の分離処理スクリプト
+dist/lib/getEntries.xxxの戻り値を得る、または*whereコマンドで出力した
+ファイル情報を読み取る、などの方法が考えられる。
+
+ppxcv8.dllではフィールド名を厳密に指定しなければならない。
+	PPx.arguments => PPx.Arguments, PPx.entry => PPx.Entry
+	またライブラリ側で頭文字の大小文字を無視できるように対処されているものもある。
+	PPx.Arguments.item(Item), PPx.result(Result)
+promiseは使えない。pptray,ppbとTextModuleの*stdout,%*stdin()を使えば簡単な操作
+なら非同期実行できる。
+動的importは使えない。行頭でimportし、不要なものを読み込まないようモジュール側
+で配慮する。
+PPx.CreateObject()で利用できるオブジェクトは現状、完全には対応されていないと
+思われる。(※ScriptModuleとCV8Moduleで差異がある)
+PPx.resultで真偽値を返すとき、ScriptModuleが"-1","0"を返すことに対し、
+CV8では"True","False"を返す。ppmではどちらも、"-1","0"を返すようにしている。
+
+===============================================================================
+ディレクトリ構成
+
+ppm用プラグインは以下のファイルから構成される。
+
+	<plugin-name>\	ルートディレクトリはプラグインの名称とする
+	 ├─dev\		開発用にトランスパイルしたjsファイルが出力される
+	 ├─dist\	実装用にトランスパイルしたjsファイルが出力される
+	 ├─doc\
+	 │  └─help.txt	プラグインのヘルプ
+	 ├─setting\
+	 │  ├─base.cfg	プラグイン設定のベースとなるファイル
+	 │  └─patch.cfg	ユーザーが変更可能な設定値をまとめたファイル
+	 ├─sheet\	ppm\cache\xxx\listにコピーされるリストを配置
+	 ├─src\		ソースコード(TypeScript)を配置
+	 ├─t\		ppx用のテストスクリプト(JScript)を配置
+	 ├─userscript\	ppm\cache\xxx\userscriptにコピーするスクリプトを配置
+	 ├─install	ppmプラグインのインストール情報
+	 ├─readme.md	プロジェクトの説明書
+	 ├─package.json		npmパッケージ情報。Jestの設定を含む
+	 │			"npm init"で初期化する必要あり
+	 └─tsconfig.json	TypeScriptの設定
+
+install
+	・必須。プラグインの動作条件を指定できる
+	  条件に満たなければインストールを中断する
+	・一行目には必ず"PPM_PLUGIN_NAME="を大文字小文字を区別して記述する
+	・"VERSION"の表記は"nn.nn.nn"、または"nn.nn"のいずれかになる
+	  "1.2"は10200、"1.2.3"は10203と解釈される
+	・プラグイン固有のディレクトリを使用する場合は、"SPECIFIC_COPY_DIR="
+	  にディレクトリ名を指定すれば、ローカルのcache\xxx\以下にコピーされる。
+	  他のプラグインとのディレクトリ名の衝突を避けるためにプラグイン名を
+	  ディレクトリ名にするなどの対策をしておく
+
+dase.cfg
+	・必須。patch.cfgとマージして生成するプラグイン設定の元になる
+
+patch.cfg
+	・必須。デフォルト設定のひな型。プラグインのインストール時に
+	  <plugin-name.cfg>として..\cache\xxx\configにコピーされる
+	・<plugin-name.cfg>は*ppmEditコマンドでユーザーが直接編集でき、
+	  base.cfgとマージされる。
+	・*ppmSetDefault, *ppmCompareなどに使用される
+
+===============================================================================
+base.cfgとpatch.cfgの仕様
+
+用語
+	ID = {
+	SubID = 値(value)
+	}
+
+	テーブルはID={}の全体を指す
+	フィールド・プロパティはSubID=valueの全体を指す
+
+・コメントは行頭のセミコロン(;)のみ認識する
+  行中・語尾のセミコロンはコメントと認識されない
+
+・base.cfgとpatch.cfgにはPPxのテーブル情報を書き込める
+
+・base.cfgの仕様
+	$replace:<name> = <value>
+		patch.cfg内の$<name>の値と$replace:<name>を置換
+		patch.cfg内に$<name>が存在しない場合は設定されない
+	@default:<name> = <default-value>
+		patch.cfg内の@<name>の値と<default-value>を置換
+		patch.cfg内に@<name>が存在しない場合は<default-value>を設定
+	[?<name>:<default-value>]
+		patch.cfg内の?<name>の値と[?<name:<default-value>]を置換
+		patch.cfg内に?<name>が存在しない場合は<default-value>と置換
+
+・patch.cfgの仕様
+	$<name> = <value>
+		<value>の内容でbase.cfg内$replace:<name>を置換
+	@<name> = <value>
+		<value>の内容でbase.cfg内@default:<name>の<defalut-value>を置換
+		行頭に<TAB>を置くことで複数行のコマンドを記述できる
+	?<name> = <value>
+		<value>の内容でbase.cfg内[?<name>:<defalut-value>]を置換
+	[section][endsection]の間はユーザーが自由に設定を記述できる
+		・冒頭に"/<name> = <value>"の記述があれば、以降の行内の
+		  "[/<name>]"が"<value>"に置換される
+		・IDの頭に"-"を付けるとテーブルごと削除する
+		・テーブルの削除のみが目的の場合は"-ID ="とする
+		  A_xxx,X_xxx,XB_xxx,XC_xxx,XV_xxx,KC_main,KV_mainは削除対象から
+		  除外される(除外対象は消すと危険そうなものを適当に選別した)
+	[linecust][endlinecust]の間はユーザーが自由に*linecustを記述できる
+		・書式は"<label>,<ID[:SubID]><=param|,command>"とする
+		・この設定値は、設定ファイルのマージと同時にPPxに登録される
+		・アンインストール情報を%sgu'ppmcache'\ppm\unset\linecust.cfgに
+		  出力する
+	[execute][endexecute]の間はユーザーが自由にコマンドを記述できる
+		・ここに記述されるコマンドはプラグイン設定時に即実行される
+		・アンインストール情報を残さない
+
+===============================================================================
+サンプル設定
+
+【base.cfg】
+	KC_main = {
+	@default:A , %K"@A"
+	@default:B , %K"@B"
+	$replace:key1 , *linemessage [?msg:message1]
+	$replace:key2 , *linemessage [?msg:message2]
+	$replace:key3 , *linemessage [?msg:message3]
+	}
+
+【patch.cfg】
+	@A = %K"@R"
+	$key1 = C
+	$key2 = D
+	;$key3 = E
+	?msg = patch1
+
+	[section]
+	/s = sample
+	KC_main = {
+	E , *ppe
+	}
+
+	-S_[/s] = {
+	[/s]1 = [/s]1
+	[/s]2 = %0
+	[/s]3 = echo [/s]3
+	}
+	[endsection]
+
+	[linecust]
+	sample,KC_main:Firstevent,*set sample_flag=1
+	[endlinecust]
+
+	[execute]
+	*string p,plugin_setup=1
+	[endexecute]
+
+上記の設定ファイルをマージすると、%sp"plugin_setup"が"1"に設定され
+下記の内容の設定ファイルが生成される
+
+【cache\ppm\setup\plugin-name.cfg】
+	KC_main = {
+	A , %K"@R"
+	B , %K"@B"
+	C , *linemessage patch1
+	D , *linemessage patch1
+	E , *ppe
+	FIRSTEVENT , ~
+		%msample *set sample_flag=1
+	}
+	S_sample = {
+	sample1 = sample1
+	sample2 = %0
+	sample3 = echo sample3
+	}
+
+【cache\ppm\unset\plugin-name.cfg】
+	KC_main = {
+	-|A =
+	-|B =
+	-|C =
+	-|D =
+	-|E =
+	}
+	-|S_sample =
+
+[cache\ppm\unset\linecust.cfg]
+	plugin-name=sample,KC_main:FIRSTEVENT,
+
+===============================================================================

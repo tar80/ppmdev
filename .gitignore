@@ -1,0 +1,8 @@
+# Ignore
+_test/
+node_modules/
+package-lock.json
+.npmrc
+dev/
+dist/
+

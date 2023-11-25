@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "lint": {
+    "files": {
+      "include": ["src"],
+      "exclude": ["node_modules"]
+    },
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no--vars"]
+    }
+  }
+}

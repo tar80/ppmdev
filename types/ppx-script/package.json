@@ -1,0 +1,9 @@
+{
+  "name": "@types/ppx-script",
+  "version": "0.1.0",
+  "private": true,
+  "types": "./index.d.ts",
+  "description": "Declare PPx Object types",
+  "author": "tar80 <tar80master@gmail.com> (https://tar80.github.io/pages-pca/)",
+  "license": "MIT"
+}

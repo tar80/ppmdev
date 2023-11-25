@@ -1,0 +1,12 @@
+{
+  "name": "ppmapps",
+  "version": "0.1.0",
+  "description": "Apps for ppm",
+  "type": "module",
+  "bin": {
+    "ppmbuild": "./build.js",
+    "ppmversion": "./version.js"
+  },
+  "author": "tar80 <tar80master@gmail.com> (https://tar80.github.io/pages-pca/)",
+  "license": "MIT"
+}

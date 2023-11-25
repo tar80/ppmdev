@@ -1,0 +1,6 @@
+{
+  "name": "@ppmdev/polyfills",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Polyfilles for JScript5.7"
+}

@@ -1,0 +1,21 @@
+;plugin repositories list
+;
+;#仕様
+; 行頭にremote|localがある行を読み込みます。
+; コメントはセミコロン(;)を使います。セミコロン以降はコメント扱いになります。
+;
+; remote <plugin-name> [{[branch: <branch-name>][, commit: <commit-hash>]}]
+; 	github上で公開されているプラグインのurl該当箇所
+; 	一行に一つのパスを書く
+; local <plugin-name>
+; 	ppmのプラグインファイルで構成されたローカルリポジトリのパス
+; 	一行に一つのパスを書く
+;
+; remote 'username/plugin-name'
+; remote 'username/plugin-name' {branch: 'dev', commit: 'ABC1234'}
+; local  'path\to\repository'
+;-------------------------------------------------------------------------------
+
+;remote 'tar80/ppm-adjacentdir'
+remote 'auther/first_plugin'
+remote 'branchspec' {branch: 'dev'}

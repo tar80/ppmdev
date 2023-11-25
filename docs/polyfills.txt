@@ -1,0 +1,59 @@
+Polyfillの仕様書
+===============================================================================
+
+スクリプト内で読み込んで使用できるPolyfill。
+ワークスペース名は、"@ppmdev/polyfills"となる。
+
+import '@ppmdev/polyfills/polyfill.ts'
+
+のようにして読み込む。
+
+===============================================================================
+Polyfillの説明
+
+BabelがトランスパイルするPolyfillは、標準ではfor-ofのみ。
+ppmが用意しているPolyfillは以下のとおり。トランスパイルされるわけではなく、
+関数がそのまま追加されることに注意。
+
+String
+
+stringTrim.ts
+	String.prototype.trim();
+
+stringPrecedes.ts (独自)
+	String.prototype.precedes(str: string): => string
+		文字列の先頭から"str"までを返す
+		文字列中に"str"が存在しない場合はそのまま返す
+
+Array
+
+arrayIsArray.ts
+	Array.isArray();
+
+arrayIncludes.ts
+	Array.prototype.includes();
+
+arrayIndexOf.ts
+	Array.prototype.indexOf();
+
+arrayRemoveEmpty.ts (独自)
+	Array.prototype.removeEmpty() => unknown[];
+		配列から空の要素を省いて返す
+		対象となる要素は、'', [], {}, null, undefined
+
+Object
+
+objectKeys.ts
+	Object.keys();
+
+objectIsEmpty.ts (独自)
+	Object.isEmpty(obj: Record<string, any>) => boolean;
+		objが空({})ならtrueを返す
+
+JSON
+
+json.ts
+※json2からtoJSON()の拡張を省いたJSONクラスを提供
+	JSON.parse();
+	JSON.stringify();
+

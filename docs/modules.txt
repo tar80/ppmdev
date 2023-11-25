@@ -1,0 +1,730 @@
+モジュールの仕様書
+===============================================================================
+
+スクリプト内で読み込んで使用できる関数群。
+ワークスペース名は、"@ppmdev/modules"となる。
+
+import default form '@ppmdev/modules/module.ts'
+import {method} form '@ppmdev/modules/module.ts'
+import type {type} form '@ppmdev/modules/types.ts'
+
+のようにして読み込む。
+
+===============================================================================
+モジュールの説明
+
+	types.ts	型情報
+
+	ppx.ts		PPxオブジェクトの代替関数を提供
+		ppmで必要な関数とプロパティをテスト用の簡易な処理に置き換える
+		PPbに処理を代行させているため、環境変数"PPX_DIR"にPPxの
+		インストールディレクトリを登録しておく必要がある
+		使い方は、jestのテストコードの先頭(他モジュールより前)で読み込み、
+		"Grobal.PPx=Object.create(PPx)"を代入してグローバル変数をハックする
+
+	ansi.ts		ansiエスケープシーケンスの制御関数
+
+	data.ts		ppm全体で使用する定数
+
+	debug.ts	debug用の関数
+			実装用のコードでは除外される
+
+	echo.ts		色付きechoに関連する関数
+
+	filesystem.ts	FileSystemObjectに関する関数
+
+	git.ts		git関連の関数
+
+	guard.ts	型ガード関数
+
+	io.ts		読み書きに関する関数
+
+	meta.ts		文字列のメタ変換
+
+	path.ts		パスを制御するための関数
+
+	ppcust.ts	PPcustのヘルパー関数
+
+	ppm.ts		PPxオブジェクトのヘルパー関数
+
+	permission.ts	プラグインの動作条件を確認する関数
+
+	run.ts		*runコマンドのヘルパー関数
+
+	source.ts	S_ppm#sourcesを操作する関数
+
+	util.ts		ヘルパー関数
+
+	window.ts	アプリケーションウィンドウの制御関数
+
+===============================================================================
+types.ts 型のエクスポートのみ
+
+NlCodes		'\r\n' | '\r' | '\n'
+NlTypes		'crlf' | 'cr' | 'lf'
+AnsiColors
+	'black'|'red'|'green'|'yellow'|'blue'|'magenta'|'cyan'|'white'|'def'
+FileEncode	'sjis' | 'utf16le' | 'utf8'
+ErrorLevel	number;
+Error_String		[boolean, string]
+Level_String		[number, string]
+Letters		LowerLetters | UpperLetters
+LowerLetters	[a-z]
+UpperLetters	[A-Z]
+
+===============================================================================
+ansi.ts
+
+colors
+	.fg: AnsiColors
+		色名を文字色番号に変換して返す
+
+	.bg: AnsiColors
+		色名を背景色番号に変換して返す
+
+colorlize(
+	{message: string, esc?: boolean, fg?: AnsiColors, bg?: AnsiColors}
+	) => string
+	引数にはオブジェクトを渡す
+	<message>を指定したフォーマットの文字列に置き換えて返す
+	<esc>が"true"なら<message>内の"%"をエスケープ("%%")する
+
+type Direction = 'u' | 'd' | 'l' | 'r'
+cursorMove(direction: Direction = 'u', count: number, esc: boolean = false)
+	=> string
+	<direction>方向に向けて、<count>行ぶんカーソルを移動する
+	<esc>が"true"なら<message>内の"%"をエスケープ("%%")する
+
+clearLine(esc: boolean = false) => string
+	カーソル行全体を消去する
+	<esc>が"true"なら<message>内の"%"をエスケープ("%%")する
+
+===============================================================================
+data.ts
+
+info
+	.ppmName: 'ppx-plugin-manager'
+		ppmのプラグイン名
+
+	.ppmVersion: number
+		ppmのバージョン
+
+	.language: 'jp'
+		メッセージの言語
+
+	.nlcode: '\r\n'
+		デフォルト改行コード
+
+	.nltype: 'crlf'
+		デフォルト改行コードの種類
+
+	.ppmID: 'P'
+		ppmが標準で使用するPPxのID
+	.ppmSubID: 'Q'
+		PPx[ppmID]の補助に使用するPPxのID
+
+useLanguage() => 'en' | 'jp'
+	ppmに設定されている使用言語を返す
+
+mandatory
+	ppxVersion: number
+		必要とするPPxのバージョン
+
+	codeType: number
+		必要とするPPxのタイプ(MultiByte,Unicode)
+
+	scriptType: number
+		必要とするスクリプトライブラリ
+
+	scriptModule() => numer
+		必要とするJScriptまたはClearScriptモジュールのバージョン
+
+	modules: string[]
+		必要とするPPxモジュール
+
+	executables: string[]
+		必要とする実行ファイル
+
+uniqName
+	.initialCfg: string
+		ppmインストール直前にPPxの設定を書き出すファイルの名前
+
+	.globalCfg: string
+		ppm設定値のバックアップ
+
+	.nopluginCfg: string
+		プラグイン設定を除外したPPx設定情報
+
+	.pluginList: string
+		プラグイン導入リストの名前
+
+	.manageFiles: string
+		ppm外の設定ファイルのリスト
+
+	.updateLog: string
+		*ppmUpdateのリザルト
+
+	.repoDir: string
+		ppmプラグインリポジトリを保存するディレクトリの名前
+
+	.archDir: string
+		ppm経由でダウンロードされた書庫を保存するディレクトリの名前
+
+	.tempKey: stirng
+		ppmが一時登録するキー設定のテーブル名
+
+	.cacheDir() => string
+		ppmが使用するファイル類を保存するディレクトリの名前
+
+tmp()
+	.dir: string
+		PPxがid別に使用する一時ディレクトリパス
+
+	.file: string
+		ppmが使用する一時ファイルパス
+
+	.stdout: string
+		標準出力を書き出す一時ファイルパス
+
+	.stderr: string
+		標準エラーを書き出す一時ファイルパス
+
+	.ppmDir() => string
+		ppmが使用する一時ファイルを作成するディレクトリの名前
+		ディレクトリがない場合は作成される
+uri
+	github: string
+	rawGithub: string
+
+===============================================================================
+debug.ts
+
+debug (default)
+	.log(...args: any[]) => void
+		"[呼び出し回数] <message>"をダイアログに表示する
+		キャンセルするとスクリプトの実行を終了する
+
+	.break() => void
+		PPx.Quit(-1)を実行する
+
+	.exists(path: stirng, att: 'file'|'dir' = 'file') => boolean
+		パスが存在するか確認する
+
+	.wait(ms: string) => void
+		ミリ秒間待機する
+
+	.func(callback: Function) => void
+		デバッグ時に呼び出される関数
+
+	.jestRun() => boolean
+		jestの実行中は"true"を返す
+
+===============================================================================
+echo.ts
+
+echoExe
+	S_ppm#global:gitが設定されていれば"git\\usr\\bin\\echo.exe"を、
+	設定されていなければ"echo"を返す
+
+coloredEcho(ppbid: string, message: string) => ErrorLevel
+	echoExeを経由して、PPb上に色付きメッセージを出力する
+
+===============================================================================
+filesystem.ts
+
+default: fso
+
+createTextFile
+ (path: string, overwrite: boolean = true, unicode: boolean = false) => Error_String
+	fso.createTextFileと同じ。エラー発生時に終了せずに
+	[error: boolean, "error message"]を返す
+
+copyFile
+ (source: string, destination: string, overwite: boolean = true) => Error_String
+	fso.copyFileと同じ。エラー発生時に終了せずに
+	[error: boolean, "error message"]を返す
+
+copyFolder
+ (source: string, destination: string, overwite: boolean = true) => Error_String
+	fso.copyFolderと同じ。エラー発生時に終了せずに
+	[error: boolean, "error message"]を返す
+
+===============================================================================
+git.ts
+
+repoRoot(path: string = '') => string
+	<path>(指定がなければPPx.scriptName)がgitリポジトリ下にあれば、
+	ルートパスを返し、違えば空文字を返す
+
+originHead(path: string = '') => Error_String
+	<path>.git/refs/remotes/origin/<branch-name>からHEADコミットハッシュを
+	読み取って返す
+	戻り値は、[error: boolean, data: string]
+	<error>が"true"のとき、<data>にはエラーメッセージが入る
+
+===============================================================================
+guard.ts
+
+isEmptyStr(value: string) => boolean
+	引数で渡された値が空文字なら"true"を返す
+
+isEmptyObj(value: Record<string,unknown>) => boolean
+	<value>が {}, null のいずれかなら"true"を返す
+
+isError(error: boolean, value: unknown) => value is string
+	<error>が"true"なら<value>は"string型"
+
+isInteger(value: unknown) => value is number
+	引数で渡された値が整数なら"true"を返す
+
+===============================================================================
+io.ts
+
+read({path: string, enc?: FileEncode = 'utf8'}) => Error_String
+	<path>で指定されたファイルの内容を<enc>で読み取って返す
+	戻り値は、[error: boolean, data: string]
+	<error>が"true"のとき、<data>にはエラーメッセージが入る
+
+readLines({path: string, enc?: FileEncode = 'utf8'})
+	=> [boolean, string|{lines: string[], nl: NlCodes}]
+	<path>で指定されたファイルの内容を<enc>で読み取って返す
+	戻り値は、[error: boolean, data: string|{lines: string[], nl: NlCodes}]
+	<error>が"true"のとき、<data>にはエラーメッセージが入る
+
+writeLines({
+	path: string;
+	data: string[];
+	enc?: FileEncode = 'utf8',
+	append?: boolean = false;
+	overwrite?: boolean = false;
+	linefeed?: NlCodes = info.nlcode;
+	=> Error_String
+	<data>を<linefeed>で区切り、指定された<path>に<enc>形式で書き込む
+	<append>が"true"なら追記、<overwrite>が"true"なら上書きする
+	<path>が存在しない場合は新規作成する
+	戻り値は、[error: boolean, data: string]
+	<error>が"true"のとき、<data>にはエラーメッセージが入る
+
+stdout({cmd: string, enc?: FileEncode = 'utf8', wd?: string}) => Level_String
+	<cmd>を実行し、標準出力を一時ファイルに書き出し、<enc>で読み取って返す
+	戻り値は、[exitcode, stdout]
+	<exitcode>が0以外のとき、<stdout>にはエラーメッセージが入る
+
+===============================================================================
+meta.ts
+
+newline
+	.TypeToCode
+		改行種類("crlf","cr","lf")を改行コード("\r\n","\r","\n")へ変換
+
+	.CodeToType
+		改行コード("\r\n","\r","\n")を改行種類("crlf","cr","lf")へ変換
+
+	.Ppx
+		改行種類+改行コードを("%%bn","%%br","%%bl")へ変換
+
+	.Ascii
+		改行種類+改行コードを("-1","13","10")へ変換
+
+===============================================================================
+path.ts
+
+	pathSelf() => {scriptName: stirng, parentDir: string}
+		現在実行されているスクリプト名とその親ディレクトリを返す
+
+	pathJoin(...args: (string|number)[]) => string
+		引数で渡されたパスを"\"で区切って返す
+
+	pathNormalize(path: string, delim: string): string
+		引数で渡されたパスを"delim"で区切って返す
+
+===============================================================================
+ppcust.ts
+
+create_backup({
+	path: string,
+	comment?: boolean,
+	discover?: boolean,
+	mask?: string|string[],
+	}) => ErrorLevel
+	<path>がパス区切りを含めばフルパスとして、含まなければ
+	ppm\cache\xxx\backup\<path>にPPx設定ファイルを書き出す
+
+===============================================================================
+ppm.ts
+
+戻り値の形式が統一されていないが、基本的に
+	確認ダイアログは、boolean
+	値があるものは、string
+	値がないものは、void
+	.getXXXは、[errorlevel, string]
+	.setXXXは、errorlevel
+
+.jobstart()は特殊で、関数.jobendを返す
+
+ppm
+	.echo(title: string, message: string, exitcode?: number) => boolean
+		PPx.Execute(`%"ppm/${<title>}" %OC %I"${<message>}(${<exitcode>})"`);
+		正常終了なら"true"を返す
+
+	.question(title: string, message: string) => boolean
+		PPx.Execute(`%"ppm/${title}" %OC %Q"${message}"`);
+		正常終了なら"true"を返す
+
+	.choice(
+		ppxid: string,
+		title: string,
+		message: string,
+		type = ChoiceType = 'ynC',
+		yes?: string,
+		no?: string,
+		cancel?: string
+		) => 'cancel'|'yes'|'no'
+		PPx.Execute('%*choice(options)')を実行し、選択された結果を返す
+		yes,no,cancelを指定すると、それぞれのボタンの文字が変更される
+		<ppxid>にPPb(*option terminal)を指定したとき、"ync"以外の
+		ショートカットキーは認識されない
+
+	.execute(id: string, command: string) => ErrorLevel
+		"."なら、"<command>"を
+		"tray"なら、"*pptray -c <command>"を
+		それ以外なら、"*execute <id>,<command>"を実行する
+		idが".","tray"以外のときは"%"のエスケープが必要
+		commandに空文字を渡すとエラー
+		戻り値は終了コード
+		(削除予定)変数"ppm_test_run"が、"2"のとき、
+		`*execute B,*linemessage %%bx1b[2F[Execute] <id>,%(<command>%)`
+		に変更される
+
+	.execSync(ppbid: string, command: string) => ErrorLevel
+		PPb[<ppbid>]上で<command>を実行して結果を待つ
+		"%"のエスケープが必要
+		commandに空文字を渡すとエラー
+		戻り値は終了コード
+		(削除予定)変数"ppm_test_run"が、"2"のとき、
+		`*execute B,*linemessage %%bx1b[2F[Execute] <id>,%(<command>%)`
+		に変更される
+
+	.extract(id: string, value: string) => Level_String
+		idが"."なら、'<value>'の
+		それ以外なら、'%*extract(<id>,"<value>")'の値を返す
+		valueに空文字を渡すとエラー
+		PPx.Extract()とは戻り値の形式が異なることに注意
+
+	.lang() => 'en'|'jp'
+		"S_ppm#global:lang"を返す。空なら'jp'を返す
+
+	.global(id: string) => string
+		S_ppm#global:<id>の値を返す
+		一度取得した値はそのスクリプト内でキャッシュされる
+
+	.user(id: string) => string
+		S_ppm#user:<id>の値を返す
+		<id>内の"%"は展開される
+
+	.setuser(id: string, value: string) => ErrorLevel
+		S_ppm#user:<id>に<value>を登録する
+		<value>が空文字ならエラー
+
+	.getpath(format: string, filename: string, path: string = '') => Level_String
+		'%*name(<format>,"<filename>",<pathspec>)'の値を返す
+		formatに対象外の文字を渡すか、filenameが空文字ならエラー
+
+	.getcust(prop: string) => Level_String
+		<prop>の値を返す
+		プロパティ(KC_,E_とか)以外を渡すとエラー
+
+	.setcust(prop: string, multiline: boolean = false) => ErrorLevel
+		'*setcust <prop>'を実行する
+		@filepath、プロパティ(KC_,E_とか)以外を渡すとエラー
+		<multiline>が"true"なら、頭に'%OC 'を追加する
+		複数行のマクロを登録する例
+			ppm.setcust('KC_main:A,1st line%bn%bt2nd line', true)
+
+	.deletecust(id: string, subid?: string|number|false, load?) => ErrorLevel
+		'*deletecust <id>,<subid>'を実行し、
+		<load>が"true"であれば、'%K"loadcust"'を実行する
+
+	.setkey(subid: string, value: string, multiline: boolean = false) => uniqName.tempKey
+		'*setcust <uniqName.tempKey>:<subid>,<value>'を実行する
+		<multiline>が"true"なら、頭に'%OC 'を追加する
+
+	.deletekeys() => void
+		'*deletecust "<uniqName.tempKey>"'を実行する
+
+	.linecust({
+	  label: string,
+	  id: string,
+	  sep: string,
+	  value: string = '',
+	  esc?: boolean,
+	  once?: boolean
+	}) => void
+		引数にはオブジェクトを渡す
+		`*linecust <label>,<id><sep><value>`を実行する
+		<esc>が"true"なら<value>は"%(%)"で括られる
+		<once>が"true"なら<value>の前に`*linecust <label>,<id>,%%:`
+		を追加する
+
+	.getvalue(
+		id: string, type: '[g]c'|'[g]i'|'[g]p'|'[g]u', key: string
+		) => Level_String
+		idが"."なら、"%s<type>'<key>'"の
+		それ以外なら、`%*extract(<id>,"%%s<type>'<key>'")`の値を返す
+		typeはc, i, p, uのいずれかで、oは意味がないので除外
+		keyに空文字を渡すとエラー
+
+	.setvalue(
+		id: string, type: 'c'|'i'|'p'|'u', key: string, value: string
+		) => ErrorLevel
+		idが"."なら、'*string <type>,<key>=<value>'の
+		それ以外なら、'*execute <id>,*string <type>,<key>=<value>'
+		を実行する
+		keyに空文字を渡すとエラー
+
+	.getinput({
+		message = '',
+		title = '',
+		mode = 'g',
+		select = 'a',
+		multi = false,
+		leavecancel = false,
+		forpath = false,
+		fordijit = false,
+		k = '',
+		autoselect = false
+		}) => Level_String
+		引数にはオブジェクトを渡す
+		modeにダイアログ種類、ヒストリ種類以外の文字を渡すとエラー
+		autoselectが"true"ならENTERキー押下時に最初の補完候補を選択状態にする
+		戻り値は、[exitcode, '入力した文字列']
+
+	.linemessage(
+		ppxid: stirng, message: string|string[], status?: boolean, multi?: boolean
+		) => void
+		メッセージをログ窓に表示する。<status>が"true"ならステータス行に
+		表示する
+		<message>が配列かつ、<multi>が"true"のとき複数行表示になる
+
+	.report(message: string|string[]) => void
+		メッセージをログ窓、なければダイアログに表示する
+
+	.close(ppxid: string) => void
+		*closeppx <ppxid>を実行する
+
+	.jobstart(ppxid: string) => Function
+		`PPx.Execute('*execute <ppxid>,*job start')`を実行し、
+		戻り値に`() => PPx.Execute('*execute <ppxid>,job end')`を返す
+
+===============================================================================
+permission.ts
+
+permission
+
+	.pluginVersion(limit: number|string, name: string) => Error_String
+		プラグイン<name>の更新状態を確認する
+		未更新の場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.ppmVersion(limit: number|string) => Error_String
+		プラグインが必要とするppmのバージョン<limit>を確認する
+		条件を満たさない場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.ppxVersion(limit: number|string) => Error_String
+		プラグインが必要とするPPx本体のバージョン<limit>を確認する
+		条件を満たさない場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.scriptVersion(limit: string|number) => Error_String
+		プラグインが必要とするスクリプトモジュールのバージョン
+		対象は、PPXSCR.DLLかPPXCV8.DLL
+		条件を満たさない場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.scriptType(limit: string|number) => Error_String
+		プラグインが必要とするスクリプトライブリの制限
+		<limit>は0-5まで指定できる。数値の対応は
+		0:制限なし, 1:JS9(5.7), 2:JS9(5.8), 3:JS9(ES5), 4:Chakra(ES6), 5:CV8(ESNEXT)
+		条件を満たさない場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.codeType(limit: string|number) => Error_String
+		プラグインが必要とするPPx本体のコードタイプ(1:MultiByte, 2:Unicode)
+		ppmはMultiByteをサポートしていないため、基本的には2を指定する
+		条件を満たさない場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.libRegexp(limit: string) => Error_String
+		ppmが必要とする正規表現ライブラリの名称
+		ppmはbregonig.dllの使用を前提としているため
+		<limit>が'bregonig'でない場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.useExecutables(items: string|string[]) => Error_String
+		プラグインが必要とする実行ファイル名
+		実行ファイルが未インストールの場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.useModules(items: string|string[]) => Error_String
+		プラグインが必要とするライブラリ
+		ライブラリが未インストールの場合はインストールを中止する
+		戻り値は[error: boolean, "error message"]
+
+	.dependencies(items: string) => Error_String
+		プラグインと関連のあるプラグインや実行ファイル名を
+		インストール実行ログに表示する
+
+===============================================================================
+run.ts
+
+type RunOptions = {
+  startwith: '' | 'min' | 'max' | 'noactive' | 'bottom';
+  wait: '' | 'wait' | 'idle' | 'later' | 'no';
+  priority: 'low' | 'belownormal' | 'normal' | 'abovenormal' | 'high' | 'realtime';
+  job: 'breakjob' | 'newgroup';
+  log: boolean;
+  wd: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+type PPbOptionsSpec = {
+  bootid?: Letters;
+  bootmax?: Letters;
+  q?: boolean;
+  c?: string;
+  k?: string;
+};
+type Description = {
+  desc: string;
+  fg: colorlize['fg'];
+  bg: colorlize['bg'];
+};
+type Run = Partial<RunOptions> & {cmd: string};
+run(
+  {startwith = '', wait = '', priority, job, log, wd, x, y, width, height, cmd}: Run
+) => boolean
+	*runコマンドを実行する
+	引数にはオブジェクトを渡す
+	戻り値は正常起動なら"true"
+
+type RunPPb = Partial<PPbOptionsSpec> & Partial<RunOptions> & Partial<Description>;
+runPPb(
+  { bootid, bootmax, q, c, k, startwith = '', wait = '', priority, job, log, wd, x, y, width, height, desc, fg, bg }: RunPPb
+) => boolean
+	PPbを*run経由で実行する
+	引数にはオブジェクトを渡す
+	<startwith>に"bottom"を指定するとPPbのGUIを実行元GUIより下に配置する
+	<desc>には起動時に表示するメッセージを指定する
+	<fg>、<bg>は<desc>の文字色と背景白を<AnsiColors>で指定する
+	戻り値は正常起動なら"true"
+
+===============================================================================
+source.ts
+
+type Source	{
+	name: string;
+	enable: boolean,
+	setup: boolean,
+	version: string,
+	location: 'remote' | 'local';
+	path: string;
+	branch?: string;
+	commit?: string;
+	autor?: string;
+	};
+
+expandSource(name: string) => Source|undefined
+	S_ppm#sources:<name>をオブジェクトとして返す
+	<name>が空なら、undefinedを返す
+
+owSource(name: string, items: Partial<Source>) => Source|undefined
+	S_ppm#sources:<name>の値を<items>の値で上書きする
+	S_ppm#sources:<name>をオブジェクトとして返す
+	<name>が空なら、undefinedを返す
+
+setSource({
+	name,
+	enable = true,
+	setup = false,
+	version = '0.1.0',
+	location = 'remote',
+	path,
+	branch = '',
+	commit = ''
+	}: Source) => ExitCode
+	引数にはオブジェクトを渡す
+	引数の内容で、'S_ppm#sources:<name>'に登録する
+
+sourceNames() => string[]
+	S_ppm#sourcesに登録されたプラグイン名を抽出して返す
+
+sourceComplistPath
+	プラグイン名補完リストのパスを返す
+
+sourceComp
+	.expandName(name: stirng) => string
+		プラグイン名から状態表示前置詞(!~)を除いて返す
+
+	.getName(name: stirng) => string | undefined
+		プラグイン名に状態表示前置詞(!~)を加えて返す
+
+	.fix(source: Source) => Error_String
+		プラグイン名補完リストに状態表示前置詞(!~)+<source.name>を追加する
+
+	.write(data: string[], add: boolean = false) => Error_String
+		プラグイン名補完リストに<data>を上書きする
+		<add>が"true"なら追記する
+
+状態表示前置詞はインストール済みのプラグインの読み込み状態を示す
+	!	未設定のプラグイン
+	~	無効化されているプラグイン
+
+===============================================================================
+util.ts
+
+expandNlCode(string) => NlCodes
+	引数内に含まれる最初の改行コードを返す
+	改行が含まれなかったときは'\n'を返す
+
+semver(version: string|number) => string
+	引数を6桁のバージョン番号に置換して返す
+		1.2 => "10200"
+		"1.20" => "12000"
+		"1.2.3" => "10203"
+		"1.2.30.04" => "10230"
+
+checkUpdate(newversion: string, oldversion: string) => boolean
+	<newversion>が<oldVersion>を上回るとき"true"を返す
+
+type targetValue = unknown
+waitUntil(
+	value: targetValue,
+	callback: (value: targetValue) => boolean,
+	timeout: number = 6000(ms),
+	interval: number = 300(ms)
+	): => boolean
+	<interval>ごとに<callback>の成否を確認して"true"になるまで繰り返す
+	<timeout>を過ぎたら"false"を返す
+
+isCV8() => boolean
+	現在使用しているJavaScriptライブラリが"ClearScriptV8"なら"true"を返す
+
+===============================================================================
+window.ts
+
+winpos(target: string, x?: number, y?: number) => string
+	xとyがNumber型なら`*windowposition <target>,<x>,<y>`を返す
+	負数は0に正される
+	Number型以外なら空文字を返す
+
+winsize(target: string, width?: number, heithg?: number) => string
+	widthとheightがNumber型なら`*windowsize <target>,<width>,<height>を返す
+	width, heigthは200が最低値
+	Number型以外なら空文字を返す
+
+getDisplaySize() => [width:number, height:number]
+	現在使用しているディスプレイの幅[横,縦]を取得する
+

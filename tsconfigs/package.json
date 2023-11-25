@@ -1,0 +1,8 @@
+{
+  "name": "@ppmdev/tsconfigs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TypeScript configurations",
+  "author": "tar80 <tar80master@gmail.com> (https://tar80.github.io/pages-pca/)",
+  "license": "MIT"
+}

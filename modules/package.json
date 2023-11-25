@@ -1,0 +1,8 @@
+{
+  "name": "@ppmdev/modules",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Modules for ppm",
+  "author": "tar80 <tar80master@gmail.com> (https://tar80.github.io/pages-pca/)",
+  "license": "MIT"
+}
