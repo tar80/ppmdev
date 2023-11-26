@@ -67,10 +67,10 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 	・"cv8/"を含むパスからは"cv8/"が省かれて出力される。
 	  "src/lib/cv8/someLibrary.ts" -> "dist/lib/someLibrary.js"
 
-	・"version"は、"./install"と"./package.json"内のバージョン表記を更新します。
+	・"version"は、"./install"と"./package.json"内のバージョン表記を更新する。
 	  [current: <version>]は"./install"があればorigin/main:installを、なければ
-	  origin/main:package.jsonを参照します。
-	  空文字、現在のバージョンより低い値のときは中止します。
+	  origin/main:package.jsonを参照する。
+	  空文字、現在のバージョンより低い値のときは中止される。
 
 	・"test"をworkaspaceで実行すると、Jest側でエラーを発生させた時にnpmの
 	  エラーメッセージも表示されてしまうため"npx jest"を直接実行して回避する。
@@ -135,7 +135,7 @@ dist/lib/getEntries.xxxの戻り値を得る、または*whereコマンドで出
 
 ppxcv8.dllではフィールド名を厳密に指定しなければならない。
 	PPx.arguments => PPx.Arguments, PPx.entry => PPx.Entry
-	またライブラリ側で頭文字の大小文字を無視できるように対処されているものもある。
+またライブラリ側で頭文字の大小文字を無視できるように対処されているものもある。
 	PPx.Arguments.item(Item), PPx.result(Result)
 promiseは使えない。pptray,ppbとTextModuleの*stdout,%*stdin()を使えば簡単な操作
 なら非同期実行できる。
@@ -167,6 +167,8 @@ ppm用プラグインは以下のファイルから構成される。
 	 ├─readme.md	プロジェクトの説明書
 	 ├─package.json		npmパッケージ情報。Jestの設定を含む
 	 │			"npm init"で初期化する必要あり
+	 ├─_package_merge.json	初期化後にpackage.jsonとマージする
+	 │			npm script と Jest の設定が書かれている
 	 └─tsconfig.json	TypeScriptの設定
 
 install
@@ -238,6 +240,8 @@ base.cfgとpatch.cfgの仕様
 		・アンインストール情報を%sgu'ppmcache'\ppm\unset\linecust.cfgに
 		  出力する
 	[execute][endexecute]の間はユーザーが自由にコマンドを記述できる
+		・コマンドは一行ずつ順番に実行されるため、一つのコマンドは
+		  一行に収めなければならない
 		・ここに記述されるコマンドはプラグイン設定時に即実行される
 		・アンインストール情報を残さない
 

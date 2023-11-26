@@ -4,7 +4,7 @@
 スクリプト内で読み込んで使用できる関数群。
 ワークスペース名は、"@ppmdev/modules"となる。
 
-import default form '@ppmdev/modules/module.ts'
+import default from '@ppmdev/modules/module.ts'
 import {method} form '@ppmdev/modules/module.ts'
 import type {type} form '@ppmdev/modules/types.ts'
 
@@ -65,7 +65,7 @@ NlTypes		'crlf' | 'cr' | 'lf'
 AnsiColors
 	'black'|'red'|'green'|'yellow'|'blue'|'magenta'|'cyan'|'white'|'def'
 FileEncode	'sjis' | 'utf16le' | 'utf8'
-ErrorLevel	number;
+ErrorLevel	number
 Error_String		[boolean, string]
 Level_String		[number, string]
 Letters		LowerLetters | UpperLetters
@@ -108,6 +108,7 @@ info
 
 	.ppmVersion: number
 		ppmのバージョン
+		※XX.YY.ZZのZZ(パッチ)は参照しない
 
 	.language: 'jp'
 		メッセージの言語
@@ -147,34 +148,34 @@ mandatory
 
 uniqName
 	.initialCfg: string
-		ppmインストール直前にPPxの設定を書き出すファイルの名前
+		ppmインストール直前にPPxの設定を書き出すファイル名
 
 	.globalCfg: string
-		ppm設定値のバックアップ
+		ppm設定値のバックアップファイルのファイル名
 
 	.nopluginCfg: string
-		プラグイン設定を除外したPPx設定情報
+		プラグイン設定を除外したPPx設定情報のファイル名
 
 	.pluginList: string
-		プラグイン導入リストの名前
+		プラグイン導入リストのファイル名
 
 	.manageFiles: string
-		ppm外の設定ファイルのリスト
+		ppm外の設定ファイルリストのファイル名
 
 	.updateLog: string
-		*ppmUpdateのリザルト
+		*ppmUpdateのリザルトのファイル名
 
 	.repoDir: string
-		ppmプラグインリポジトリを保存するディレクトリの名前
+		ppmプラグインリポジトリを保存するディレクトリ名
 
 	.archDir: string
-		ppm経由でダウンロードされた書庫を保存するディレクトリの名前
+		ppm経由でダウンロードされた書庫を保存するディレクトリ名
 
 	.tempKey: stirng
 		ppmが一時登録するキー設定のテーブル名
 
 	.cacheDir() => string
-		ppmが使用するファイル類を保存するディレクトリの名前
+		ppmが使用するファイル類を保存するディレクトリ名
 
 tmp()
 	.dir: string
@@ -190,7 +191,7 @@ tmp()
 		標準エラーを書き出す一時ファイルパス
 
 	.ppmDir() => string
-		ppmが使用する一時ファイルを作成するディレクトリの名前
+		ppmが使用する一時ファイルを作成するディレクトリ名
 		ディレクトリがない場合は作成される
 uri
 	github: string
@@ -223,7 +224,7 @@ debug (default)
 echo.ts
 
 echoExe
-	S_ppm#global:gitが設定されていれば"git\\usr\\bin\\echo.exe"を、
+	S_ppm#global:gitが設定されていれば"<git>\\usr\\bin\\echo.exe"を、
 	設定されていなければ"echo"を返す
 
 coloredEcho(ppbid: string, message: string) => ErrorLevel
@@ -252,13 +253,34 @@ copyFolder
 ===============================================================================
 git.ts
 
+type gitCmd = {
+  subcmd: string;
+  wd?: string;
+  noquotepath?: boolean;
+  noeditor?: boolean;
+  config?: string;
+  opts?: string;
+};
+
+gitCmd({ ... }: gitCmd) => string
+	`git -C "<wd>"
+		-c core.quotepath=<noquotepath>
+		-c core.editor=<noeditor>
+		-c <config>
+		<subcmd> <opts>`
+	を調整して返す
+	<subcmd>の指定がなければエラー
+
 repoRoot(path: string = '') => string
 	<path>(指定がなければPPx.scriptName)がgitリポジトリ下にあれば、
 	ルートパスを返し、違えば空文字を返す
 
-originHead(path: string = '') => Error_String
-	<path>.git/refs/remotes/origin/<branch-name>からHEADコミットハッシュを
-	読み取って返す
+branchName(path: string): string[]
+	["ブランチ名", "デタッチ状態"]を返す
+	<path>が存在しないときは、["", ""]を返す
+
+branchHead(path: string = '') => Error_String
+	<path>.git/HEADからHEADコミットハッシュを読み取って返す
 	戻り値は、[error: boolean, data: string]
 	<error>が"true"のとき、<data>にはエラーメッセージが入る
 
@@ -272,10 +294,10 @@ isEmptyObj(value: Record<string,unknown>) => boolean
 	<value>が {}, null のいずれかなら"true"を返す
 
 isError(error: boolean, value: unknown) => value is string
-	<error>が"true"なら<value>は"string型"
+	<error>が"true"なら<value>はstring型
 
 isInteger(value: unknown) => value is number
-	引数で渡された値が整数なら"true"を返す
+	<value>が"true"なら<value>は整数
 
 ===============================================================================
 io.ts
@@ -307,8 +329,8 @@ writeLines({
 
 stdout({cmd: string, enc?: FileEncode = 'utf8', wd?: string}) => Level_String
 	<cmd>を実行し、標準出力を一時ファイルに書き出し、<enc>で読み取って返す
-	戻り値は、[exitcode, stdout]
-	<exitcode>が0以外のとき、<stdout>にはエラーメッセージが入る
+	戻り値は、[ErrorLevel, stdout]
+	<ErrorLevel>が0以外のとき、<stdout>にはエラーメッセージが入る
 
 ===============================================================================
 meta.ts
@@ -329,7 +351,7 @@ newline
 ===============================================================================
 path.ts
 
-	pathSelf() => {scriptName: stirng, parentDir: string}
+	pathSelf() => {scriptName: string, parentDir: string}
 		現在実行されているスクリプト名とその親ディレクトリを返す
 
 	pathJoin(...args: (string|number)[]) => string
@@ -386,10 +408,10 @@ ppm
 		ショートカットキーは認識されない
 
 	.execute(id: string, command: string) => ErrorLevel
-		"."なら、"<command>"を
+		<id>が"."なら、"<command>"を
 		"tray"なら、"*pptray -c <command>"を
 		それ以外なら、"*execute <id>,<command>"を実行する
-		idが".","tray"以外のときは"%"のエスケープが必要
+		idが"."以外のときは"%"のエスケープが必要
 		commandに空文字を渡すとエラー
 		戻り値は終了コード
 		(削除予定)変数"ppm_test_run"が、"2"のとき、
@@ -497,7 +519,7 @@ ppm
 		引数にはオブジェクトを渡す
 		modeにダイアログ種類、ヒストリ種類以外の文字を渡すとエラー
 		autoselectが"true"ならENTERキー押下時に最初の補完候補を選択状態にする
-		戻り値は、[exitcode, '入力した文字列']
+		戻り値は、[ErrorLevel, '入力した文字列']
 
 	.linemessage(
 		ppxid: stirng, message: string|string[], status?: boolean, multi?: boolean
@@ -654,7 +676,7 @@ setSource({
 	path,
 	branch = '',
 	commit = ''
-	}: Source) => ExitCode
+	}: Source) => ErrorLevel
 	引数にはオブジェクトを渡す
 	引数の内容で、'S_ppm#sources:<name>'に登録する
 
@@ -690,7 +712,7 @@ expandNlCode(string) => NlCodes
 	改行が含まれなかったときは'\n'を返す
 
 semver(version: string|number) => string
-	引数を6桁のバージョン番号に置換して返す
+	引数を5-6桁のバージョン番号に置換して返す
 		1.2 => "10200"
 		"1.20" => "12000"
 		"1.2.3" => "10203"
