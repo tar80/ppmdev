@@ -9,7 +9,8 @@ export const echoExe = ((): string => {
 })();
 
 export const coloredEcho = (ppbid: string, message: string): ErrorLevel => {
+  message = message.replace(/\\/g, '\\\\')
   const cmdline =
-    ppbid === '.' ? `%OP ${echoExe} -ne '${message}'` : `*execute ${ppbid},%%OP ${echoExe} -ne '${message}'`;
+    ppbid === '.' ? `%OP ${echoExe} -ne '%(${message}%)'` : `*execute ${ppbid},%%OP ${echoExe} -ne '%%(${message}%%)'`;
   return PPx.Execute(cmdline);
 };

@@ -1,4 +1,4 @@
-// Type definitions for PPx Script Module R20
+// Type definitions for PPx Script Module R21
 // Definitions by: tar80 (https://github.com/tar80)
 
 declare var PPx: PPx;
@@ -92,7 +92,7 @@ declare interface PPx {
 declare namespace entry {
   function Hide(): number;
   function information(): string;
-  function item(index: number | string): number;
+  function Item(index: number | string): typeof entry;
   function getComment(id: number | string): string;
   function setComment(id: number | string, value: string): void;
   function FirstMark(): number;

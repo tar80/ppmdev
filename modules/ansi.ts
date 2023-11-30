@@ -49,7 +49,7 @@ export const colorlize = ({
   }
 
   const e = getEscSeq(esc);
-  message = message.replace(/\\/g, '\\\\');
+  message = message;
 
   if (!fg || isEmptyStr(fg)) {
     return `${message}`;

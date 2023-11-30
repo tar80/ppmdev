@@ -238,17 +238,17 @@ default: fso
 createTextFile
  (path: string, overwrite: boolean = true, unicode: boolean = false) => Error_String
 	fso.createTextFileと同じ。エラー発生時に終了せずに
-	[error: boolean, "error message"]を返す
+	[error: boolean, "<error message>"]を返す
 
 copyFile
  (source: string, destination: string, overwite: boolean = true) => Error_String
 	fso.copyFileと同じ。エラー発生時に終了せずに
-	[error: boolean, "error message"]を返す
+	[error: boolean, "<error message>"]を返す
 
 copyFolder
  (source: string, destination: string, overwite: boolean = true) => Error_String
 	fso.copyFolderと同じ。エラー発生時に終了せずに
-	[error: boolean, "error message"]を返す
+	[error: boolean, "<error message>"]を返す
 
 ===============================================================================
 git.ts
@@ -276,7 +276,7 @@ repoRoot(path: string = '') => string
 	ルートパスを返し、違えば空文字を返す
 
 branchName(path: string): string[]
-	["ブランチ名", "デタッチ状態"]を返す
+	["<ブランチ名>", "<デタッチ状態>"]を返す
 	<path>が存在しないときは、["", ""]を返す
 
 branchHead(path: string = '') => Error_String
@@ -295,6 +295,9 @@ isEmptyObj(value: Record<string,unknown>) => boolean
 
 isError(error: boolean, value: unknown) => value is string
 	<error>が"true"なら<value>はstring型
+	この型ガードは、io.tsのreadLines()のように戻り値が
+	["実行結果"(boolean), "エラーメッセージ"(string)|必要とする型(any)]
+	になる場合に、string型をブロックするために利用する
 
 isInteger(value: unknown) => value is number
 	<value>が"true"なら<value>は整数
@@ -343,10 +346,10 @@ newline
 		改行コード("\r\n","\r","\n")を改行種類("crlf","cr","lf")へ変換
 
 	.Ppx
-		改行種類+改行コードを("%%bn","%%br","%%bl")へ変換
+		改行種類or改行コードを("%%bn","%%br","%%bl")へ変換
 
 	.Ascii
-		改行種類+改行コードを("-1","13","10")へ変換
+		改行種類or改行コードを("-1","13","10")へ変換
 
 ===============================================================================
 path.ts
@@ -367,7 +370,7 @@ create_backup({
 	path: string,
 	comment?: boolean,
 	discover?: boolean,
-	mask?: string|string[],
+	mask?: string[],
 	}) => ErrorLevel
 	<path>がパス区切りを含めばフルパスとして、含まなければ
 	ppm\cache\xxx\backup\<path>にPPx設定ファイルを書き出す
@@ -379,9 +382,8 @@ ppm.ts
 	確認ダイアログは、boolean
 	値があるものは、string
 	値がないものは、void
-	.getXXXは、[errorlevel, string]
-	.setXXXは、errorlevel
-
+	.getXXXは、[ErrorLevel, string]
+	.setXXXは、ErrorLevel
 .jobstart()は特殊で、関数.jobendを返す
 
 ppm
@@ -546,52 +548,52 @@ permission
 	.pluginVersion(limit: number|string, name: string) => Error_String
 		プラグイン<name>の更新状態を確認する
 		未更新の場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.ppmVersion(limit: number|string) => Error_String
 		プラグインが必要とするppmのバージョン<limit>を確認する
 		条件を満たさない場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.ppxVersion(limit: number|string) => Error_String
 		プラグインが必要とするPPx本体のバージョン<limit>を確認する
 		条件を満たさない場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.scriptVersion(limit: string|number) => Error_String
 		プラグインが必要とするスクリプトモジュールのバージョン
 		対象は、PPXSCR.DLLかPPXCV8.DLL
 		条件を満たさない場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.scriptType(limit: string|number) => Error_String
 		プラグインが必要とするスクリプトライブリの制限
 		<limit>は0-5まで指定できる。数値の対応は
 		0:制限なし, 1:JS9(5.7), 2:JS9(5.8), 3:JS9(ES5), 4:Chakra(ES6), 5:CV8(ESNEXT)
 		条件を満たさない場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.codeType(limit: string|number) => Error_String
 		プラグインが必要とするPPx本体のコードタイプ(1:MultiByte, 2:Unicode)
 		ppmはMultiByteをサポートしていないため、基本的には2を指定する
 		条件を満たさない場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.libRegexp(limit: string) => Error_String
 		ppmが必要とする正規表現ライブラリの名称
 		ppmはbregonig.dllの使用を前提としているため
 		<limit>が'bregonig'でない場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.useExecutables(items: string|string[]) => Error_String
 		プラグインが必要とする実行ファイル名
 		実行ファイルが未インストールの場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.useModules(items: string|string[]) => Error_String
 		プラグインが必要とするライブラリ
 		ライブラリが未インストールの場合はインストールを中止する
-		戻り値は[error: boolean, "error message"]
+		戻り値は[error: boolean, "<error message>"]
 
 	.dependencies(items: string) => Error_String
 		プラグインと関連のあるプラグインや実行ファイル名を
@@ -640,7 +642,7 @@ runPPb(
 	引数にはオブジェクトを渡す
 	<startwith>に"bottom"を指定するとPPbのGUIを実行元GUIより下に配置する
 	<desc>には起動時に表示するメッセージを指定する
-	<fg>、<bg>は<desc>の文字色と背景白を<AnsiColors>で指定する
+	<fg>、<bg>は<desc>の文字色と背景白をAnsiColors型で指定する
 	戻り値は正常起動なら"true"
 
 ===============================================================================
@@ -717,6 +719,7 @@ semver(version: string|number) => string
 		"1.20" => "12000"
 		"1.2.3" => "10203"
 		"1.2.30.04" => "10230"
+		"10.20.30.40" => "102030"
 
 checkUpdate(newversion: string, oldversion: string) => boolean
 	<newversion>が<oldVersion>を上回るとき"true"を返す
@@ -729,7 +732,7 @@ waitUntil(
 	interval: number = 300(ms)
 	): => boolean
 	<interval>ごとに<callback>の成否を確認して"true"になるまで繰り返す
-	<timeout>を過ぎたら"false"を返す
+	<timeout>を過ぎたら"false"を返して終了する
 
 isCV8() => boolean
 	現在使用しているJavaScriptライブラリが"ClearScriptV8"なら"true"を返す

@@ -1,3 +1,6 @@
+/* This code based on vim-g(https://github.com/kana/vim-g/autoload/g/branch.vim)
+ * Under the MIT license
+ */
 import {Error_String} from '@ppmdev/modules/types.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
 import {isEmptyStr, isError} from '@ppmdev/modules/guard.ts';

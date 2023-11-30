@@ -29,7 +29,7 @@ const parseSource = (name: string, source: string): typeof resp => {
   return resp;
 };
 
-/** Expand a S\_ppm#sources:`name`. */
+/** Expand a S_ppm#sources:`name`. */
 export const expandSource = (name: string) => {
   const source = PPx.Extract(`%*getcust(S_ppm#sources:${name})`);
 

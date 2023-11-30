@@ -136,7 +136,7 @@ export const ppm = {
 
   /**
    * Wrapper PPx.Execute.
-   * @param ppxid - ID|"." `period` means current PPx
+   * @param ppxid - ID|"."|"tray" `period` means current PPx
    * @param command - PPx ex command line
    */
   execute(ppxid: string, command: string): ErrorLevel {
@@ -303,7 +303,6 @@ export const ppm = {
     }
 
     const value = PPx.Extract(`%*getcust(${prop})`);
-    errorlevel = Number(PPx.Extract());
 
     return [errorlevel, value];
   },

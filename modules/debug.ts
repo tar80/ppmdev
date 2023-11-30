@@ -18,7 +18,7 @@ const debug = {
     return PPx.Quit(-1);
   },
 
-  /** Check for existence of path */
+  /** Check for existence of the path */
   exists(path: string, att: string = 'file'): void {
     const fso = PPx.CreateObject('Scripting.FileSystemObject');
     const att_ = att === 'file' ? 'FileExists' : 'FolderExists';

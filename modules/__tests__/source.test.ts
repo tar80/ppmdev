@@ -52,7 +52,6 @@ describe('setSource()', function () {
   afterAll(() => (PPx.Execute = ppxe));
   it('set remote plugin', () => {
     const source: Source = {name, enable: true, setup: false, version: '0.1.0', location: 'remote', path};
-    // const spy = jest.spyOn(PPx, 'Execute');
     setSource(source);
     expect(spy).toHaveBeenLastCalledWith(
       `*setcust S_ppm#sources:${name}={"enable":true,"setup":false,"version":"0.1.0","location":"remote"}`
@@ -60,7 +59,6 @@ describe('setSource()', function () {
   });
   it('set local plugin', () => {
     const source: Source = {name, enable: false, setup: false, version: '0.1.0', location: 'local', path};
-    // const spy = jest.spyOn(PPx, 'Execute');
     setSource(source);
     expect(spy).toHaveBeenLastCalledWith(
       `*setcust S_ppm#sources:${name}={"enable":false,"setup":false,"version":"0.1.0","location":"local","path":"${path}"}`

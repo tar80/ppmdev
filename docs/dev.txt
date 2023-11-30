@@ -165,8 +165,6 @@ ppm用プラグインは以下のファイルから構成される。
 	 ├─userscript\	ppm\cache\xxx\userscriptにコピーするスクリプトを配置
 	 ├─install	ppmプラグインのインストール情報
 	 ├─readme.md	プロジェクトの説明書
-	 ├─package.json		npmパッケージ情報。Jestの設定を含む
-	 │			"npm init"で初期化する必要あり
 	 ├─_package_merge.json	初期化後にpackage.jsonとマージする
 	 │			npm script と Jest の設定が書かれている
 	 └─tsconfig.json	TypeScriptの設定
@@ -314,7 +312,7 @@ base.cfgとpatch.cfgの仕様
 	}
 	-|S_sample =
 
-[cache\ppm\unset\linecust.cfg]
+【cache\ppm\unset\linecust.cfg】
 	plugin-name=sample,KC_main:FIRSTEVENT,
 
 ===============================================================================
