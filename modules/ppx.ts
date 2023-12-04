@@ -74,7 +74,7 @@ const PPx = {
     const ppb = `${process.env.PPX_DIR}\\ppbw.exe`;
     param = param ?? '';
     // param = param.includes('%') ? param : `%*extract(CA,"${param.replace('%', '%%')}")`;
-    let stdout = execSync(`${ppb} -c *maxlength 2000%:*stdout " ${param}"`);
+    let stdout = execSync(`${ppb} -c *maxlength 2000%:%OC *stdout " ${param}"`);
 
     return stdout.toString().substring(1);
   },

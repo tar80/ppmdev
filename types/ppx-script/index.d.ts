@@ -7,10 +7,27 @@ interface PPxArguments extends WshArguments {
   atEnd(): boolean;
   moveNext(): void;
   reset(): void;
-  item(int: number): string;
+  Item(int: number): string;
   value: string;
 }
 
+declare namespace PPxEntry {
+  const enum Attribute {
+    Normal = 0,
+    ReadOnly = 1,
+    Hidden = 2,
+    System = 4,
+    Label = 8,
+    Directory = 16,
+    Archive = 32,
+    Temporary = 256,
+    Sparse = 512,
+    Reparse = 1024,
+    Compressed = 2048,
+    Offline = 4096,
+    NoIndex = 8192
+  }
+}
 declare interface PPx {
   // Cursor();
   Arguments: PPxArguments;
@@ -90,18 +107,21 @@ declare interface PPx {
 }
 
 declare namespace entry {
-  function Hide(): number;
+  function Entry(int: number): Object;
+  function atEnd(): typeof entry;
+  function moveNext(): typeof entry;
+  function Hide(): void;
   function information(): string;
   function Item(index: number | string): typeof entry;
   function getComment(id: number | string): string;
   function setComment(id: number | string, value: string): void;
-  function FirstMark(): number;
-  function NextMark(): number;
-  function PrevMark(): number;
-  function LastMark(): number;
-  var AllEntry: object;
-  var AllMark: object;
-  var Attributes: number;
+  function FirstMark(): number
+  function NextMark(): number
+  function PrevMark(): number
+  function LastMark(): number
+  var AllEntry: typeof entry;
+  var AllMark: typeof entry;
+  var Attributes: PPxEntry.Attribute;
   var Comment: string;
   var Count: number;
   var DateCreated: Date;
@@ -151,3 +171,4 @@ declare namespace tab {
   var TotalPPcCount: number;
   var Type: number;
 }
+

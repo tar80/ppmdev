@@ -1,4 +1,5 @@
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
+import {entryAttribute} from '@ppmdev/modules/meta.ts';
 
 /** Get information about the currently running script. */
 export const pathSelf = (): {scriptName: string; parentDir: string} => {
@@ -46,4 +47,16 @@ export const pathNormalize = (path: string, delim: string): string => {
   }
 
   return path.replace(/[/\\]/g, delim);
+};
+
+export const actualPaths = (): string[] => {
+  const paths: string[] = [];
+  let att: string;
+
+  for (var a = PPx.Entry.AllMark; !a.atEnd(); a.moveNext()) {
+    att = entryAttribute.alias & PPx.Entry.Attributes ? '%*linkedpath(%FDC)' : '%FDC';
+    paths.push(PPx.Extract(att));
+  }
+
+  return paths;
 };

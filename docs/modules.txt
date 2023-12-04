@@ -5,8 +5,8 @@
 ワークスペース名は、"@ppmdev/modules"となる。
 
 import default from '@ppmdev/modules/module.ts'
-import {method} form '@ppmdev/modules/module.ts'
-import type {type} form '@ppmdev/modules/types.ts'
+import {method} from '@ppmdev/modules/module.ts'
+import type {type} from '@ppmdev/modules/types.ts'
 
 のようにして読み込む。
 
@@ -66,8 +66,8 @@ AnsiColors
 	'black'|'red'|'green'|'yellow'|'blue'|'magenta'|'cyan'|'white'|'def'
 FileEncode	'sjis' | 'utf16le' | 'utf8'
 ErrorLevel	number
-Error_String		[boolean, string]
-Level_String		[number, string]
+Error_String	[boolean, string]
+Level_String	[number, string]
 Letters		LowerLetters | UpperLetters
 LowerLetters	[a-z]
 UpperLetters	[A-Z]
@@ -183,6 +183,9 @@ tmp()
 
 	.file: string
 		ppmが使用する一時ファイルパス
+
+	.lf: string
+		ppmが使用する一時リストファイルパス
 
 	.stdout: string
 		標準出力を書き出す一時ファイルパス
@@ -338,6 +341,9 @@ stdout({cmd: string, enc?: FileEncode = 'utf8', wd?: string}) => Level_String
 ===============================================================================
 meta.ts
 
+entryAttribute
+	ファイル属性値のリスト
+
 newline
 	.TypeToCode
 		改行種類("crlf","cr","lf")を改行コード("\r\n","\r","\n")へ変換
@@ -362,6 +368,10 @@ path.ts
 
 	pathNormalize(path: string, delim: string): string
 		引数で渡されたパスを"delim"で区切って返す
+
+	actualPaths() => string[]
+		カーソル(マーク)パスの実体パスを返す
+		リンクから実体パスに変換するとき短い名前に変換される場合がある
 
 ===============================================================================
 ppcust.ts
@@ -438,16 +448,16 @@ ppm
 	.lang() => 'en'|'jp'
 		"S_ppm#global:lang"を返す。空なら'jp'を返す
 
-	.global(id: string) => string
-		S_ppm#global:<id>の値を返す
+	.global(subid: string) => string
+		S_ppm#global:<subid>の値を返す
 		一度取得した値はそのスクリプト内でキャッシュされる
 
-	.user(id: string) => string
-		S_ppm#user:<id>の値を返す
-		<id>内の"%"は展開される
+	.user(subid: string) => string
+		S_ppm#user:<subid>の値を返す
+		<subid>内の"%"は展開される
 
-	.setuser(id: string, value: string) => ErrorLevel
-		S_ppm#user:<id>に<value>を登録する
+	.setuser(subid: string, value: string) => ErrorLevel
+		S_ppm#user:<subid>に<value>を登録する
 		<value>が空文字ならエラー
 
 	.getpath(format: string, filename: string, path: string = '') => Level_String
@@ -539,6 +549,10 @@ ppm
 	.jobstart(ppxid: string) => Function
 		`PPx.Execute('*execute <ppxid>,*job start')`を実行し、
 		戻り値に`() => PPx.Execute('*execute <ppxid>,job end')`を返す
+
+	.getVersion(path: string) => string | void
+		リポジトリの"package.json"から"version"を読み取って返す
+		読み取れなかった場合は"void"を返す
 
 ===============================================================================
 permission.ts

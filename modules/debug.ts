@@ -4,7 +4,7 @@ const debug = {
   /** Display a dialog box. Canceling aborts a running script. */
   log(...args: any[]): void {
     const message = args.length > 0 ? args.join(', ') : '';
-    const exitcode = PPx.Execute(`%OC %"DEBUG_LOG"%Q"[${this.logCount}] %(${String(message).replace(/"/g, '""')}%)"`);
+    const exitcode = PPx.Execute(`%OC %"DEBUG_LOG"%Q"[${this.logCount}] %(${String(message)}%)"`);
 
     if (exitcode !== 0) {
       PPx.Quit(-1);

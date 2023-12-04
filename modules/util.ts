@@ -12,11 +12,15 @@ export const expandNlCode = (data: string): NlCodes => {
   return nl;
 };
 
-const partOfVersion = (part: string | undefined): string => {
+const partOfVersion = (part: string | undefined, major: boolean = false): string => {
   let part_ = '00';
 
   if (part) {
     part_ = part.length === 1 ? `0${part}` : part;
+  }
+
+  if (major && part_ === '00') {
+    part_ = '0.';
   }
 
   return part_;
@@ -25,6 +29,7 @@ const partOfVersion = (part: string | undefined): string => {
 /** Semantic Versioning the `version`. */
 export const semver = (version: string | number): number => {
   const s = String(version).split('.');
+  s[0] = partOfVersion(s[0], true);
   s[1] = partOfVersion(s[1]);
   s[2] = partOfVersion(s[2]);
 

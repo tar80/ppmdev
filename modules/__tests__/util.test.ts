@@ -15,6 +15,10 @@ describe('expandNlCode()', function () {
 });
 
 describe('semver()', function () {
+  it('convert 0.2 to 10200', () => {
+    expect(semver(0.2)).toBe(0.02);
+    expect(semver('0.2')).toBe(0.02);
+  });
   it('convert 1.2 to 10200', () => {
     expect(semver(1.2)).toBe(10200);
     expect(semver('1.2')).toBe(10200);

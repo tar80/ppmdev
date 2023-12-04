@@ -1,6 +1,6 @@
 {
   "name": "ppmdev",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "development environment for ppx-plugin-manager",
   "author": "tar80",
@@ -10,7 +10,7 @@
   "type": "module",
   "scripts": {
     "deno": "deno run --allow-read",
-    "version": "ppmversion",
+    "ppmver": "ppmversion",
     "test": "jest"
   },
   "jest": {

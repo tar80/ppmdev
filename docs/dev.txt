@@ -48,7 +48,7 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 	deno		deno run --no-check --allow-all --unstable
 	build		ppmbuild
 	build:prod	set NODE_ENV=Production&&ppmbuild -- src
-	version		ppmversion
+	ppmver		ppmversion
 	test		jest
 
 	・ts-nodeが遅いので確認用にdenoをセットしている。
@@ -67,7 +67,7 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 	・"cv8/"を含むパスからは"cv8/"が省かれて出力される。
 	  "src/lib/cv8/someLibrary.ts" -> "dist/lib/someLibrary.js"
 
-	・"version"は、"./install"と"./package.json"内のバージョン表記を更新する。
+	・"ppmver"は、"./install"と"./package.json"内のバージョン表記を更新する。
 	  [current: <version>]は"./install"があればorigin/main:installを、なければ
 	  origin/main:package.jsonを参照する。
 	  空文字、現在のバージョンより低い値のときは中止される。
@@ -87,6 +87,8 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 
 ・TypeScriptでは以下の型情報を参照できる。
   Windows-Script-Host, Activex-Scripting, Activex-Adodb, PPx-Script, Jest
+・PPx-Scriptの型情報は正しい情報を参照しておらず抜けも多い。
+  必要な箇所は書き足して利用できる。
 
 ===============================================================================
 バージョンの表記規則

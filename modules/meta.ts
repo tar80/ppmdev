@@ -1,3 +1,19 @@
+export const entryAttribute = {
+  normal: 0,
+  readonly: 1,
+  hidden: 2,
+  system: 4,
+  volume: 8,
+  directory: 16,
+  archive: 32,
+  temporary: 256,
+  sparse: 512,
+  alias: 1024,
+  compressed: 2048,
+  offline: 4096,
+  noindex: 8192
+};
+
 export const newline = {
   TypeToCode: {
     crlf: '\r\n',

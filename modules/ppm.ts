@@ -1,7 +1,8 @@
 import type {Level_String, ErrorLevel} from '@ppmdev/modules/types.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
-import {isEmptyStr} from '@ppmdev/modules/guard.ts';
+import {isEmptyStr, isError} from '@ppmdev/modules/guard.ts';
 import {info, uniqName} from '@ppmdev/modules/data.ts';
+import {readLines} from '@ppmdev/modules/io.ts';
 
 type StringValues = 'e' | 'i' | 'p' | 'u';
 type StringExpandValues = 'ge' | 'gi' | 'gp' | 'gu';
@@ -514,5 +515,22 @@ export const ppm = {
     ppm.execute(ppxid, '*job start');
 
     return () => ppm.execute(ppxid, '*job end');
+  },
+
+  getVersion(path: string): string | void {
+    path = `${path}\\package.json`;
+    const [error, data] = readLines({path});
+
+    if (!isError(error, data)) {
+      const rgx = /^\s*"version":\s*"([0-9\.]+)"\s*,/;
+
+      for (let i = 2, k = data.lines.length; i < k; i++) {
+        if (~data.lines[i].indexOf('"version":')) {
+          return data.lines[i].replace(rgx, '$1');
+        }
+      }
+    }
+
+    return;
   }
 } as const;

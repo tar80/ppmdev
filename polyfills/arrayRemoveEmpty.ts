@@ -5,13 +5,13 @@ declare global {
     /**
      * Array with empty elements removed
      */
-    removeEmpty<T>(this: T[]): unknown[];
+    removeEmpty<T>(this: T[]): T[];
   }
 }
 
 if (!Array.prototype.removeEmpty) {
-  Array.prototype.removeEmpty = function <T>(this: T[]): unknown[] {
-    const sortedArr: unknown[] = [];
+  Array.prototype.removeEmpty = function <T>(this: T[]): typeof sortedArr {
+    const sortedArr: T[] = [];
 
     for (let i = 0, k = this.length; i < k; i++) {
       let thisArr = this[i];

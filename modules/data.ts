@@ -53,6 +53,7 @@ const tmp = () => {
   return {
     dir: parent,
     file: `${parent}_ppmtemp`,
+    lf: `${parent}_temp.xlf`,
     stdout: `${parent}_stdout`,
     stderr: `${parent}_stderr`,
     ppmDir() {

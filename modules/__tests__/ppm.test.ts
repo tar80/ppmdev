@@ -2,6 +2,9 @@ import PPx from '@ppmdev/modules/ppx';
 global.PPx = Object.create(PPx);
 import {ppm} from '@ppmdev/modules/ppm';
 import {execSync} from 'node:child_process';
+import {expandSource} from '@ppmdev/modules/source.ts';
+
+jest.mock('@ppmdev/modules/io');
 
 const ppxe = PPx.Execute;
 const ppxt = PPx.Extract;
@@ -87,6 +90,21 @@ describe('ppm.extract()', function () {
   });
   it('specify non-existent id', () => {
     expect(ppm.extract('V', '%%n')).toEqual([0, '']);
+  });
+  it('performing replacements', () => {
+    let str = 'test test test';
+    let rgx = '\\s';
+    let rep = `\\\\ `;
+
+    expect(ppm.extract('.', `%*regexp("${str}","/${rgx}/${rep}/g")`)).toEqual([0, 'test\\ test\\ test']);
+    expect(ppm.extract('CA', `%(%*regexp("${str}","/${rgx}/${rep}/")%)`)).toEqual([0, 'test\\ test test']);
+  });
+  it('named groups are an error in the process of going through nodejs', () => {
+    let str = 'one two three';
+    let rgx = 'one (?<num>.+) three';
+    let rep = '${num}';
+
+    expect(() => ppm.extract('.', `%*regexp("${str}","/${rgx}/${rep}/g")`)).toThrow()
   });
 });
 
@@ -206,7 +224,7 @@ describe('ppm.setvalue()', function () {
   });
 });
 
-describe('ppm.input()', function () {
+describe('ppm.getinput()', function () {
   it('unavailable type of mode. the return level must be 13', () => {
     expect(ppm.getinput({mode: ''})).toEqual([13, '']);
     expect(ppm.getinput({mode: 'REg'})).toEqual([13, '']);
@@ -231,5 +249,12 @@ describe('ppm.input()', function () {
     expect(PPx.Extract).toHaveBeenLastCalledWith();
     expect(PPx.Extract).toBeCalledTimes(2);
     PPx.Extract = ppxt;
+  });
+});
+
+describe('ppm.getVersion()', function () {
+  it('compare sources and package versions', () => {
+    const obj = expandSource('ppx-plugin-manager');
+    obj && expect(ppm.getVersion(obj.path)).toBe(obj.version);
   });
 });
