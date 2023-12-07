@@ -9,10 +9,10 @@ import {expandSource} from '@ppmdev/modules/source.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 
 const pass = colorlize({esc: true, message: ' PASS ', fg: 'black', bg: 'green'});
-const fail = colorlize({esc: true, message: ' FAIL ', fg: 'black', bg: 'red'});
+const drop = colorlize({esc: true, message: ' DROP ', fg: 'black', bg: 'red'});
 const failedItem = (message: string): string => colorlize({esc: true, message: message, fg: 'yellow'});
 const result = (error: boolean, message: string): Error_String =>
-  error ? [true, `${fail} ${message}`] : [false, `${pass} ${message}`];
+  error ? [true, `${drop} ${message}`] : [false, `${pass} ${message}`];
 
 let libDir: string;
 export const useSelfLibDir = (path: string): void => {
@@ -28,7 +28,7 @@ export const existence = (scriptname: string, header: string, items: string | st
 
   // There are no items to check
   if (isEmptyStr(items)) {
-    return result(true, 'There are no items');
+    return result(false, `${header}: There are no items`);
   }
 
   // Note that S_global#global:ppm is unset when installing ppm itself.
@@ -36,13 +36,13 @@ export const existence = (scriptname: string, header: string, items: string | st
   const scriptPath = `${libDir}\\${scriptname}.js`;
 
   if (!fso.FileExists(scriptPath)) {
-    return result(true, `${scriptPath.replace(/\\/g, '/')} is not found`);
+    return result(true, `${header}: ${scriptPath.replace(/\\/g, '/')} is not found`);
   }
 
   const [errorlevel, resp] = ppm.extract('.', `%*script(${scriptPath},${items})`);
 
   if (errorlevel !== 0) {
-    return result(true, `An error has occurred(${errorlevel})`);
+    return result(true, `${header}: An error has occurred(${errorlevel})`);
   }
 
   const list: {[key in (typeof items)[number]]: boolean} = JSON.parse(resp);

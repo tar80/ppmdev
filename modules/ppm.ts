@@ -139,8 +139,9 @@ export const ppm = {
    * Wrapper PPx.Execute.
    * @param ppxid - ID|"."|"tray" `period` means current PPx
    * @param command - PPx ex command line
+   * @param wait - Wait for command to finish
    */
-  execute(ppxid: string, command: string): ErrorLevel {
+  execute(ppxid: string, command: string, wait = false): ErrorLevel {
     if (isEmptyStr(command)) {
       return 1;
     }
@@ -151,7 +152,13 @@ export const ppm = {
     } else if (ppxid === 'tray') {
       return PPx.Execute(`*pptray -c ${command}`);
     } else {
-      return hasTargetId(ppxid) ? PPx.Execute(`*execute ${ppxid},${command}`) : PPx.Execute(command);
+      if (hasTargetId(ppxid)) {
+        return wait
+          ? Number(PPx.Extract(`%*extract(${ppxid},"${command}%%:0")`))
+          : PPx.Execute(`*execute ${ppxid},${command}`);
+      } else {
+        return PPx.Execute(command);
+      }
     }
   },
 
@@ -173,6 +180,10 @@ export const ppm = {
     if (ppbid.length === 1) {
       ppbid = `b${ppbid}`;
     } else if (ppbid.toUpperCase().indexOf('B') !== 0) {
+      return 6;
+    }
+
+    if (isEmptyStr(PPx.Extract(`%N${ppbid}`))) {
       return 6;
     }
 

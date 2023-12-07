@@ -43,19 +43,19 @@ export const getFiletime = (data: string): string => {
   return `${bit.high}.${bit.low}`;
 };
 
-export const formLfData = (line: string, rgx: RegExp, rep: string): string => {
+export const formLfData = (data: string, rgx: RegExp, rep: string): string => {
   let comment: string | undefined = undefined;
-  line = line.replace(/\\/g, '\\\\');
-  line = line.replace(rgx, rep);
+  data = data.replace(/\\/g, '\\\\');
+  data = data.replace(rgx, rep);
 
-  if (~line.indexOf(',"comment":')) {
-    line = line.replace(/,"comment":\s?"(.+)"/, (_, m) => {
+  if (~data.indexOf(',"comment":')) {
+    data = data.replace(/,"comment":\s?"(.+)"/, (_, m) => {
       comment = `T:"${m.replace(/""/g, '`')}"`;
       return '';
     });
   }
 
-  const o = JSON.parse(line);
+  const o = JSON.parse(data);
   const att = o.att != undefined && o.att !== '' ? o.att : '0';
   const ext = o.ext != undefined ? `X:${o.ext}` : undefined;
   const highlight = o.hl ? `H:${o.hl}` : undefined;

@@ -419,10 +419,11 @@ ppm
 		<ppxid>にPPb(*option terminal)を指定したとき、"ync"以外の
 		ショートカットキーは認識されない
 
-	.execute(id: string, command: string) => ErrorLevel
+	.execute(id: string, command: string, wait: boolean = false) => ErrorLevel
 		<id>が"."なら、"<command>"を
 		"tray"なら、"*pptray -c <command>"を
-		それ以外なら、"*execute <id>,<command>"を実行する
+		それ以外で<wait>が"true"なら、"%*extract(<id>,"<command>%%:0")"を
+		"false"なら、"*execute <id>,<command>"を実行する
 		idが"."以外のときは"%"のエスケープが必要
 		commandに空文字を渡すとエラー
 		戻り値は終了コード

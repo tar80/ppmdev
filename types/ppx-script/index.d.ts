@@ -59,7 +59,7 @@ declare interface PPx {
   setIValue(key: string, value: string | number): void;
   getProcessValue(key: string): string;
   setProcessValue(key: string, value: string | number): void;
-  GetFileInformation(filename: string, mode: number): string;
+  GetFileInformation(filename: string, mode?: number): string;
   Pane: typeof pane;
   SetPopLineMessage(message: any): void;
   Sleep(intTime: number): void;
@@ -107,7 +107,7 @@ declare interface PPx {
 }
 
 declare namespace entry {
-  function Entry(int: number): Object;
+  var Entry: Object;
   function atEnd(): typeof entry;
   function moveNext(): typeof entry;
   function Hide(): void;
