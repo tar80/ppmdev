@@ -158,7 +158,14 @@ export const getLfMeta = (lines: string[]): typeof metadata => {
     }
 
     lines[i].replace(rgx, (_, id, value) => {
-      metadata[id.toLowerCase()] = value;
+      if (id === 'Base') {
+        const v = value.split('|');
+        metadata['base'] = v[0];
+        metadata['dirtype'] = v[1];
+      } else {
+        metadata[id.toLowerCase()] = value;
+      }
+
       return '';
     });
   }
