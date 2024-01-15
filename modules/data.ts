@@ -65,7 +65,7 @@ const tmp = () => {
   } as const;
 };
 
-/* NOTE: As a general rule, do not add "/" at the end */
+/* NOTE: As a general rule, no trailing slash. */
 const uri = {
   github: 'https://github.com',
   rawGithub: 'https://raw.githubusercontent.com'

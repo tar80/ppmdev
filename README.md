@@ -10,6 +10,6 @@ ppx-plugin-manager のプラグイン開発環境です。npm-workspace 上で�
 
 - 開発言語は TypeScript です。ソースコードを、Babel で ES3 相当にトランスパイルし、
   Rollup でバンドルします。
-- テストには Jest を採用しています。
+- ユニットテストには Jest を採用しています。
 - 型情報は、windows-script-host, activex-scripting, activex-adodb, PPx-script,
   Jest を参照できます。

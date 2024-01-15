@@ -376,7 +376,7 @@ path.ts
 ===============================================================================
 ppcust.ts
 
-create_backup({
+createBackup({
 	path: string,
 	comment?: boolean,
 	discover?: boolean,

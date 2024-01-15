@@ -12,7 +12,7 @@ import {Function} from '@ppmdev/parsers/parser.ts'
 Parserの説明
 
 json.ts
-	valueReplacer(value: string) => string
+	valueEscape(value: string) => string
 		JSON.parseで読めるように値をエスケープして返す
 
 listfile.ts

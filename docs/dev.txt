@@ -1,13 +1,13 @@
 ppmdevの仕様書
 ===============================================================================
 
-ppmではPPxのJavaScriptの使用ライブラリによるコードの互換性を維持するため、
+ppmでは、PPxのJavaScript使用ライブラリによるコードの互換性を維持するため、
 TypeScriptで記述したコードをBabelでES3相当のJavaScriptにトランスパイルし
 Rollupでバンドルしている。
-Babelは構文解析を主とし、Polyfillは必要最低限にとどめている。
+トランスパイルは構文解析を主とし、Polyfillの導入は必要最低限にとどめている。
 npm workaspace上で実行され、テストにはJestを採用している。
 
-基本的にはESNEXTで記述して必要なものだけ自分でPolyfillを用意する。
+基本的にはESNEXTで記述して必要なものだけユーザー側でPolyfillを用意する。
 EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScriptでも使えるように
 考慮してプログラムしなければならない。
 
@@ -24,13 +24,13 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 
 ・設定ファイル類は自由に編集してかまわない。
   "tsconfigs"ディレクトリ配下の"base.json"はワークスペース全体のtsconfig.jsonの
-  共通設定になる。
+  共通設定となる。
 
 ・開発するプラグインは"ppmdev/packages/<plugin-name>/"に配置する。
 ・ソースコードは"ppmdev/packages/<plugin-name>/src/"に配置する。
-・ワークスペースへの追加は、
-  ワークスペースのルートから"npm init --scope ppmdev -w packages/<plugin-name>"
-  を実行し、その後package.jsonに_package_merge.jsonをマージする。
+・ワークスペースへの追加は、ワークスペース全体のルートから
+  "npm init --scope ppmdev -w packages/<plugin-name>"を実行し、その後
+  プラグイン側のpackage.jsonに_package_merge.jsonをマージする。
 
 ・プラグインで使用するnpmパッケージを追加したいときは、プラグインのルート上で
   "npm install -w @ppmdev/<plugin-name> <package-name>"を実行する。
@@ -68,8 +68,8 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 	  "src/lib/cv8/someLibrary.ts" -> "dist/lib/someLibrary.js"
 
 	・"ppmver"は、"./install"と"./package.json"内のバージョン表記を更新する。
-	  [current: <version>]は"./install"があればorigin/main:installを、なければ
-	  origin/main:package.jsonを参照する。
+	  プロンプトに表示されるcurrent: <version>]は、"./install"があれば
+	  origin/main:installを、なければorigin/main:package.jsonを参照する。
 	  空文字、現在のバージョンより低い値のときは中止される。
 
 	・"test"をworkaspaceで実行すると、Jest側でエラーを発生させた時にnpmの
@@ -110,7 +110,7 @@ nodejsが必須。
 2. "ppmdev"に移動し、シェルから"npm install"を実行する
 3. "_newproject"ディレクトリを"packages"配下にコピーする
 4. "3."でコピーしたディレクトリ名を開発するプラグイン名にリネームする
-5. "npm init --scope ppmdev -w packages/<plugin-name>"を実行する
+5. "ppmdev"上で、npm init --scope ppmdev -w packages/<plugin-name>"を実行する
 
 ===============================================================================
 スクリプトの記述ルール
@@ -127,7 +127,7 @@ JScript.dll,JScript9.dll,chakra.dll,ppxcv8.dllのすべてで使えない関数�
 コレクションを取得できるため実際に代替手段がないのはchakra.dllのみとなる。
 ppmでは、JScript.dllと他dllの互換性を保てない場合にVBScriptで代用しているが、
 ppxcv8.dllはvbsファイルを読めないので専用のjsファイルを書く必要がある。
-要するに"Enumerator"を使う必要がある場合は、
+"Enumerator"を使う必要がある場合にppmでは、
 	JScript.dll,JScript9.dll,chakra.dll用のvbsファイル"dist/lib/xxx.vbs"
 	ppxcv8.dll用の"dist/lib/xxx.js"
 を"PPx.ScripEngineName"の値で分岐し、同等の引数を渡し、戻り値を返すようにしている。
@@ -187,7 +187,7 @@ dase.cfg
 
 patch.cfg
 	・必須。デフォルト設定のひな型。プラグインのインストール時に
-	  <plugin-name.cfg>として..\cache\xxx\configにコピーされる
+	  <plugin-name.cfg>としてcache\xxx\configにコピーされる
 	・<plugin-name.cfg>は*ppmEditコマンドでユーザーが直接編集でき、
 	  base.cfgとマージされる。
 	・*ppmSetDefault, *ppmCompareなどに使用される
@@ -195,7 +195,7 @@ patch.cfg
 ===============================================================================
 base.cfgとpatch.cfgの仕様
 
-用語
+・用語
 	ID = {
 	SubID = 値(value)
 	}

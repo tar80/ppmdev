@@ -14,7 +14,7 @@ export const pathSelf = (): {scriptName: string; parentDir: string} => {
     parentDir = PPx.Extract(`%FDN`);
   }
 
-  /* As a general rule, do not add "\\" at the end */
+  /* As a general rule, no trailing backslash. */
   return {scriptName, parentDir: parentDir.replace(/\\$/, '')};
 };
 
