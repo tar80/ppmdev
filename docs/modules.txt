@@ -357,6 +357,11 @@ newline
 	.Ascii
 		改行種類or改行コードを("-1","13","10")へ変換
 
+type Histories = "g"|"p"|"v"|"n"|"m"|"s"|"h"|"d"|"c"|"f"|"u"|"x"
+type RefHistories = "general"|"PPcRef"|"PPvRef"|"number"|"mask"|"search"|"command"|"directory"|"file"|"path"|"user1"|"user2"
+refHistory = {[RefHistories[number]]: Histories[number]}
+	PPx参照履歴のリスト
+
 ===============================================================================
 path.ts
 

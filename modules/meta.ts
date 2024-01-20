@@ -48,3 +48,20 @@ export const newline = {
     '\r\n': '-1'
   }
 };
+
+export type Histories = keyof typeof refHistory
+export type RefHistories = (typeof refHistory)[Histories]
+export const refHistory = {
+  g: 'general',
+  p: 'PPcRef',
+  v: 'PPvRef',
+  n: 'number',
+  m: 'mask',
+  s: 'search',
+  h: 'command',
+  d: 'directory',
+  c: 'filename',
+  f: 'fullpath',
+  u: 'user1',
+  x: 'user2'
+} as const;
