@@ -75,7 +75,8 @@ export const readLines = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}
   }
 
   const nl: NlCodes = expandNlCode(stdout.slice(0, 1000));
-  const lines = stdout.split(nl);
+  const nl_ = nl !== '\r' ? /\r?\n/ : nl;
+  const lines = stdout.split(nl_);
 
   if (isEmptyStr(lines[lines.length - 1])) {
     lines.pop();
@@ -150,6 +151,11 @@ export const writeLines = ({
     });
   } else {
     const mode = append ? 8 : overwrite ? 2 : 1;
+
+    if (!fso.FileExists(path)) {
+      PPx.Execute(`%Osq *makefile ${path}`);
+    }
+
     const f = fso.GetFile(path);
     const tristate = enc === 'utf16le' ? -1 : 0;
     const st = f.OpenAsTextStream(mode, tristate);
