@@ -8,8 +8,8 @@ import {ppm} from '@ppmdev/modules/ppm.ts';
 import {expandSource} from '@ppmdev/modules/source.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 
-const pass = colorlize({esc: true, message: ' PASS ', fg: 'black', bg: 'green'});
-const drop = colorlize({esc: true, message: ' DROP ', fg: 'black', bg: 'red'});
+const pass = colorlize({esc: false, message: ' PASS ', fg: 'green'});
+const drop = colorlize({esc: false, message: ' DROP ', fg: 'red'});
 const failedItem = (message: string): string => colorlize({esc: true, message: message, fg: 'yellow'});
 const result = (error: boolean, message: string): Error_String =>
   error ? [true, `${drop} ${message}`] : [false, `${pass} ${message}`];

@@ -9,7 +9,7 @@ const fso = PPx.CreateObject('Scripting.FileSystemObject');
  * @param unicode - [default:false] Create file with utf16le encoding
  * @return `boolean` Whether the file was created
  */
-export const createTextFile = (path: string, overwrite: boolean = true, unicode: boolean = false): Error_String => {
+export const createTextFile = (path: string, overwrite = true, unicode = false): Error_String => {
   let [error, errormsg] = [false, ''];
   let st: Scripting.TextStream | undefined;
 
@@ -31,7 +31,7 @@ const create = (
   dest: string,
   isDelete: boolean,
   pwd: string,
-  ow?: boolean
+  ow = false
 ): Error_String => {
   try {
     fso[method](src, dest, ow);

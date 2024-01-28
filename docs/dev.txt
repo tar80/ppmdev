@@ -68,7 +68,7 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 	  "src/lib/cv8/someLibrary.ts" -> "dist/lib/someLibrary.js"
 
 	・"ppmver"は、"./install"と"./package.json"内のバージョン表記を更新する。
-	  プロンプトに表示されるcurrent: <version>]は、"./install"があれば
+	  プロンプトに表示される[current: <version>]は、"./install"があれば
 	  origin/main:installを、なければorigin/main:package.jsonを参照する。
 	  空文字、現在のバージョンより低い値のときは中止される。
 
@@ -110,7 +110,7 @@ nodejsが必須。
 2. "ppmdev"に移動し、シェルから"npm install"を実行する
 3. "_newproject"ディレクトリを"packages"配下にコピーする
 4. "3."でコピーしたディレクトリ名を開発するプラグイン名にリネームする
-5. "ppmdev"上で、npm init --scope ppmdev -w packages/<plugin-name>"を実行する
+5. "ppmdev"上で、"npm init --scope ppmdev -w packages/<plugin-name>"を実行する
 
 ===============================================================================
 スクリプトの記述ルール
