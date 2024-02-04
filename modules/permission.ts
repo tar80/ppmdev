@@ -10,7 +10,7 @@ import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 
 const pass = colorlize({esc: false, message: ' PASS ', fg: 'green'});
 const drop = colorlize({esc: false, message: ' DROP ', fg: 'red'});
-const failedItem = (message: string): string => colorlize({esc: true, message: message, fg: 'yellow'});
+const failedItem = (message: string): string => colorlize({esc: false, message: message, fg: 'yellow'});
 const result = (error: boolean, message: string): Error_String =>
   error ? [true, `${drop} ${message}`] : [false, `${pass} ${message}`];
 
