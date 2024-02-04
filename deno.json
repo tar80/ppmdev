@@ -12,5 +12,6 @@
       "tags": ["recommended"],
       "exclude": ["no--vars"]
     }
-  }
+  },
+  "unstable": ["byonm", "bare-node-builtins"]
 }

@@ -26,6 +26,7 @@ if (isProduction) {
   });
 } else {
   input = process.argv[2].replace(/\\/g, '/');
+  input = input.replace(/^src\//, '');
   const cv8 = input.includes('cv8/');
 
   build(...configuration(DEV_DIR, false, cv8));

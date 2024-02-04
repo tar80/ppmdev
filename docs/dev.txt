@@ -53,12 +53,14 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 
 	・ts-nodeが遅いので確認用にdenoをセットしている。
 	  ts-nodeを使う場合は"npx ts-node"を直接実行する。
-	・denoで確認する場合は、import文にパスエイリアスは使えず、
-	  拡張子を省略できない。@scopeは使える。
+	・denoで確認する場合は拡張子を省略できない。@scopeは使える。
 
 	・"build"は"src"ディレクトリ以下のファイルを一つ指定できる。
-	  対象ファイルの指定方法は"src/"からの相対パスとする。
-	  "npm run build index.ts", "npm run build lib/library.ts"
+	  対象ファイルの指定方法は"src/"からの相対パスとする。なお、
+	  "src/"から始まるパスの場合"src/"は無視される。
+	  パス区切りは"/"(slash),"\"(backslash)どちらでもかまわない。
+	    "npm run build index.ts", "npm run build lib/library.ts"
+	    "npm run build src/index.ts", "npm run build src\lib\library.ts"
 	・"build"は"dev","dist"両方へ出力する。
 	・"build:prod"は"src"配下の全スクリプトを対象に"dist"へ出力する。
 	・ディレクトリ名"mod/"配下のスクリプトは出力対象外。
