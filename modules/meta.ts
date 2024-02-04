@@ -49,8 +49,8 @@ export const newline = {
   }
 };
 
-export type Histories = keyof typeof refHistory
-export type RefHistories = (typeof refHistory)[Histories]
+export type Histories = keyof typeof refHistory;
+export type RefHistories = (typeof refHistory)[Histories];
 export const refHistory = {
   g: 'general',
   p: 'PPcRef',
@@ -65,3 +65,39 @@ export const refHistory = {
   u: 'user1',
   x: 'user2'
 } as const;
+
+export const rgxEscape = {
+  app: {
+    '^': '\\^',
+    '$': '\\$',
+    '(': '\\(',
+    ')': '\\)',
+    '[': '\\[',
+    '|': '\\|',
+    '=': '\\=',
+    '*': '\\*',
+    '+': '\\+',
+    '?': '\\?',
+    '.': '\\.',
+    '/': '\\/',
+    '\\': '\\\\'
+  },
+  exclude: {
+    '\\^': '^',
+    '\\$': '$',
+    '\\(': '(',
+    '\\)': ')',
+    '\\[': '[',
+    '\\]': ']',
+    '\\|': '|',
+    '\\=': '=',
+    '\\*': '*',
+    '\\+': '+',
+    '\\?': '?',
+    '\\.': '.',
+    '\\/': '/',
+    '\\s': ' ',
+    '\\t': '\t',
+    '\\\\': '\\'
+  }
+};

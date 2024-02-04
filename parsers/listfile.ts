@@ -43,25 +43,38 @@ export const getFiletime = (data: string): string => {
   return `${bit.high}.${bit.low}`;
 };
 
-export const formLfData = (data: string, rgx: RegExp, rep: string): string => {
+export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: boolean): string => {
   let comment: string | undefined = undefined;
-  data = data.replace(/\\/g, '\\\\');
+  // data = data.replace(/\\/g, '\\\\');
   data = data.replace(rgx, rep);
 
   if (~data.indexOf(',"comment":')) {
-    data = data.replace(/,"comment":\s?"(.+)"/, (_, m) => {
-      comment = `T:"${m.replace(/""/g, '`')}"`;
+    data = data.replace(/,"comment":\s?"(.*)"/, (_, m) => {
+      comment = `${m.replace(/""/g, '`')}`;
       return '';
     });
   }
 
-  const o = JSON.parse(data);
+  const o = (() => {
+    try {
+      return JSON.parse(data);
+    } catch (err) {
+      comment = data;
+
+      return {name: '---',sname: '-', att: '264'};
+    }
+  })();
   const att = o.att != undefined && o.att !== '' ? o.att : '0';
   const ext = o.ext != undefined ? `X:${o.ext}` : undefined;
   const highlight = o.hl ? `H:${o.hl}` : undefined;
   const mark = o.mark ? `M:${o.mark}` : undefined;
   const exitem = o.oid && o.ovalue ? `O${o.oid}:"${o.ovalue}"` : undefined;
+  let name = o.name ?? '';
   let [create, access, write]: string[] = [];
+
+  if (!!virtualEntry) {
+    [name, comment] = name === '-' ? ['-', '---'] : [comment, name];
+  }
 
   if (!!o.date) {
     create = getFiletime(o.date);
@@ -74,7 +87,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: string): string => {
   }
 
   const tbl = [
-    `"${o.name ?? ''}"`,
+    `"${name}"`,
     `"${o.sname ?? ''}"`,
     `A:H${att}`,
     `C:${create}`,
@@ -86,7 +99,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: string): string => {
     highlight,
     mark,
     exitem,
-    comment
+    `T:"${comment}"`
   ];
 
   return tbl.removeEmpty().join(',');
@@ -97,6 +110,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: string): string => {
  * @param lines Lines of raw data
  * @param rgx Pattern of regular expression
  * @param rep Replacement of regular expression
+ * @param virtualEntry Exchange "name" and "comment"
  * @return ListFile lines
  * NOTE: "rep" must be a JSON format string
  * - "ext" specifies the decimal number of the color code
@@ -112,28 +126,39 @@ export const formLfData = (data: string, rgx: RegExp, rep: string): string => {
  *      '{"name":"$1","sname":"","att":"$2","create":"$3,$4,$5,$6,$7,$8","write":"$3,$4,$5,$6,$7,$8","access":"$3,$4,$5,$6,$7,$8",
  *      "size":"0.0","reparse":"0.0","ext":16777215,"hl":1,"mark":1,"oid":"id","ovalue":"value","comment":"words"}'
  */
-export const createLfItems = ({lines, rgx, rep}: {lines: string[]; rgx: RegExp; rep: string}): typeof items => {
+export const createLfItems = ({
+  lines,
+  rgx,
+  rep,
+  virtualEntry = false
+}: {
+  lines: string[];
+  rgx: RegExp;
+  rep: string | Function;
+  virtualEntry?: boolean;
+}): typeof items => {
   const items: string[] = [];
 
   for (const line of lines) {
-    items.push(formLfData(line, rgx, rep));
+    items.push(formLfData(line, rgx, rep, virtualEntry));
   }
 
   return items;
 };
 
 export const createLfMeta = ({
-  charset = 'utf-8',
+  charset = 'utf16le',
   basepath,
   dirtype = '0',
   opts
 }: {
   charset?: string;
   basepath?: string;
-  dirtype?: string;
+  dirtype?: string | number;
   opts?: string[];
 }): typeof meta => {
-  const meta: string[] = [LF_HEADER, `${LF_CHARSET}=${charset}`];
+  const meta: string[] = [LF_HEADER];
+  charset !== 'utf16le' && meta.push(`${LF_CHARSET}=${charset}`);
 
   if (basepath !== '') {
     meta.push(`${LF_BASE}=${basepath}|${dirtype}`);

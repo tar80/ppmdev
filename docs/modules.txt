@@ -171,11 +171,19 @@ uniqName
 	.archDir: string
 		ppm経由でダウンロードされた書庫を保存するディレクトリ名
 
-	.tempKey: stirng
-		ppmが一時登録するキー設定のテーブル名
-
 	.cacheDir() => string
 		ppmが使用するファイル類を保存するディレクトリ名
+
+uniqID
+	.tempKey: string
+		ppmが一時登録するキー設定のテーブル名
+
+	.tempMenu: string
+		ppmが一時登録するメニュー設定のテーブル名
+
+	.lfDset: string
+		ppmが生成したリストファイルのメタ情報を一時保存する
+		_UserテーブルのID名
 
 tmp()
 	.dir: string
@@ -362,6 +370,13 @@ type RefHistories = "general"|"PPcRef"|"PPvRef"|"number"|"mask"|"search"|"comman
 refHistory = {[RefHistories[number]]: Histories[number]}
 	PPx参照履歴のリスト
 
+rgxEscape
+	.add
+		文字に正規表現エスケープを加える
+
+	.exclude
+		文字から正規表現エスケープを除去する
+
 ===============================================================================
 path.ts
 
@@ -400,6 +415,9 @@ ppm.ts
 	.getXXXは、[ErrorLevel, string]
 	.setXXXは、ErrorLevel
 .jobstart()は特殊で、関数.jobendを返す
+
+msgBox(title: stirng, message) => boolean
+	ppmオブジェクトは大きいのでppm.echoだけ使いたいときにはこちらを使う。
 
 ppm
 	.echo(title: string, message: string, exitcode?: number) => boolean
@@ -489,6 +507,9 @@ ppm
 		'*setcust <uniqName.tempKey>:<subid>,<value>'を実行する
 		<multiline>が"true"なら、頭に'%OC 'を追加する
 
+	.deletemenu() => void
+		'*deletecust "<uniqName.tempMenu>"'を実行する
+
 	.deletekeys() => void
 		'*deletecust "<uniqName.tempKey>"'を実行する
 
@@ -537,6 +558,7 @@ ppm
 		引数にはオブジェクトを渡す
 		modeにダイアログ種類、ヒストリ種類以外の文字を渡すとエラー
 		autoselectが"true"ならENTERキー押下時に最初の補完候補を選択状態にする
+		入力終了時に、uniqID.tempKeyとuniqID.tempMenuを削除する
 		戻り値は、[ErrorLevel, '入力した文字列']
 
 	.linemessage(

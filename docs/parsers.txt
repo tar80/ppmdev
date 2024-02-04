@@ -43,19 +43,28 @@ listfile.ts
 		時刻を指す文字列をFILETIME構造体に変換し、"<上位32bit>.<下位32bit>"
 		の文字列として返す
 
-	formLfData(data: string, rgx: RegExp, rep: string) => string
+	formLfData(
+	  data: string,
+	  rgx: RegExp,
+	  rep: string,
+	  virtualEntry: boolean
+	) => string
 		<data>.replace(<rgx>,<rep>)を実行し、リストファイルの形式に
 		整形して返す
+		virtualEntryが真でエントリ名が"-"のときエントリ名を"---"に、
+		コメントを"-"に変更する(エントリを区切り行として扱う)
 
-	createLfItems({lines: string[], rgx: RegExp, rep: string})
-	=> string[]
+	createLfItems(
+	  {lines: string[], rgx: RegExp, rep: string, virtualEntry?: boolean = false}
+	) => string[]
 		複数の行情報を一行ずつformLfData()に送り、リストファイルの形式の
 		行情報を格納した配列として返す
+		virtualEntryにはエントリを仮想エントリとして扱うかどうかを指定する
 
 	createLfMeta({
-		charset?: string = 'utf-8',
+		charset?: string = 'utf16le',
 		basepath?: string,
-		dirtype?: string = '0',
+		dirtype?: string|number = '0',
 		opts?: string[]
 	}) => string[]
 		引数からメタ情報を形成して配列として返す

@@ -1,7 +1,7 @@
 import type {Level_String, ErrorLevel} from '@ppmdev/modules/types.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
 import {isEmptyStr, isError} from '@ppmdev/modules/guard.ts';
-import {info, uniqName} from '@ppmdev/modules/data.ts';
+import {info, uniqName, uniqID} from '@ppmdev/modules/data.ts';
 import {readLines} from '@ppmdev/modules/io.ts';
 
 type StringValues = 'e' | 'i' | 'p' | 'u';
@@ -45,21 +45,24 @@ const cache: Record<string, string> = {lang: info.language};
 const createCache = (key: string): string => {
   const value = PPx.Extract(`%*getcust(S_ppm#global:${key})`);
   cache[key] = value;
+
   return value;
 };
 
-// table name for temporary keymaps
-const TEMP_KEYS = 'K_ppmTemp';
-
-/** register a temporary key and return the command line for the post command */
+/** register temporary keys and return the command line for the input post command */
 const autoselectEnter = (cmdline: string): string => {
-  PPx.Execute(`%OC *setcust ${TEMP_KEYS}:ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`);
-  PPx.Execute(`%OC *setcust ${TEMP_KEYS}:\\ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`);
-  return `*mapkey use,${TEMP_KEYS}%%:${cmdline}`;
+  PPx.Execute(
+    `%OC *setcust ${uniqID.tempKey}:ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`
+  );
+  PPx.Execute(
+    `%OC *setcust ${uniqID.tempKey}:\\ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`
+  );
+
+  return `*mapkey use,${uniqID.tempKey}%%:${cmdline}`;
 };
 
-const deleteEnter = (): void => {
-  PPx.Execute(`*deletecust "${TEMP_KEYS}"`);
+export const msgBox = (title: string, message: string) => {
+  dialog('I', `${title}`, `${message}`);
 };
 
 export const ppm = {
@@ -377,14 +380,19 @@ export const ppm = {
     }
 
     const opt = multiline ? '%OC ' : '';
-    PPx.Execute(`${opt}*setcust ${uniqName.tempKey}:${subid},${value}`);
+    PPx.Execute(`${opt}*setcust ${uniqID.tempKey}:${subid},${value}`);
 
-    return uniqName.tempKey;
+    return uniqID.tempKey;
+  },
+
+  /** Delete a temporary menu. */
+  deletemenu(): void {
+    PPx.Execute(`*deletecust "${uniqID.tempMenu}"`);
   },
 
   /** Delete temporary keys. */
   deletekeys(): void {
-    PPx.Execute(`*deletecust "${uniqName.tempKey}"`);
+    PPx.Execute(`*deletecust "${uniqID.tempKey}"`);
   },
 
   /** Set linecust. */
@@ -480,7 +488,8 @@ export const ppm = {
       `%OCP %*input("${message}" -title:"${title}" -mode:${mode} -select:${select}${m}${l}${fp}${fd}${k_})`
     );
     errorlevel = Number(PPx.Extract());
-    autoselect && deleteEnter();
+    this.deletemenu();
+    this.deletekeys();
 
     return [errorlevel, input];
   },

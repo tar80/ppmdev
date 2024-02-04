@@ -22,7 +22,7 @@ type Mandatory = {
   readonly executables: string[];
 };
 const mandatory: Mandatory = {
-  ppxVersion: 19400,
+  ppxVersion: 19500,
   codeType: 2,
   scriptType: 0,
   scriptModule() {
@@ -41,10 +41,15 @@ const uniqName = {
   updateLog: '_updateLog',
   repoDir: 'repo',
   archDir: 'arch',
-  tempKey: 'K_ppmTemp',
   cacheDir() {
     return `cache\\${PPx.Extract('%0').slice(3).replace(/\\/g, '@')}`;
   }
+} as const;
+
+const uniqID = {
+  tempKey: 'K_ppmTemp',
+  tempMenu: 'M_ppmTemp',
+  lfDset: 'ppmlfdset'
 } as const;
 
 const tmp = () => {
@@ -71,4 +76,4 @@ const uri = {
   rawGithub: 'https://raw.githubusercontent.com'
 } as const;
 
-export {info, useLanguage, mandatory, tmp, uri, uniqName};
+export {info, useLanguage, mandatory, tmp, uri, uniqName, uniqID};
