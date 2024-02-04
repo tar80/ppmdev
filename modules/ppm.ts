@@ -374,13 +374,18 @@ export const ppm = {
    * Set temporary key.
    * @return Temporary key table name
    */
-  setkey(subid: string, value: string, multiline: boolean = false): string {
+  setkey(subid: string, value: string, multiline = false, desc = ''): string {
     if (isEmptyStr(subid)) {
-      throw new Error('SubId is empty');
+      throw new Error('SubId not specified');
+    }
+
+    if (!isEmptyStr(desc)) {
+      desc = `*skip ${desc}%bn%bt`;
+      multiline = true;
     }
 
     const opt = multiline ? '%OC ' : '';
-    PPx.Execute(`${opt}*setcust ${uniqID.tempKey}:${subid},${value}`);
+    PPx.Execute(`${opt}*setcust ${uniqID.tempKey}:${subid},${desc}${value}`);
 
     return uniqID.tempKey;
   },

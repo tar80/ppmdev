@@ -65,23 +65,32 @@ type FileContents = {lines: string[]; nl: NlCodes};
  * Read lines from a file.
  * @param path Read file
  * @param enc [default:"utf8"] "sjis"|"utf16le"|"utf8"
+ * @param linefeed "\r\n"|"\r"|"\n"
  * @return [error, "error message"|{lines: file contents, nl: newline code}]
  */
-export const readLines = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}): [boolean, string | FileContents] => {
+export const readLines = ({
+  path,
+  enc = 'utf8',
+  linefeed
+}: {
+  path: string;
+  enc?: FileEncode;
+  linefeed?: NlCodes;
+}): [boolean, string | FileContents] => {
   const [error, stdout] = read({path, enc});
 
   if (error) {
     return [true, stdout];
   }
 
-  const nl: NlCodes = expandNlCode(stdout.slice(0, 1000));
-  const lines = stdout.split(nl);
+  linefeed = linefeed ?? expandNlCode(stdout.slice(0, 1000));
+  const lines = stdout.split(linefeed);
 
   if (isEmptyStr(lines[lines.length - 1])) {
     lines.pop();
   }
 
-  return [false, {lines, nl}];
+  return [false, {lines, nl: linefeed}];
 };
 
 type WriteLines = {

@@ -72,7 +72,7 @@ export type PermissionItems = {
   readonly libRegexp?: string;
   readonly useModules: string | string[];
   readonly useExecutables: string | string[];
-  readonly dependencies?: string;
+  // readonly dependencies?: string;
   // readonly copyFlag?: string;
   // readonly copyScript?: string;
   // readonly copySpec?: string;
@@ -82,7 +82,7 @@ export const permission = {
   /** plugin version limit. */
   pluginVersion: (version: number | string, name: string): Error_String => {
     const pluginDetail = expandSource(name);
-    const m: Record<string, string> = {'false': `${name} version ${version}`, 'true': `${name} has not been updated}`};
+    const m: Record<string, string> = {'false': `${name} version ${version}`, 'true': `${name} has not been updated`};
 
     // not installed
     if (!pluginDetail) {
@@ -166,6 +166,6 @@ export const permission = {
   /** Required libraries */
   useModules: (items: string | string[]): Error_String => existence('libExists', 'Required modules', items),
 
-  /** Items with dependencies */
-  dependencies: (items: string): Error_String => [false, items]
+  // /** Items with dependencies */
+  // dependencies: (items: string): Error_String => [true, `[dep]${items}`]
 } as const;

@@ -321,9 +321,11 @@ read({path: string, enc?: FileEncode = 'utf8'}) => Error_String
 	戻り値は、[error: boolean, data: string]
 	<error>が"true"のとき、<data>にはエラーメッセージが入る
 
-readLines({path: string, enc?: FileEncode = 'utf8'})
+readLines({path: string, enc?: FileEncode = 'utf8', linefeed?: NlCodes})
 	=> [boolean, string|{lines: string[], nl: NlCodes}]
-	<path>で指定されたファイルの内容を<enc>で読み取って返す
+	<path>で指定されたファイルの内容を<enc>で読み取り、<nl>で改行して返す
+	<nl>の指定がない場合は頭から1000文字の最初に使われた改行コードで区切る
+	1000文字内に改行がなかったときは"\n"で区切られる
 	戻り値は、[error: boolean, data: string|{lines: string[], nl: NlCodes}]
 	<error>が"true"のとき、<data>にはエラーメッセージが入る
 
@@ -503,9 +505,10 @@ ppm
 		'*deletecust <id>,<subid>'を実行し、
 		<load>が"true"であれば、'%K"loadcust"'を実行する
 
-	.setkey(subid: string, value: string, multiline: boolean = false) => uniqName.tempKey
+	.setkey(subid: string, value: string, multiline: boolean = false, desc: string) => uniqName.tempKey
 		'*setcust <uniqName.tempKey>:<subid>,<value>'を実行する
 		<multiline>が"true"なら、頭に'%OC 'を追加する
+		<desc>が空でなければ1行目に'*skip <desc>%bn%bt'を追加する
 
 	.deletemenu() => void
 		'*deletecust "<uniqName.tempMenu>"'を実行する
@@ -778,6 +781,10 @@ waitUntil(
 
 isCV8() => boolean
 	現在使用しているJavaScriptライブラリが"ClearScriptV8"なら"true"を返す
+
+actualParentDirectory() => string
+	常に実体のあるディレクトリパスを返す
+	パスが存在するかどうかは問わない
 
 ===============================================================================
 window.ts

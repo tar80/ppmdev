@@ -63,3 +63,10 @@ export const waitUntil = (
 
 /** Whether the library used by JavaScript is ClearScriptV8 */
 export const isCV8 = (): boolean => PPx.ScriptEngineName === 'ClearScriptV8';
+
+export const actualParentDirectory = (): string => {
+  const rgx = /^aux:(\/\/)?[MS]_[^/\\]+[/\\]/;
+  const macro = PPx.DirectoryType === 4 ? '%FDVN' : '%FDN';
+
+  return  PPx.Extract(macro).replace(rgx, '');
+}
