@@ -1,6 +1,6 @@
 const info = {
   ppmName: 'ppx-plugin-manager',
-  ppmVersion: 0.93,
+  ppmVersion: 0.94,
   language: 'jp',
   nlcode: '\r\n',
   nltype: 'crlf',

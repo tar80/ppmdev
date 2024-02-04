@@ -75,8 +75,7 @@ export const readLines = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}
   }
 
   const nl: NlCodes = expandNlCode(stdout.slice(0, 1000));
-  const nl_ = nl !== '\r' ? /\r?\n/ : nl;
-  const lines = stdout.split(nl_);
+  const lines = stdout.split(nl);
 
   if (isEmptyStr(lines[lines.length - 1])) {
     lines.pop();
