@@ -68,5 +68,12 @@ export const actualParentDirectory = (): string => {
   const rgx = /^aux:(\/\/)?[MS]_[^/\\]+[/\\]/;
   const macro = PPx.DirectoryType === 4 ? '%FDVN' : '%FDN';
 
-  return  PPx.Extract(macro).replace(rgx, '');
-}
+  return PPx.Extract(macro).replace(rgx, '');
+};
+
+export const windowID = (): {id: string; uid: string} => {
+  const id = PPx.Extract('%n');
+  let uid = id.replace(/^(C)([^_]+)$/, '$1_$2');
+
+  return {id, uid};
+};

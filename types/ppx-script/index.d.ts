@@ -103,7 +103,7 @@ declare interface PPx {
   SlowMode: number;
   SyncView: number;
   readonly WindowDirection: number;
-  readonly windowIDName: string;
+  windowIDName: string;
 }
 
 declare namespace entry {

@@ -786,6 +786,14 @@ actualParentDirectory() => string
 	常に実体のあるディレクトリパスを返す
 	パスが存在するかどうかは問わない
 
+windowID() => {id: string, uid: string}
+	"id"にはPPx.Extract('%n')の値が入る
+	"uid"には"id"の値にアンダースコアを追加した値が入る
+		{id: 'CA', uid: 'C_A'}
+		{id: 'CZaa', uid: 'C_Zaa'}
+	※%*ppxlist(-C)はID名に必ずアンダースコアを含むがPPx.windowIDNameは
+	値が"CZxx"のときにアンダースコアを含まないため同一IDでも一致しない
+
 ===============================================================================
 window.ts
 
