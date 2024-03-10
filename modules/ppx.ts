@@ -43,7 +43,7 @@ const fso = {
     }
   },
   GetFile: (filepath: string): object => fs.statSync(filepath),
-  GetParentFolderName: (filepath: string): string => path.dirname(filepath),
+  GetParentFolderName: (filepath: string): string => path.dirname(filepath)
 };
 
 const dummyActivex = (obj: string): any => {
@@ -53,8 +53,8 @@ const dummyActivex = (obj: string): any => {
 };
 
 const PPx = {
-  PPxVersion: 19400,
-  ModuleVersion: 20,
+  PPxVersion: 19500,
+  ModuleVersion: 21,
   CodeType: 1,
   DirectoryType: 0,
   ScriptEngineName: 'JScript',
@@ -94,7 +94,17 @@ const PPx = {
   setValue: (key: string, value: string | number): void => {
     PPx.Execute(`*string p,${key}=${value}`);
   },
-  Quit: (exitcode: number = 1): void => console.log(`PPx.Quit(${exitcode})`)
+  Quit: (exitcode: number = 1): void => console.log(`PPx.Quit(${exitcode})`),
+
+  /* Not checking the contents as in the actual PPx.GetFileInformation,
+     Note that the extension is returned as is.
+  */
+  GetFileInformation: (param: string, option?: never): string => {
+    let ext = path.extname(param);
+    const _ = option;
+
+    return ext === '' && fso.FolderExists(param) ? ':DIR' : `:${ext.slice(1).toUpperCase()}`;
+  }
 } as PPx;
 
 export default PPx;
