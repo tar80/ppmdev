@@ -74,7 +74,7 @@ const PPx = {
     const ppb = `${process.env.PPX_DIR}\\ppbw.exe`;
     param = param ?? '';
     // param = param.includes('%') ? param : `%*extract(CA,"${param.replace('%', '%%')}")`;
-    let stdout = execSync(`${ppb} -c *maxlength 2000%:%OC *stdout " ${param}"`);
+    let stdout = execSync(`${ppb} -c *maxlength 2000%:%OC *stdout " ${param}"%&`);
 
     return stdout.toString().substring(1);
   },
@@ -91,11 +91,6 @@ const PPx = {
 
     return Number(0);
   },
-  setValue: (key: string, value: string | number): void => {
-    PPx.Execute(`*string p,${key}=${value}`);
-  },
-  Quit: (exitcode: number = 1): void => console.log(`PPx.Quit(${exitcode})`),
-
   /* Not checking the contents as in the actual PPx.GetFileInformation,
      Note that the extension is returned as is.
   */
@@ -104,6 +99,14 @@ const PPx = {
     const _ = option;
 
     return ext === '' && fso.FolderExists(param) ? ':DIR' : `:${ext.slice(1).toUpperCase()}`;
+  },
+  linemessage: (text?: any): void => {
+    const ppb = `${process.env.PPX_DIR}\\ppbw.exe`;
+    execSync(`${ppb} -c *execute C,*linemessage ${text ?? ''}%&`);
+  },
+  Quit: (exitcode: number = 1): void => console.log(`PPx.Quit(${exitcode})`),
+  setValue: (key: string, value: string | number): void => {
+    PPx.Execute(`*string p,${key}=${value}`);
   }
 } as PPx;
 
