@@ -43,9 +43,8 @@ export const getFiletime = (data: string): string => {
   return `${bit.high}.${bit.low}`;
 };
 
-export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: boolean): string => {
+export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: boolean = false): string => {
   let comment: string | undefined = undefined;
-  // data = data.replace(/\\/g, '\\\\');
   data = data.replace(rgx, rep);
 
   if (~data.indexOf(',"comment":')) {
@@ -56,12 +55,14 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
   }
 
   const o = (() => {
+    data = data.replace(/\\/g, '\\\\');
+
     try {
       return JSON.parse(data);
     } catch (err) {
       comment = data;
 
-      return {name: '---',sname: '-', att: '264'};
+      return {name: '---', sname: '-', att: '264'};
     }
   })();
   const att = o.att != undefined && o.att !== '' ? o.att : '0';
@@ -86,6 +87,10 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
     write = o.write ? getFiletime(o.write) : '0.0';
   }
 
+  if (!!comment) {
+    comment = `T:"${comment}"`;
+  }
+
   const tbl = [
     `"${name}"`,
     `"${o.sname ?? ''}"`,
@@ -99,7 +104,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
     highlight,
     mark,
     exitem,
-    `T:"${comment}"`
+    comment
   ];
 
   return tbl.removeEmpty().join(',');

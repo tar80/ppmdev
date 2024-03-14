@@ -75,15 +75,16 @@ describe('createLfMeta', function () {
   it('regular metadata', () => {
     const basepath = 'path\\to\\directory';
     const dirtype = '1';
-    const resp = [';ListFile', ';charset=utf-8', `;Base=${basepath}|${dirtype}`];
+    const resp = [';ListFile', `;Base=${basepath}|${dirtype}`];
     expect(createLfMeta({basepath, dirtype})).toEqual(resp);
   });
   it('ppm plugin metadata', () => {
     const basepath = 'path\\to\\directory';
     const dirtype = '4';
+    const charset = 'utf-8';
     const opts = [';ppm=test', ';freq=every'];
     const resp = [';ListFile', ';charset=utf-8', `;Base=${basepath}|${dirtype}`, ...opts];
-    expect(createLfMeta({basepath, dirtype, opts})).toEqual(resp);
+    expect(createLfMeta({basepath, charset, dirtype, opts})).toEqual(resp);
   });
 });
 describe('getLfMeta()', function () {
@@ -94,7 +95,8 @@ describe('getLfMeta()', function () {
       const metadata = getLfMeta(data.lines);
       console.log(metadata);
       expect(metadata.charset).toBe('utf-8');
-      expect(metadata.base).toBe('c:\\path\\to\\parent|1');
+      expect(metadata.base).toBe('c:\\path\\to\\parent');
+      expect(metadata.dirtype).toBe('1');
       expect(metadata.search).toBe('search words');
       expect(metadata.error).toBe('0000');
       expect(metadata.option).toBe('directory');

@@ -5,7 +5,7 @@ if (!Array.prototype.includes) {
       throw new TypeError('Array.includes: "this" is null or not defined');
     }
 
-    var o: typeof Array = Object(this);
+    var o = Object(this);
 
     // 2. Let len be ? ToLength(? Get(O, "length")).
     var len = o.length >>> 0;
