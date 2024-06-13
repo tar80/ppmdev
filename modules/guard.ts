@@ -1,4 +1,5 @@
-export const isString = (value: any): value is string => typeof value === 'string';
+import type {ZeroTo} from '@ppmdev/modules/types.ts';
+
 export const isEmptyStr = (value: string): boolean => value === '';
 export const isEmptyObj = (obj: Record<string, any>): boolean => {
   if (obj === undefined) {
@@ -21,6 +22,20 @@ export const isError = (error: boolean, value: unknown): value is string => {
   return error && isString;
 };
 
+export const isString = (value: unknown): value is string => typeof value === 'string';
+
 export const isInteger = (value: unknown): value is number => {
   return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
 };
+
+export const isBottom = (value: unknown): value is undefined|null => value == null;
+
+export const isNonZero = (value: string | number): boolean => {
+  if (typeof value === 'string') {
+    return !isEmptyStr(value) && value !== '0';
+  }
+
+  return value !== 0;
+};
+
+export const withinRange = <T extends number>(n: number, max: T): n is ZeroTo<T> => n >= 0 && n <= max;

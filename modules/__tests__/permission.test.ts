@@ -1,108 +1,117 @@
 import PPx from '@ppmdev/modules/ppx';
 global.PPx = Object.create(PPx);
 import {permission, existence} from '../permission';
+import {colorlize} from '../ansi';
+
+const pass = colorlize({esc: false, message: ' PASS ', fg: 'green'});
+const drop = colorlize({esc: false, message: ' DROP ', fg: 'red'});
 
 describe('existence()', function () {
-  const deco = (name: string) => `\\x1b[33m${name}\\x1b[49;39m`;
+  const deco = (name: string) => `\x1b[33m${name}\x1b[49;39m`;
+  const header = 'test'
 
   it('not specified items. the return value must be [true, "<error message>"]', () => {
-    expect(existence('libExists', 'test', [])).toEqual([true, '\\x1b[41;30m FAIL \\x1b[49;39m There are no items']);
+    expect(existence('libExists',header, [])).toEqual([true, `${drop} ${header}: There are no items`]);
   });
   it('pass non-existent file name. the return value must be [true, "<error message>"]', () => {
     const path = PPx.Extract('%*name(LDC,%sgu"ppmlib")');
     const name = 'nonexistent';
-    expect(existence(name, 'test', ['test'])).toEqual([
+    expect(existence(name, header, ['test'])).toEqual([
       true,
-      `\\x1b[41;30m FAIL \\x1b[49;39m ${path}/${name}.js is not found`
+      `${drop} ${header}: ${path}/${name}.js is not found`
     ]);
   });
   it('libExists "pass" pattern', () => {
     const name = 'libExists';
-    const header = 'Test';
     const items = ['ppxscr', 'ppxkey'];
     expect(existence(name, header, items)).toEqual([
       false,
-      `\\x1b[42;30m PASS \\x1b[49;39m ${header}: ${items.join(', ')}`
+      `${pass} ${header}: ${items.join(', ')}`
     ]);
   });
   it('libExists "fail" pattern', () => {
     const name = 'libExists';
-    const header = 'Test';
     const items = ['nonexistent', '1234'];
     expect(existence(name, header, items)).toEqual([
       true,
-      `\\x1b[41;30m FAIL \\x1b[49;39m ${header}: ${deco(items[1])}, ${deco(items[0])}`
+      `${drop} ${header}: ${deco(items[1])}, ${deco(items[0])}`
     ]);
   });
   it('exeExists "pass" pattern', () => {
     const name = 'exeExists';
-    const header = 'Test';
     const items = ['git', 'echo.exe'];
     const executables = ['git.exe', 'echo.exe'];
     expect(existence(name, header, items)).toEqual([
       false,
-      `\\x1b[42;30m PASS \\x1b[49;39m ${header}: ${executables.join(', ')}`
+      `${pass} ${header}: ${executables.join(', ')}`
     ]);
   });
   it('exeExists "fail" pattern', () => {
     const name = 'exeExists';
-    const header = 'Test';
     const items = ['nonexistent', '1234.exe'];
     const executables = ['nonexistent.exe', '1234.exe'];
     expect(existence(name, header, items)).toEqual([
       true,
-      `\\x1b[41;30m FAIL \\x1b[49;39m ${header}: ${deco(executables[0])}, ${deco(executables[1])}`
+      `${drop} ${header}: ${deco(executables[0])}, ${deco(executables[1])}`
     ]);
   });
 });
 
 describe('codeType()', function () {
   it('allow unicode. the return value must be [false, "<pass message>"]', () => {
-    expect(permission.codeType(1)).toEqual([false, '\\x1b[42;30m PASS \\x1b[49;39m Using PPx Unicode']);
+    expect(permission.codeType(2)).toEqual([false, `${pass} Using PPx Unicode`]);
   });
   it('disallow unicode. the return value must be [true, "<fail message>"]', () => {
-    expect(permission.codeType(2)).toEqual([
+    expect(permission.codeType(1)).toEqual([
       true,
-      '\\x1b[41;30m FAIL \\x1b[49;39m Using PPx Unicode. Required MultiByte'
+      `${drop} Using PPx Unicode. Required MultiByte`
     ]);
   });
 });
 
 describe('ppxVersion', function () {
   it('meet the version', () => {
-    expect(permission.ppxVersion(19100)).toEqual([false, '\\x1b[42;30m PASS \\x1b[49;39m PPx version 19100 or later']);
-    expect(permission.ppxVersion(192.0)).toEqual([false, '\\x1b[42;30m PASS \\x1b[49;39m PPx version 19200 or later']);
-    expect(permission.ppxVersion(192)).toEqual([false, '\\x1b[42;30m PASS \\x1b[49;39m PPx version 19200 or later']);
+    let version = 19000
+    expect(permission.ppxVersion(version)).toEqual([false, `${pass} PPx version ${version} or later`]);
+    version = 19001
+    expect(permission.ppxVersion(version)).toEqual([false, `${pass} PPx version ${version} or later`]);
+    version = 191.1
+    const exp = 19101
+    expect(permission.ppxVersion(version)).toEqual([false, `${pass} PPx version ${exp} or later`]);
   });
   it('does not meet the version', () => {
-    expect(permission.ppxVersion(200)).toEqual([true, '\\x1b[41;30m FAIL \\x1b[49;39m PPx version 20000 or later']);
+    expect(permission.ppxVersion(200)).toEqual([true, `${drop} PPx version 20000 or later`]);
   });
 });
 
 describe('scriptVersion()', function () {
+  const scriptEngine = PPx.ScriptEngineName;
+
   it('meet the version', () => {
     const version = 1;
     expect(permission.scriptVersion(version)).toEqual([
       false,
-      `\\x1b[42;30m PASS \\x1b[49;39m ScriptModule R${version} or later`
+      `${pass} ${scriptEngine} module R${version} or later`
     ]);
   });
   it('does not meet the version', () => {
     const version = 99;
     expect(permission.scriptVersion(version)).toEqual([
       true,
-      `\\x1b[41;30m FAIL \\x1b[49;39m ScriptModule R${version} or later`
+      `${drop} ${scriptEngine} module R${version} or later`
     ]);
   });
 });
 
 describe('scriptType()', function () {
   it('meet the version', () => {
-    expect(permission.scriptType(0)).toEqual([false, '\\x1b[42;30m PASS \\x1b[49;39m Use JScript version anything']);
-    expect(permission.scriptType(4)).toEqual([false, '\\x1b[42;30m PASS \\x1b[49;39m Use JScript version Chakra(ES6)']);
+    expect(permission.scriptType(0)).toEqual([false, `${pass} Use engine anything`]);
+    expect(permission.scriptType(4)).toEqual([false, `${pass} Use engine Chakra(ES6)`]);
+    expect(permission.scriptType(5)).toEqual([true, `${drop} Use engine CV8(ES2021)`]);
+    expect(permission.scriptType(6)).toEqual([true, `${drop} Use engine QuickJS(ES2023)`]);
   });
   it('does not meet the version', () => {
-    expect(permission.scriptType(1)).toEqual([true, '\\x1b[41;30m FAIL \\x1b[49;39m Use JScript version JS9(5.7)']);
+    expect(permission.scriptType(1)).toEqual([true, `${drop} Use engine JS9(5.7)`]);
   });
 });
 
@@ -110,13 +119,13 @@ describe('ppmVersion()', function () {
   const passedVersion = (version: string | number): void => {
     expect(permission.ppmVersion(version)).toEqual([
       false,
-      `\\x1b[42;30m PASS \\x1b[49;39m ppx-plugin-manager version ${version} or later`
+      `${pass} ppx-plugin-manager version ${version} or later`
     ]);
   };
   const failedVersion = (version: string | number): void => {
     expect(permission.ppmVersion(version)).toEqual([
       true,
-      `\\x1b[41;30m FAIL \\x1b[49;39m ppx-plugin-manager version ${version} or later`
+      `${drop} ppx-plugin-manager version ${version} or later`
     ]);
   };
 
@@ -133,9 +142,9 @@ describe('ppmVersion()', function () {
 
 describe('libRegexp()', function () {
   it('using bregonig.dll', () => {
-    expect(permission.libRegexp('bregonig')).toEqual([false, '\\x1b[42;30m PASS \\x1b[49;39m Using bregonig.dll']);
+    expect(permission.libRegexp('bregonig')).toEqual([false, `${pass} Using bregonig.dll`]);
   });
   it('not using bregonig.dll', () => {
-    expect(permission.libRegexp('RegExp')).toEqual([true, '\\x1b[41;30m FAIL \\x1b[49;39m Using bregonig.dll']);
+    expect(permission.libRegexp('RegExp')).toEqual([true, `${drop} Using bregonig.dll`]);
   });
 });

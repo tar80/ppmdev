@@ -1,18 +1,19 @@
 const info = {
   ppmName: 'ppx-plugin-manager',
-  ppmVersion: 0.94,
-  language: 'jp',
+  ppmVersion: 0.95,
+  language: 'ja',
   nlcode: '\r\n',
   nltype: 'crlf',
   ppmID: 'P',
   ppmSubID: 'Q'
 } as const;
 
-const useLanguage = (): 'en' | 'jp' => {
-  let lang = PPx.Extract('%*getcust(S_ppm#global:lang)') as 'en' | 'jp';
-  return lang === 'en' || lang === 'jp' ? lang : info.language;
+const useLanguage = (): 'en' | 'ja' => {
+  let lang = PPx.Extract('%*getcust(S_ppm#global:lang)') as 'en' | 'ja';
+  return lang === 'en' || lang === 'ja' ? lang : info.language;
 };
 
+type ModuleName = 'JScript' | 'ClearScriptV8' | 'QuickJS';
 type Mandatory = {
   readonly ppxVersion: number;
   readonly codeType: number;
@@ -22,11 +23,17 @@ type Mandatory = {
   readonly executables: string[];
 };
 const mandatory: Mandatory = {
-  ppxVersion: 19500,
-  codeType: 2,
+  ppxVersion: 19700,
+  codeType: 1,
   scriptType: 0,
   scriptModule() {
-    return PPx.ScriptEngineName === 'ClearScriptV8' ? 3 : 21;
+    const module = PPx.ScriptEngineName as ModuleName;
+
+    return {
+      'JScript': 21,
+      'ClearScriptV8': 3,
+      'QuickJS': 0
+    }[module];
   },
   modules: ['ppxkey', 'ppxmes', 'ppxtext'],
   executables: ['git']

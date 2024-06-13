@@ -59,7 +59,7 @@ export const read = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}): Er
   return error ? [true, `Unable to read ${path}`] : [false, data];
 };
 
-type FileContents = {lines: string[]; nl: NlCodes};
+type ReadLines = [true, string] | [false, {lines: string[]; nl: NlCodes}];
 
 /**
  * Read lines from a file.
@@ -68,15 +68,7 @@ type FileContents = {lines: string[]; nl: NlCodes};
  * @param linefeed "\r\n"|"\r"|"\n"
  * @return [error, "error message"|{lines: file contents, nl: newline code}]
  */
-export const readLines = ({
-  path,
-  enc = 'utf8',
-  linefeed
-}: {
-  path: string;
-  enc?: FileEncode;
-  linefeed?: NlCodes;
-}): [boolean, string | FileContents] => {
+export const readLines = ({path, enc = 'utf8', linefeed}: {path: string; enc?: FileEncode; linefeed?: NlCodes}): ReadLines => {
   const [error, stdout] = read({path, enc});
 
   if (error) {

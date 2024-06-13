@@ -21,8 +21,11 @@ import type {type} from '@ppmdev/modules/types.ts'
 		インストールディレクトリを登録しておく必要がある
 		使い方は、jestのテストコードの先頭(他モジュールより前)で読み込み、
 		"Grobal.PPx=Object.create(PPx)"を代入してグローバル変数をハックする
+		※現在、PPx.ArgumentsおよびPPx.CreateObjectは正しく動作しません
 
 	ansi.ts		ansiエスケープシーケンスの制御関数
+
+	argument.ts	PPx.Argumentの戻り値に関する関数
 
 	data.ts		ppm全体で使用する定数
 
@@ -53,6 +56,8 @@ import type {type} from '@ppmdev/modules/types.ts'
 
 	source.ts	S_ppm#sourcesを操作する関数
 
+	staymode.ts	PPx.StayModeに関する関数
+
 	util.ts		ヘルパー関数
 
 	window.ts	アプリケーションウィンドウの制御関数
@@ -62,17 +67,19 @@ types.ts 型のエクスポートのみ
 
 NlCodes		'\r\n' | '\r' | '\n'
 NlTypes		'crlf' | 'cr' | 'lf'
-AnsiColors
-	'black'|'red'|'green'|'yellow'|'blue'|'magenta'|'cyan'|'white'|'def'
+AnsiColors 'black'|'red'|'green'|'yellow'|'blue'|'magenta'|'cyan'|'white'|'def'
 FileEncode	'sjis' | 'utf16le' | 'utf8'
 ErrorLevel	number
 Error_String	[boolean, string]
+Error_Data	[true, string] | [false, string[]]
 Level_String	[number, string]
 Letters		LowerLetters | UpperLetters
 LowerLetters	[a-z]
 UpperLetters	[A-Z]
-ReturnType<T extends (...args: any) => any>
-	T extends (...args: any) => infer R ? R : any;
+ScriptEngine	'JScript' | 'ClearScriptV8' | 'QuickJS'
+Mutable<T extends {}>	オブジェクトの全プロパティからreadonlyを省いた型
+Flatten<T extends string|string[]>	配列の要素を並べたunion型
+ZeroTo<T extends number>	0からTまでの数字を並べたunion型
 
 ===============================================================================
 ansi.ts
@@ -89,17 +96,36 @@ colorlize(
 	) => string
 	引数にはオブジェクトを渡す
 	<message>を指定したフォーマットの文字列に置き換えて返す
-	<esc>が"true"なら<message>内の"%"をエスケープ("%%")する
+	<esc>が true なら<message>内の"%"をエスケープ("%%")する
 
 type Direction = 'u' | 'd' | 'l' | 'r'
 cursorMove(direction: Direction = 'u', count: number, esc: boolean = false)
 	=> string
 	<direction>方向に向けて、<count>行ぶんカーソルを移動する
-	<esc>が"true"なら<message>内の"%"をエスケープ("%%")する
+	<esc>が true なら<message>内の"%"をエスケープ("%%")する
 
 clearLine(esc: boolean = false) => string
 	カーソル行全体を消去する
-	<esc>が"true"なら<message>内の"%"をエスケープ("%%")する
+	<esc>が true なら<message>内の"%"をエスケープ("%%")する
+
+===============================================================================
+argument.ts
+
+type ArgTypes = string | number | boolean | undefined | null;
+
+hasArg(value: string) => boolean
+	第一引数が<value>なら true を返す
+
+validArgs() => string[]
+	PPx.Argumentを配列にして返す
+
+safeArgs<T extends ArgTypes[]>(...arr: T) => ArgTypes[]
+	PPx.Argumentに初期値を設定し、型を付けて返す
+	<arr>は配列で、arr[n]はPPx.Argument(n)に対応する
+	戻り値は、PPx.Argument(n)をarr[n]の型に変換した配列
+	PPx.Argument(n)が、undefinedか""(空文字)のとき、arr[n]を返す
+	arr[n]に設定された ""(空文字) は、string型と認識される
+	arr[n]に設定された undefined は、string|undefined型と認識される
 
 ===============================================================================
 data.ts
@@ -112,7 +138,7 @@ info
 		ppmのバージョン
 		※XX.YY.ZZのZZ(パッチ)は参照しない
 
-	.language: 'jp'
+	.language: 'ja'
 		メッセージの言語
 
 	.nlcode: '\r\n'
@@ -126,7 +152,7 @@ info
 	.ppmSubID: 'Q'
 		PPx[ppmID]の補助に使用するPPxのID
 
-useLanguage() => 'en' | 'jp'
+useLanguage() => 'en' | 'ja'
 	ppmに設定されている使用言語を返す
 
 mandatory
@@ -140,7 +166,7 @@ mandatory
 		必要とするスクリプトライブラリ
 
 	scriptModule() => numer
-		必要とするJScriptまたはClearScriptモジュールのバージョン
+		必要とするScriptモジュールのバージョン
 
 	modules: string[]
 		必要とするPPxモジュール
@@ -221,7 +247,7 @@ debug (default)
 	.break() => void
 		PPx.Quit(-1)を実行する
 
-	.exists(path: stirng, att: 'file'|'dir' = 'file') => boolean
+	.exists(path: string, att: 'file'|'dir' = 'file') => boolean
 		パスが存在するか確認する
 
 	.wait(ms: string) => void
@@ -231,7 +257,7 @@ debug (default)
 		デバッグ時に呼び出される関数
 
 	.jestRun() => boolean
-		jestの実行中は"true"を返す
+		jestの実行中は true を返す
 
 ===============================================================================
 echo.ts
@@ -295,25 +321,39 @@ branchName(path: string): string[]
 branchHead(path: string = '') => Error_String
 	<path>.git/HEADからHEADコミットハッシュを読み取って返す
 	戻り値は、[error: boolean, data: string]
-	<error>が"true"のとき、<data>にはエラーメッセージが入る
+	<error>が true のとき、<data>にはエラーメッセージが入る
 
 ===============================================================================
 guard.ts
 
+isInteger(value: unknown): value is number => boolean
+	<value>が"整数"なら<value>はnumber型
+
+isString(value:unknown): value is string => boolean
+	<value>が"文字列"なら<value>はstring型
+
+isBottom(value:unknown): value is undefined|null => boolean
+	<value>がnullかundefinedなら<value>はundefined|null型
+
+isNonZero(value:string|number) => boolean
+	<value>が 0 か"0"か""(空文字)以外なら true を返す
+
 isEmptyStr(value: string) => boolean
-	引数で渡された値が空文字なら"true"を返す
+	<value>が空文字なら true を返す
 
 isEmptyObj(value: Record<string,unknown>) => boolean
-	<value>が {}, null のいずれかなら"true"を返す
+	<value>が {}, null のいずれかなら true を返す
 
-isError(error: boolean, value: unknown) => value is string
-	<error>が"true"なら<value>はstring型
-	この型ガードは、io.tsのreadLines()のように戻り値が
+isError(error: boolean, value: unknown): value is string => string
+	<error>が true なら<value>はstring型
+	io.tsのreadLines()のように戻り値が
 	["実行結果"(boolean), "エラーメッセージ"(string)|必要とする型(any)]
 	になる場合に、string型をブロックするために利用する
+	readLines()はconstで宣言した場合にはこの型ガードを必要としないが、
+	letで宣言した場合には必要になる場合がある
 
-isInteger(value: unknown) => value is number
-	<value>が"true"なら<value>は整数
+withinRange<T extends number>(n: number, max: T): n is ZeroTo<T> => boolean
+	<n>が0以上<max>以下のときに、<n>は0から<max>までの整数を並べたunion型
 
 ===============================================================================
 io.ts
@@ -321,15 +361,15 @@ io.ts
 read({path: string, enc?: FileEncode = 'utf8'}) => Error_String
 	<path>で指定されたファイルの内容を<enc>で読み取って返す
 	戻り値は、[error: boolean, data: string]
-	<error>が"true"のとき、<data>にはエラーメッセージが入る
+	<error>が true のとき、<data>にはエラーメッセージが入る
 
 readLines({path: string, enc?: FileEncode = 'utf8', linefeed?: NlCodes})
-	=> [boolean, string|{lines: string[], nl: NlCodes}]
+	=> [true, string] | [false, {lines: string[], nl: NlCodes} ]
 	<path>で指定されたファイルの内容を<enc>で読み取り、<nl>で改行して返す
 	<nl>の指定がない場合は頭から1000文字の最初に使われた改行コードで区切る
 	1000文字内に改行がなかったときは"\n"で区切られる
 	戻り値は、[error: boolean, data: string|{lines: string[], nl: NlCodes}]
-	<error>が"true"のとき、<data>にはエラーメッセージが入る
+	<error>が true のとき、<data>にはエラーメッセージが入る
 
 writeLines({
 	path: string;
@@ -340,10 +380,10 @@ writeLines({
 	linefeed?: NlCodes = info.nlcode;
 	=> Error_String
 	<data>を<linefeed>で区切り、指定された<path>に<enc>形式で書き込む
-	<append>が"true"なら追記、<overwrite>が"true"なら上書きする
+	<append>が true なら追記、<overwrite>が true なら上書きする
 	<path>が存在しない場合は新規作成する
 	戻り値は、[error: boolean, data: string]
-	<error>が"true"のとき、<data>にはエラーメッセージが入る
+	<error>が true のとき、<data>にはエラーメッセージが入る
 
 stdout({cmd: string, enc?: FileEncode = 'utf8', wd?: string}) => Level_String
 	<cmd>を実行し、標準出力を一時ファイルに書き出し、<enc>で読み取って返す
@@ -420,17 +460,17 @@ ppm.ts
 	.setXXXは、ErrorLevel
 .jobstart()は特殊で、関数.jobendを返す
 
-msgBox(title: stirng, message) => boolean
+msgBox(title: string, message) => boolean
 	ppmオブジェクトは大きいのでppm.echoだけ使いたいときにはこちらを使う。
 
 ppm
 	.echo(title: string, message: string, exitcode?: number) => boolean
 		PPx.Execute(`%"ppm/${<title>}" %OC %I"${<message>}(${<exitcode>})"`);
-		正常終了なら"true"を返す
+		正常終了なら true を返す
 
 	.question(title: string, message: string) => boolean
 		PPx.Execute(`%"ppm/${title}" %OC %Q"${message}"`);
-		正常終了なら"true"を返す
+		正常終了なら true を返す
 
 	.choice(
 		ppxid: string,
@@ -449,7 +489,7 @@ ppm
 	.execute(id: string, command: string, wait: boolean = false) => ErrorLevel
 		<id>が"."なら、"<command>"を
 		"tray"なら、"*pptray -c <command>"を
-		それ以外で<wait>が"true"なら、"%*extract(<id>,"<command>%%:0")"を
+		それ以外で<wait>が true なら、"%*extract(<id>,"<command>%%:0")"を
 		"false"なら、"*execute <id>,<command>"を実行する
 		idが"."以外のときは"%"のエスケープが必要
 		commandに空文字を渡すとエラー
@@ -473,8 +513,8 @@ ppm
 		valueに空文字を渡すとエラー
 		PPx.Extract()とは戻り値の形式が異なることに注意
 
-	.lang() => 'en'|'jp'
-		"S_ppm#global:lang"を返す。空なら'jp'を返す
+	.lang() => 'en'|'ja'
+		"S_ppm#global:lang"を返す。空なら'ja'を返す
 
 	.global(subid: string) => string
 		S_ppm#global:<subid>の値を返す
@@ -499,17 +539,17 @@ ppm
 	.setcust(prop: string, multiline: boolean = false) => ErrorLevel
 		'*setcust <prop>'を実行する
 		@filepath、プロパティ(KC_,E_とか)以外を渡すとエラー
-		<multiline>が"true"なら、頭に'%OC 'を追加する
+		<multiline>が true なら、頭に'%OC 'を追加する
 		複数行のマクロを登録する例
 			ppm.setcust('KC_main:A,1st line%bn%bt2nd line', true)
 
 	.deletecust(id: string, subid?: string|number|false, load?) => ErrorLevel
 		'*deletecust <id>,<subid>'を実行し、
-		<load>が"true"であれば、'%K"loadcust"'を実行する
+		<load>が true なら、'%K"loadcust"'を実行する
 
 	.setkey(subid: string, value: string, multiline: boolean = false, desc: string) => uniqName.tempKey
 		'*setcust <uniqName.tempKey>:<subid>,<value>'を実行する
-		<multiline>が"true"なら、頭に'%OC 'を追加する
+		<multiline>が true なら、頭に'%OC 'を追加する
 		<desc>が空でなければ1行目に'*skip <desc>%bn%bt'を追加する
 
 	.deletemenu() => void
@@ -528,8 +568,8 @@ ppm
 	}) => void
 		引数にはオブジェクトを渡す
 		`*linecust <label>,<id><sep><value>`を実行する
-		<esc>が"true"なら<value>は"%(%)"で括られる
-		<once>が"true"なら<value>の前に`*linecust <label>,<id>,%%:`
+		<esc>が true なら<value>は"%(%)"で括られる
+		<once>が true なら<value>の前に`*linecust <label>,<id>,%%:`
 		を追加する
 
 	.getvalue(
@@ -562,16 +602,16 @@ ppm
 		}) => Level_String
 		引数にはオブジェクトを渡す
 		modeにダイアログ種類、ヒストリ種類以外の文字を渡すとエラー
-		autoselectが"true"ならENTERキー押下時に最初の補完候補を選択状態にする
+		autoselectが true ならENTERキー押下時に最初の補完候補を選択状態にする
 		入力終了時に、uniqID.tempKeyとuniqID.tempMenuを削除する
 		戻り値は、[ErrorLevel, '入力した文字列']
 
 	.linemessage(
-		ppxid: stirng, message: string|string[], status?: boolean, multi?: boolean
+		ppxid: string, message: string|string[], status?: boolean, multi?: boolean
 		) => void
-		メッセージをログ窓に表示する。<status>が"true"ならステータス行に
+		メッセージをログ窓に表示する。<status>が true ならステータス行に
 		表示する
-		<message>が配列かつ、<multi>が"true"のとき複数行表示になる
+		<message>が配列かつ、<multi>が true のとき複数行表示になる
 
 	.report(message: string|string[]) => void
 		メッセージをログ窓、なければダイアログに表示する
@@ -679,7 +719,7 @@ run(
 ) => boolean
 	*runコマンドを実行する
 	引数にはオブジェクトを渡す
-	戻り値は正常起動なら"true"
+	戻り値は正常起動なら true 
 
 type RunPPb = Partial<PPbOptionsSpec> & Partial<RunOptions> & Partial<Description>;
 runPPb(
@@ -687,10 +727,17 @@ runPPb(
 ) => boolean
 	PPbを*run経由で実行する
 	引数にはオブジェクトを渡す
-	<startwith>に"bottom"を指定するとPPbのGUIを実行元GUIより下に配置する
+	<startwith>に"bottom"を指定するとPPbのUIを実行元UIより下に配置する
 	<desc>には起動時に表示するメッセージを指定する
 	<fg>、<bg>は<desc>の文字色と背景白をAnsiColors型で指定する
-	戻り値は正常起動なら"true"
+	戻り値は正常起動なら true 
+
+type Stdout = {cmdline: string; extract?: boolean; startmsg?: boolean, hide?: boolean};
+stdout({cmdline, extract = false, startmsg = false, hide = false}: Stdout) => Level_String
+	%*runを実行する
+	引数にはオブジェクトを渡す
+	<extract>に true を指定すると%macroが展開される
+	戻り値は[errorlevel, stdout]の配列
 
 ===============================================================================
 source.ts
@@ -736,10 +783,10 @@ sourceComplistPath
 	プラグイン名補完リストのパスを返す
 
 sourceComp
-	.expandName(name: stirng) => string
+	.expandName(name: string) => string
 		プラグイン名から状態表示前置詞(!~)を除いて返す
 
-	.getName(name: stirng) => string | undefined
+	.getName(name: string) => string | undefined
 		プラグイン名に状態表示前置詞(!~)を加えて返す
 
 	.fix(source: Source) => Error_String
@@ -747,11 +794,27 @@ sourceComp
 
 	.write(data: string[], add: boolean = false) => Error_String
 		プラグイン名補完リストに<data>を上書きする
-		<add>が"true"なら追記する
+		<add>が true なら追記する
 
 状態表示前置詞はインストール済みのプラグインの読み込み状態を示す
 	!	未設定のプラグイン
 	~	無効化されているプラグイン
+
+===============================================================================
+staymode.ts
+
+discardInstance(debounce: string, debug?: string) => void
+	ppx_Discardと一緒に使う。非表示状態のPPb上で<debounce>ミリ秒待機したあと
+	%sgu'ppmlib'\discardStayMode.jsを実行する
+	discardStayMode.jsは<debounce>ミリ秒待機したあと、_User:ppm_sm<instance>
+	をチェックし、値が0ならppx_Discard経由でインスタンスを廃棄し、0以上で
+	あれば実行維持状態を延期する
+	_User:ppm_sm<instance>には最初<debounce>が代入され、延期するごとに
+	0に更新される
+	具体的な使用方法はadjacentDirのmoveDirectory.tsを参照
+
+ppx_Discard(debug?: string) => void
+	discardInstanceと一緒に使う。Importするだけで機能する
 
 ===============================================================================
 util.ts
@@ -769,7 +832,7 @@ semver(version: string|number) => string
 		"10.20.30.40" => "102030"
 
 checkUpdate(newversion: string, oldversion: string) => boolean
-	<newversion>が<oldVersion>を上回るとき"true"を返す
+	<newversion>が<oldVersion>を上回るとき true を返す
 
 type targetValue = unknown
 waitUntil(
@@ -778,14 +841,17 @@ waitUntil(
 	timeout: number = 6000(ms),
 	interval: number = 300(ms)
 	): => boolean
-	<interval>ごとに<callback>の成否を確認して"true"になるまで繰り返す
+	<interval>ごとに<callback>の成否を確認して true になるまで繰り返す
 	<timeout>を過ぎたら"false"を返して終了する
 
 isCV8() => boolean
-	現在使用しているJavaScriptライブラリが"ClearScriptV8"なら"true"を返す
+	現在使用しているJavaScriptライブラリが"ClearScriptV8"なら true を返す
+
+isQJS() => boolean
+	現在使用しているJavaScriptライブラリが"QuickJS"なら true を返す
 
 actualParentDirectory() => string
-	常に実体のあるディレクトリパスを返す
+	常にファイルシステムのディレクトリパスを返す
 	パスが存在するかどうかは問わない
 
 windowID() => {id: string, uid: string}

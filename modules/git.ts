@@ -3,7 +3,7 @@
  */
 import {Error_String} from '@ppmdev/modules/types.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
-import {isEmptyStr, isError} from '@ppmdev/modules/guard.ts';
+import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {read, readLines} from '@ppmdev/modules/io.ts';
 
 export type gitCmd = {
@@ -84,23 +84,26 @@ const eventSpec = [
 
 const nameAndState = (root: string, filepath: string, state: string): string[] => {
   const unknown = '(unknown)';
-  let [error, data] = readLines({path: filepath});
 
-  if (isError(error, data)) {
-    return [unknown, state];
-  }
+  {
+    const [error, data] = readLines({path: filepath});
 
-  if (~data.lines[0].indexOf('refs/heads/')) {
-    return [data.lines[0].replace(/^(ref: )?refs\/heads\/(.+)/, '$2'), state];
+    if (error) {
+      return [unknown, state];
+    }
+
+    if (~data.lines[0].indexOf('refs/heads/')) {
+      return [data.lines[0].replace(/^(ref: )?refs\/heads\/(.+)/, '$2'), state];
+    }
   }
 
   let name = unknown;
   const logsHead = `${root}/logs/HEAD`;
 
   if (fso.FileExists(logsHead)) {
-    [error, data] = readLines({path: logsHead});
+    const [error, data] = readLines({path: logsHead});
 
-    if (isError(error, data)) {
+    if (error) {
       return [unknown, state];
     }
 

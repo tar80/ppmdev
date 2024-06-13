@@ -3,12 +3,16 @@
 
 declare var PPx: PPx;
 
-interface PPxArguments extends WshArguments {
+interface PPxArguments {
   atEnd(): boolean;
   moveNext(): void;
   reset(): void;
   Item(int: number): string;
   value: string;
+  length: number;
+  Length: number;
+  count: number;
+  Count: number;
 }
 
 declare namespace PPxEntry {
@@ -30,20 +34,20 @@ declare namespace PPxEntry {
 }
 declare interface PPx {
   // Cursor();
+  Argument: PPxArguments['Item'];
   Arguments: PPxArguments;
   CreateObject<K extends keyof ActiveXObjectNameMap = any>(strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
   ConnectObject(objEventSource: any, strPrefix: string): void;
   DisconnectObject(object: any): void;
-  GetObject<K extends keyof ActiveXObjectNameMap>(
-    strPathname: string,
-    strProgID: K,
-    strPrefix?: string
-  ): ActiveXObjectNameMap[K];
+  GetObject<K extends keyof ActiveXObjectNameMap>(strPathname: string, strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
   GetObject(pathname: string, progid: string): object;
   Echo(...args: any[]): void;
+  Include(): any;
   linemessage(text: any): void;
   log(text: any): void;
   report(text: any): void;
+  //TODO: update later
+  Enumerator: any;
   Entry: typeof entry;
   EntryInsert(index: number, name: string): void;
   EntryFirstMark(): number;
@@ -60,10 +64,11 @@ declare interface PPx {
   getProcessValue(key: string): string;
   setProcessValue(key: string, value: string | number): void;
   GetFileInformation(filename: string, mode?: number): string;
+  LoadCount(): number;
   Pane: typeof pane;
   SetPopLineMessage(message: any): void;
   Sleep(intTime: number): void;
-  StayMode(value: number | string): number;
+  StayMode: number;
   // Quit(exitcode?: number): void;
   Quit: typeof process.exit;
   Clipboard: string;
@@ -111,14 +116,15 @@ declare namespace entry {
   function atEnd(): typeof entry;
   function moveNext(): typeof entry;
   function Hide(): void;
+  function IndexFrom(name: string): number;
   function information(): string;
   function Item(index: number | string): typeof entry;
   function getComment(id: number | string): string;
   function setComment(id: number | string, value: string): void;
-  function FirstMark(): number
-  function NextMark(): number
-  function PrevMark(): number
-  function LastMark(): number
+  function FirstMark(): number;
+  function NextMark(): number;
+  function PrevMark(): number;
+  function LastMark(): number;
   var AllEntry: typeof entry;
   var AllMark: typeof entry;
   var Attributes: PPxEntry.Attribute;
@@ -171,4 +177,3 @@ declare namespace tab {
   var TotalPPcCount: number;
   var Type: number;
 }
-

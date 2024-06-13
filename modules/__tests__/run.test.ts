@@ -7,7 +7,7 @@ describe('runPPb()', function () {
   let spy = jest.spyOn(PPx, 'Execute').mockImplementation(() => 0);
   afterEach(() => spy.mockClear());
 
-  it('no arguments specified', () => {
+  it.only('no arguments specified', () => {
     expect(runPPb({})).toBeTruthy();
     expect(spy).toHaveBeenCalledWith(`*run -noppb %0ppbw.exe %:*wait 500,2`);
     expect(spy).toHaveBeenCalledTimes(1);

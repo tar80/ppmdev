@@ -1,14 +1,14 @@
 ppmdevの仕様書
 ===============================================================================
 
-ppmでは、PPxのJavaScript使用ライブラリによるコードの互換性を維持するため、
+ppmでは、PPxで使用するJavaScriptエンジン間でのコードの互換性を維持するため、
 TypeScriptで記述したコードをBabelでES3相当のJavaScriptにトランスパイルし
 Rollupでバンドルしている。
 トランスパイルは構文解析を主とし、Polyfillの導入は必要最低限にとどめている。
 npm workaspace上で実行され、テストにはJestを採用している。
 
 基本的にはESNEXTで記述して必要なものだけユーザー側でPolyfillを用意する。
-EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScriptでも使えるように
+JScriptでしか使えないオブジェクトは、JavaScriptでも使えるように
 考慮してプログラムしなければならない。
 
 また、TypeScript上でPPxオブジェクトを実行することはできないため、PPx側で実行
@@ -40,6 +40,7 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 ・"@ppmdev/modules/ppx"をimportする場合は環境変数"PPX_DIR"を事前に登録しておく。
   詳細はmodules.txtのppx.tsの項目を参照。
 ・"@ppmdev/modules/io"は"jest.mock('@ppmdev/modules/io')"でモッキングできる。
+  現在CV8,QuickJSでjest.spyOn(PPx,"Execute").mockImplementation()を使うと応答不能になる。
 ・PPxScriptModuleではexport文を扱えないため、実装用ファイルを出力するときは
   export文をコメントアウトすること。
 
@@ -53,7 +54,7 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 
 	・ts-nodeが遅いので確認用にdenoをセットしている。
 	  ts-nodeを使う場合は"npx ts-node"を直接実行する。
-	・denoで確認する場合は拡張子を省略できない。@scopeは使える。
+	・denoで確認する場合はimport文の拡張子を省略できない。@scopeは使える。
 
 	・"build"は"src"ディレクトリ以下のファイルを一つ指定できる。
 	  対象ファイルの指定方法は"src/"からの相対パスとする。なお、
@@ -61,13 +62,20 @@ EnumeratorなどのJScriptでしか使えないオブジェクトは、JavaScrip
 	  パス区切りは"/"(slash),"\"(backslash)どちらでもかまわない。
 	    "npm run build index.ts", "npm run build lib/library.ts"
 	    "npm run build src/index.ts", "npm run build src\lib\library.ts"
-	・"build"は"dev","dist"両方へ出力する。
 	・"build:prod"は"src"配下の全スクリプトを対象に"dist"へ出力する。
 	・ディレクトリ名"mod/"配下のスクリプトは出力対象外。
-	・"_"で始まるエントリは出力対象外。
+	・"_"で始まるエントリ名は出力対象外。
 	  "__test__/", "_noOutput.ts"
-	・"cv8/"を含むパスからは"cv8/"が省かれて出力される。
+	・"cv8/"を含むディレクトリパスからは"cv8/"が省かれて出力される。
 	  "src/lib/cv8/someLibrary.ts" -> "dist/lib/someLibrary.js"
+	・ファイル名末尾に".stay.ts"を含むスクリプトは関数名/^ppx_.+/(正規表現)
+	  にマッチするデッドコードを削除しない。(※PPx.StayMode=2で使用する外部
+	  呼び出し関数がtree shakingにより削除されないための処置)
+	  PPx.StayMode=2による外部呼び出し関数を登録する場合は、関数名を
+	  "ppx_<name>"とする必要があり、スクリプトモジュール本体で実装されている
+	  メソッド名とのバッティングを避けるため、<ppx_FunctionName>のように
+	  キャメルケースを使うなどの対策を取ること。なお、PPx.StayMode=2を使う
+	  場合でもデッドコードが含まれない場合は".stay.ts"とする必要はない。
 
 	・"ppmver"は、"./install"と"./package.json"内のバージョン表記を更新する。
 	  プロンプトに表示される[current: <version>]は、"./install"があれば
@@ -117,38 +125,32 @@ nodejsが必須。
 ===============================================================================
 スクリプトの記述ルール
 
-JScript.dll,JScript9.dll,chakra.dll,ppxcv8.dllのすべてで使えない関数・記述は
-使わない。若しくはinstallファイルの"SCRIPTTYPE_PERMISSION"で特定のdllに限定する。
+JScript.dll,JScript9.dll,chakra.dll,ppxcv8.dll,ppxqjs.dllのすべてで使えない
+関数・記述は使わない。若しくはinstallファイルの"SCRIPTTYPE_PERMISSION"で
+特定のdllに限定する。
 
-"WScript.CreateObject"、"ActiveXObject"はchakra.dll,ppxcv8.dllでは使えない。
-代わりにPPx.CreateObjectを使用する。ただし、ppxcv8.dllでPPx.CreateObjectを利用
-する場合に、一部のオプションが設定できない(エラーになる)ことを確認している。
-※ADODB.Streamの"Type","LineSeparator"などのプロパティ値、メソッドのオプション
+"WScript.CreateObject"、"ActiveXObject"はJScript(9).dll以外では使えない。
+代わりにPPx.CreateObjectを使用する。ただし、CreateObjectと完全に同様ではない
+ようなので、モジュールのドキュメントを参照し対応状況を確認すること。
 
-"Enumerator"はchakra.dllでは使えない。ppxcv8.dllでも使えないが、for ofで
-コレクションを取得できるため実際に代替手段がないのはchakra.dllのみとなる。
-ppmでは、JScript.dllと他dllの互換性を保てない場合にVBScriptで代用しているが、
-ppxcv8.dllはvbsファイルを読めないので専用のjsファイルを書く必要がある。
-"Enumerator"を使う必要がある場合にppmでは、
-	JScript.dll,JScript9.dll,chakra.dll用のvbsファイル"dist/lib/xxx.vbs"
-	ppxcv8.dll用の"dist/lib/xxx.js"
-を"PPx.ScripEngineName"の値で分岐し、同等の引数を渡し、戻り値を返すようにしている。
-あるディレクトリ配下のパスを取得する手段としては、上述の分離処理スクリプト
-dist/lib/getEntries.xxxの戻り値を得る、または*whereコマンドで出力した
-ファイル情報を読み取る、などの方法が考えられる。
+PPx.Enumerator関数が用意され、互換性の強化も行われているため、PPx1.97,
+ScriptModule21R1,CV8ModuleR3+3,QuickJSModuleT5以降はどのモジュールでも
+TypeScriptで互換性を維持できるようになっている。
+これに伴いVBScriptで書いていたライブラリスクリプトはTypeScriptで書き直した。
+※src/lib/countEntries.ts, getEntries.ts
 
-ppxcv8.dllではフィールド名を厳密に指定しなければならない。
+ppxcv8.dll,ppxqjs.dllではフィールド名を厳密に指定しなければならない。
 	PPx.arguments => PPx.Arguments, PPx.entry => PPx.Entry
 またライブラリ側で頭文字の大小文字を無視できるように対処されているものもある。
 	PPx.Arguments.item(Item), PPx.result(Result)
+
 promiseは使えない。pptray,ppbとTextModuleの*stdout,%*stdin()を使えば簡単な操作
 なら非同期実行できる。
 動的importは使えない。行頭でimportし、不要なものを読み込まないようモジュール側
 で配慮する。
-PPx.CreateObject()で利用できるオブジェクトは現状、完全には対応されていないと
-思われる。(※ScriptModuleとCV8Moduleで差異がある)
-PPx.resultで真偽値を返すとき、ScriptModuleが"-1","0"を返すことに対し、
-CV8では"True","False"を返す。ppmではどちらも、"-1","0"を返すようにしている。
+
+PPx.resultで真偽値を返すとき、ScriptModuleとCV8で値が違ったが、現在は同様の値を
+返すように調整されている。
 
 ===============================================================================
 ディレクトリ構成

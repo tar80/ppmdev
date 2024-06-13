@@ -7,11 +7,12 @@ VERSION=1.0.0
 PPM_VERSION=0.93
 
 #Requires PPx version
-PPX_VERSION=194
+PPX_VERSION=197
 
 #Requires PPx Script Module version
 SCRIPT_VERSION=21
 CV8_VERSION=3
+QJS_VERSION=0
 
 #Requires external executables. Separated dy commas
 EXECUTABLES=
@@ -25,7 +26,7 @@ DEPENDENCIES=
 #CodeType permisson. 0:No restriction | 1:Not use multiByte | 2:Not use unicode
 CODETYPE_PERMISSION=1
 
-#ScriptType permisson. 0:No restriction | 1:JS9(5.7) | 2:JS9(5.8) | 3:JS9(ES5) | 4:Chakra(ES6) | 5:CV8(ESNEXT)
+#ScriptType permisson. 0:No restriction | 1:JS9(5.7) | 2:JS9(5.8) | 3:JS9(ES5) | 4:Chakra(ES6) | 5:CV8(ES2021) | 6:QuickJS(ES2023)
 SCRIPTTYPE_PERMISSION=0
 
 #To copy files in the Sheet directory. true | false

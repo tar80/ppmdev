@@ -12,12 +12,15 @@ const SOURCE_DIR = 'src';
 const DEV_DIR = 'dev';
 const DIST_DIR = 'dist';
 const isProduction = process.env.NODE_ENV === 'Production';
+const filePath = process.argv[2]
 
-if (!isProduction && typeof process.argv[2] === 'undefined') {
+if (!isProduction && typeof filePath === 'undefined') {
   console.log('\x1b[31m[!] Error: no path specified\x1b[39m');
   process.exit(1);
 }
 
+const isTreeshake = !/^.+\.stay\.ts$/.test(filePath);
+// console.log(isTreeshake)
 let input;
 
 if (isProduction) {
@@ -25,18 +28,19 @@ if (isProduction) {
     console.error('Error:', err);
   });
 } else {
-  input = process.argv[2].replace(/\\/g, '/');
+  input = filePath.replace(/\\/g, '/');
   input = input.replace(/^src\//, '');
   const cv8 = input.includes('cv8/');
 
-  build(...configuration(DEV_DIR, false, cv8));
-  build(...configuration(DIST_DIR, true, cv8));
+  build(...configuration(DEV_DIR, false, isTreeshake, cv8));
+  build(...configuration(DIST_DIR, true, isTreeshake, cv8));
 }
 
-function configuration(dest, prod, cv8) {
+function configuration(dest, prod, ts, cv8) {
   return [
     {
       input: SOURCE_DIR + '/' + input,
+      treeshake: ts,
       plugins: [
         swc(),
         commonjs({
@@ -59,18 +63,27 @@ function configuration(dest, prod, cv8) {
           }),
         prod &&
           terser({
-            ie8: true,
+            compress: {
+              top_retain: /^ppx_.+/,
+              reduce_vars: false,
+              reduce_funcs: false
+            },
+            mangle: {
+              keep_fnames: true,
+              reserved: ['ppx_resume', 'ppx_finally'],
+            },
             format: {
               comments: false,
-              ecma: 3,
               shebang: false
-            }
+            },
+            ecma: 3,
+            ie8: true,
           })
       ]
     },
     {
       file: `${dest}/${input.replace(/(cv8\/)?([^/]+)\.ts$/, '$2.js')}`,
-      format: 'es',
+      format: 'es'
       // sourcemap: !prod
     }
   ];
@@ -113,7 +126,7 @@ async function readdirRecursively(dir) {
     if (dirent.isFile()) {
       input = `${dirent.path}/${dirent.name}`.substring(SOURCE_DIR.length + 1);
       const cv8 = input.includes('cv8/');
-      await build(...configuration(DIST_DIR, true, cv8));
+      await build(...configuration(DIST_DIR, true, isTreeshake, cv8));
     }
   }
 }

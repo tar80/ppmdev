@@ -64,6 +64,9 @@ export const waitUntil = (
 /** Whether the library used by JavaScript is ClearScriptV8 */
 export const isCV8 = (): boolean => PPx.ScriptEngineName === 'ClearScriptV8';
 
+/** Whether the library used by JavaScript is QuickJS */
+export const isQJS = (): boolean => PPx.ScriptEngineName === 'QuickJS';
+
 export const actualParentDirectory = (): string => {
   const rgx = /^aux:(\/\/)?[MS]_[^/\\]+[/\\]/;
   const macro = PPx.DirectoryType === 4 ? '%FDVN' : '%FDN';

@@ -1,6 +1,6 @@
 import '@ppmdev/polyfills/json.ts';
 import '@ppmdev/polyfills/objectKeys.ts';
-import type {Error_String} from '@ppmdev/modules/types.ts';
+import type {Error_String, ScriptEngine} from '@ppmdev/modules/types.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
 import {colorlize} from '@ppmdev/modules/ansi.ts';
 import {semver} from '@ppmdev/modules/util.ts';
@@ -11,8 +11,7 @@ import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 const pass = colorlize({esc: false, message: ' PASS ', fg: 'green'});
 const drop = colorlize({esc: false, message: ' DROP ', fg: 'red'});
 const failedItem = (message: string): string => colorlize({esc: false, message: message, fg: 'yellow'});
-const result = (error: boolean, message: string): Error_String =>
-  error ? [true, `${drop} ${message}`] : [false, `${pass} ${message}`];
+const result = (error: boolean, message: string): Error_String => (error ? [true, `${drop} ${message}`] : [false, `${pass} ${message}`]);
 
 let libDir: string;
 export const useSelfLibDir = (path: string): void => {
@@ -109,7 +108,7 @@ export const permission = {
   ppxVersion: (limit: string | number): Error_String => {
     limit = Number(limit);
     const current = PPx.PPxVersion;
-    const lower = limit < 1000 ? limit * 100 : limit;
+    const lower = limit >= 1000 ? limit : semver(limit) / 100;
     const m = `PPx version ${lower} or later`;
 
     return result(current < lower, m);
@@ -118,17 +117,21 @@ export const permission = {
   /** Script Module version limit. */
   scriptVersion: (lower: string | number): Error_String => {
     const current = PPx.ModuleVersion;
-    const m = `ScriptModule R${lower} or later`;
+    const m = `${PPx.ScriptEngineName} module R${lower} or later`;
 
     return result(current < Number(lower), m);
   },
 
-  /** JScript version limit. */
+  /** Script engine version limit. */
   scriptType: (limit: string | number): Error_String => {
     limit = Number(limit);
-    const currentType = PPx.ScriptEngineName === 'ClearScriptV8' ? 5 : Number(PPx.Extract('%*getcust(_others:usejs9)'));
-    const version = ['anything', 'JS9(5.7)', 'JS9(5.8)', 'JS9(ES5)', 'Chakra(ES6)', 'CV8(ESNEXT)'];
-    const m = `Use JScript version ${version[limit]}`;
+    const currentType = {
+      JScript: Number(PPx.Extract('%*getcust(_others:usejs9)')),
+      ClearScriptV8: 5,
+      QuickJS: 6
+    }[PPx.ScriptEngineName as ScriptEngine];
+    const version = ['anything', 'JS9(5.7)', 'JS9(5.8)', 'JS9(ES5)', 'Chakra(ES6)', 'CV8(ES2021)', 'QuickJS(ES2023)'];
+    const m = `Use engine ${version[limit]}`;
     let error = limit === 0 ? false : currentType !== limit;
 
     return result(error, m);
@@ -164,7 +167,7 @@ export const permission = {
   useExecutables: (items: string | string[]): Error_String => existence('exeExists', 'Required executables', items),
 
   /** Required libraries */
-  useModules: (items: string | string[]): Error_String => existence('libExists', 'Required modules', items),
+  useModules: (items: string | string[]): Error_String => existence('libExists', 'Required modules', items)
 
   // /** Items with dependencies */
   // dependencies: (items: string): Error_String => [true, `[dep]${items}`]

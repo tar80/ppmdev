@@ -1,5 +1,5 @@
 import '@ppmdev/polyfills/arrayRemoveEmpty.ts';
-import type {AnsiColors, Letters} from '@ppmdev/modules/types.ts';
+import type {AnsiColors, Letters, Level_String} from '@ppmdev/modules/types.ts';
 import {ppm} from '@ppmdev/modules/ppm.ts';
 import {echoExe} from '@ppmdev/modules/echo.ts';
 import {colorlize} from '@ppmdev/modules/ansi.ts';
@@ -22,18 +22,7 @@ type RunOptions = {
  * run command details.
  * @return ["success or not", ["run details or error message"]]
  */
-const runCmdline = ({
-  startwith = '',
-  wait = '',
-  priority,
-  job,
-  log,
-  wd,
-  x,
-  y,
-  width,
-  height
-}: Partial<RunOptions>): [boolean, String[]] => {
+const runCmdline = ({startwith = '', wait = '', priority, job, log, wd, x, y, width, height}: Partial<RunOptions>): [boolean, String[]] => {
   const startwith_ = {'': '', min: '-min', max: '-max', noactive: '-noactive', bottom: '-noactive'}[startwith];
   const wait_ = {'': '', wait: '-wait', idle: '-wait:idle', later: '-wait:later', no: '-wait:no'}[wait];
   let wd_ = '';
@@ -170,4 +159,20 @@ export const runPPb = ({
   } finally {
     return resp;
   }
+};
+
+type Stdout = {cmdline: string; extract?: boolean; startmsg?: boolean, hide?: boolean};
+export const stdout = ({cmdline, extract = false, startmsg = false, hide = false}: Stdout): Level_String => {
+  const def = hide ? '-noppb -hide' : '-min';
+  const msg = startmsg ? '' : '-nostartmsg';
+  const opts = [def, msg].join(' ');
+
+  if (extract) {
+    cmdline = PPx.Extract(cmdline);
+  }
+
+  const data = PPx.Extract(`%*run(${opts} %(${cmdline}%))`);
+  const errorlevel = Number(PPx.Extract());
+
+  return [errorlevel, data]
 };

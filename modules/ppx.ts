@@ -5,21 +5,32 @@ import {execSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-class DummyArguments {
-  num: number = 1;
+class DummyArguments implements PPxArguments {
+  private num: number = 4;
+  public length: number = process.argv.length - 4;
+  public Length: number = this.length;
+  public count: number = this.length;
+  public Count: number = this.length;
 
-  constructor(arg?: number) {
-    this.num = arg || this.num;
+  constructor(index?: number) {
+    this.num = index || this.num;
+    this.length = process.argv.length - 4
   }
-  Count() {
-    return process.argv.length;
-  }
-  Length() {
-    return process.argv.length;
-  }
-  Item() {
+  Item(int?: number): string {
+    this.num = int || this.num;
     return process.argv[this.num] || '';
   }
+  // static Length: number = this.length;
+  atEnd(): boolean {
+    return this.num === process.argv.length;
+  }
+  moveNext(): void {
+    this.num++;
+  }
+  reset(): void {
+    this.num = 4;
+  }
+  value: string = this.Item()
 }
 
 const fso = {
@@ -53,16 +64,17 @@ const dummyActivex = (obj: string): any => {
 };
 
 const PPx = {
-  PPxVersion: 19500,
+  PPxVersion: 19700,
   ModuleVersion: 21,
   CodeType: 1,
   DirectoryType: 0,
   ScriptEngineName: 'JScript',
-  ScriptName: __dirname + '\\jest-mock.js',
+  ScriptName: __dirname + '\\this-is-jest-mock.js',
+  Argument: (num = 0): string => String(process.argv[num + 4] || ''),
   //FIXME! wakarimasen
-  Arguments: (num?: number): any => new DummyArguments(num),
+  Arguments: new DummyArguments,
   //FIXME! nanimowakarimasen
-  CreateObject: (strProgID: string, strPrefix?: string): ActiveXObject => {
+  CreateObject: (strProgID: string, strPrefix?: string): any => {
     strPrefix;
 
     return dummyActivex(strProgID);
@@ -74,7 +86,7 @@ const PPx = {
     const ppb = `${process.env.PPX_DIR}\\ppbw.exe`;
     param = param ?? '';
     // param = param.includes('%') ? param : `%*extract(CA,"${param.replace('%', '%%')}")`;
-    let stdout = execSync(`${ppb} -c *maxlength 2000%:%OC *stdout " ${param}"%&`);
+    let stdout = execSync(`${ppb} -c *maxlength 10000%:%OC *stdout " ${param}"%&`);
 
     return stdout.toString().substring(1);
   },
@@ -104,10 +116,13 @@ const PPx = {
     const ppb = `${process.env.PPX_DIR}\\ppbw.exe`;
     execSync(`${ppb} -c *execute C,*linemessage ${text ?? ''}%&`);
   },
-  Quit: (exitcode: number = 1): void => console.log(`PPx.Quit(${exitcode})`),
+  Quit: (exitcode = 1) => {
+    return console.log(`PPx.Quit(${exitcode})`) as never;
+  },
   setValue: (key: string, value: string | number): void => {
-    PPx.Execute(`*string p,${key}=${value}`);
+    const ppb = `${process.env.PPX_DIR}\\ppbw.exe`;
+    execSync(`${ppb} -c *execute C,*string p,${key}=${value}%%&`);
   }
-} as PPx;
+};
 
 export default PPx;

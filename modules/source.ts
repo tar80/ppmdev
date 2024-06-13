@@ -2,7 +2,7 @@ import '@ppmdev/polyfills/arrayIndexOf.ts';
 import '@ppmdev/polyfills/objectKeys.ts';
 import '@ppmdev/polyfills/json.ts';
 import type {Error_String} from '@ppmdev/modules/types.ts';
-import {isEmptyStr, isEmptyObj, isError} from '@ppmdev/modules/guard.ts';
+import {isEmptyStr, isEmptyObj} from '@ppmdev/modules/guard.ts';
 import {info} from '@ppmdev/modules/data.ts';
 import {readLines, writeLines} from '@ppmdev/modules/io.ts';
 
@@ -143,7 +143,7 @@ export const sourceComp = {
     const [error, data] = readLines({path: sourceComplistPath});
 
     // when list does not exist
-    if (isError(error, data)) {
+    if (error) {
       const candidates: string[] = [];
       for (const item of items) {
         candidates.push(`${this.getPrefix(item)}${item.name}`);

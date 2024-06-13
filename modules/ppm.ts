@@ -1,6 +1,6 @@
 import type {Level_String, ErrorLevel} from '@ppmdev/modules/types.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
-import {isEmptyStr, isError} from '@ppmdev/modules/guard.ts';
+import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {info, uniqName, uniqID} from '@ppmdev/modules/data.ts';
 import {readLines} from '@ppmdev/modules/io.ts';
 
@@ -213,14 +213,14 @@ export const ppm = {
   /** Language use in ppm. */
   lang(): typeof lang {
     type SystemLanguage = typeof lang;
-    let lang = cache['lang'] as 'en' | 'jp';
+    let lang = cache['lang'] as 'en' | 'ja';
 
     if (!isEmptyStr(lang)) {
       return lang;
     }
 
     const useLanguage = PPx.Extract('%*getcust(S_ppm#global:lang)') as SystemLanguage;
-    lang = useLanguage === 'en' || useLanguage === 'jp' ? useLanguage : info.language;
+    lang = useLanguage === 'en' || useLanguage === 'ja' ? useLanguage : info.language;
     cache['lang'] = lang;
     return lang;
   },
@@ -546,7 +546,7 @@ export const ppm = {
     path = `${path}\\package.json`;
     const [error, data] = readLines({path});
 
-    if (!isError(error, data)) {
+    if (!error) {
       const rgx = /^\s*"version":\s*"([0-9\.]+)"\s*,/;
 
       for (let i = 2, k = data.lines.length; i < k; i++) {

@@ -99,12 +99,12 @@ describe('ppm.extract()', function () {
     expect(ppm.extract('.', `%*regexp("${str}","/${rgx}/${rep}/g")`)).toEqual([0, 'test\\ test\\ test']);
     expect(ppm.extract('CA', `%(%*regexp("${str}","/${rgx}/${rep}/")%)`)).toEqual([0, 'test\\ test test']);
   });
-  it('named groups are an error in the process of going through nodejs', () => {
+  it('does nodejs return empty characters for named captcha groups?', () => {
     let str = 'one two three';
     let rgx = 'one (?<num>.+) three';
     let rep = '${num}';
 
-    expect(() => ppm.extract('.', `%*regexp("${str}","/${rgx}/${rep}/g")`)).toThrow()
+    expect(ppm.extract('.', `%*regexp("${str}","/${rgx}/${rep}/g")`)).toEqual([0, '']);
   });
 });
 
@@ -199,14 +199,13 @@ describe('ppm.getvalue()', function () {
     expect(ppm.getvalue('V', 'p', 'key')).toEqual([13, '']);
   });
   it('pass existing id', () => {
-    jest.spyOn(PPx, 'Execute').mockImplementation((param) => {
+    const setvalue = (param: string) => {
       const ppc = `${process.env.PPX_DIR}\\ppcw.exe`;
       execSync(`${ppc} -bootid:p -noactive -r -k ${param}`);
-      return 0;
-    });
-    PPx.Execute('*execute C,*string i,ppm_test_id=test');
+    };
+    setvalue('*execute C,*string i,ppm_test_id=test');
     expect(ppm.getvalue('C', 'i', 'ppm_test_id')).toEqual([0, 'test']);
-    PPx.Execute('*execute C,*string i,ppm_test_id=');
+    setvalue('*execute C,*string i,ppm_test_id=');
   });
 });
 
@@ -247,7 +246,7 @@ describe('ppm.getinput()', function () {
       `%OCP %*input("" -title:"jest" -mode:RSg,dm -select:first -multi -leavecancel -forpath -fordijit -k %%OP- *wait 300%%:%%k"test")`
     );
     expect(PPx.Extract).toHaveBeenLastCalledWith();
-    expect(PPx.Extract).toBeCalledTimes(2);
+    expect(PPx.Extract).toHaveBeenCalledTimes(2);
     PPx.Extract = ppxt;
   });
 });
