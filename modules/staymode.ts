@@ -7,7 +7,8 @@ export const discardInstance = (debounce: string, debug?: string): void => {
   PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script ${path},${propName},${instance},${debug}`);
 };
 
-export const ppx_Discard = (debug?: string) => {
+export const ppx_Discard = (debug?: string, instance?: string) => {
   PPx.StayMode = 0;
-  debug === 'DEBUG' && PPx.linemessage('[DEBUG] discard');
+  instance = instance ?? '';
+  debug === 'DEBUG' && PPx.linemessage(`[DEBUG] discard ${instance}`);
 };
