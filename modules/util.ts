@@ -80,3 +80,21 @@ export const windowID = (): {id: string; uid: string} => {
 
   return {id, uid};
 };
+
+export const codeToChar = (v: string): string => {
+  if (v.indexOf('x') === 0) {
+    v = PPx.Extract(`%b${v}`);
+  } else if (v.indexOf('u') === 0) {
+    v = PPx.Extract(`%b${v.substring(1)}`);
+  }
+
+  return v;
+};
+
+export const hexToNum = (hex: string) => {
+  const num = parseInt(hex, 16);
+
+  return isNaN(num) ? undefined : num;
+};
+
+export const numToHex = (num: number) => (isNaN(num) ? undefined : num.toString(16));

@@ -13,7 +13,13 @@ Parserの説明
 
 json.ts
 	valueEscape(value: string) => string
-		JSON.parseで読めるように値をエスケープして返す
+		JSON.parseで読めるように<value>をエスケープして返す
+
+	argParse() => false | string
+		JSON.parseで読めるようにPPx.Argument(0)をエスケープして返す
+
+	parseString(table: string) => false | string
+		JSON.parseで読めるように<table>をエスケープして返す
 
 listfile.ts
 	type EntryElements = {

@@ -45,16 +45,34 @@ JScriptでしか使えないオブジェクトは、JavaScriptでも使えるよ
   export文をコメントアウトすること。
 
 ・標準のnpm scriptは以下になる。
-	ts		tsc --noEmit true --skipLibCheck true
+ (ppmdev全体で使用できる)
 	deno		deno run --no-check --allow-all --unstable
-	build		ppmbuild
-	build:prod	set NODE_ENV=Production&&ppmbuild -- src
 	ppmver		ppmversion
 	test		jest
+ (ppmdev/で使用できる)
+	packadd		npm init --scope ppmdev -w packages/${npm_config_name}
+ (ppmdev/packages/で使用できる)
+	ts		tsc --noEmit true --skipLibCheck true
+	build		ppmbuild
+	build:prod	set NODE_ENV=Production&&ppmbuild -- src
 
 	・ts-nodeが遅いので確認用にdenoをセットしている。
 	  ts-nodeを使う場合は"npx ts-node"を直接実行する。
 	・denoで確認する場合はimport文の拡張子を省略できない。@scopeは使える。
+
+	・"ppmver"は、"./install"と"./package.json"内のバージョン表記を更新する。
+	  プロンプトに表示される[current: <version>]は、"./install"があれば
+	  origin/main:installを、なければorigin/main:package.jsonを参照する。
+	  空文字、現在のバージョンより低い値のときは中止される。
+
+	・"test"をworkaspaceで実行すると、Jest側でエラーを発生させた時にnpmの
+	  エラーメッセージも表示されてしまうため"npx jest"を直接実行して回避する。
+	・"npx jest"は、workspaceのルートから実行する。
+	・単一のファイルに対して実行したいときは、
+	  "npx jest --testMatch **/<filename>.test.ts"とする。
+
+	・"packadd"は、workspaceを追加する。
+	  "npm run packadd -name=<plugin-nam>"とする。
 
 	・"build"は"src"ディレクトリ以下のファイルを一つ指定できる。
 	  対象ファイルの指定方法は"src/"からの相対パスとする。なお、
@@ -76,17 +94,6 @@ JScriptでしか使えないオブジェクトは、JavaScriptでも使えるよ
 	  メソッド名とのバッティングを避けるため、<ppx_FunctionName>のように
 	  キャメルケースを使うなどの対策を取ること。なお、PPx.StayMode=2を使う
 	  場合でもデッドコードが含まれない場合は".stay.ts"とする必要はない。
-
-	・"ppmver"は、"./install"と"./package.json"内のバージョン表記を更新する。
-	  プロンプトに表示される[current: <version>]は、"./install"があれば
-	  origin/main:installを、なければorigin/main:package.jsonを参照する。
-	  空文字、現在のバージョンより低い値のときは中止される。
-
-	・"test"をworkaspaceで実行すると、Jest側でエラーを発生させた時にnpmの
-	  エラーメッセージも表示されてしまうため"npx jest"を直接実行して回避する。
-	・"npx jest"は、workspaceのルートから実行する。
-	・単一のファイルに対して実行したいときは、
-	  "npx jest --testMatch **/<filename>.test.ts"とする。
 
 ・ビルドしたコードは"dev/"以下に開発用、"dist/"以下に実装用が出力される。
 ・ビルドした開発用コードの先頭に、import文が追加されているときはES3では使えない

@@ -47,9 +47,23 @@ export const safeArgs = <T extends ArgTypes[]>(...arr: T) => {
   return typedArgs as Ret<T>;
 };
 
-if (undefined) {
-  const [a, b, c, d, e] = safeArgs('', 'string', 1, true, undefined);
-}
+const _valueConverter = (defaultValue: ArgTypes, argValue: string | undefined) => {
+  if (argValue == null || argValue === '') {
+    return defaultValue != null ? defaultValue : undefined;
+  }
+
+  switch (typeof defaultValue) {
+    case 'number':
+      const n = Number(argValue);
+
+      return isNaN(n) ? defaultValue : n;
+    case 'boolean':
+      return argValue === 'false' || argValue === '0' || argValue == null ? false : true;
+    default:
+      return argValue;
+  }
+};
+
 //export const safeArgs = <T extends ArgObj<U>[], U extends string>(...arr: T) => {
 //  const args: string[] = [];
 //  const validArgs: Record<string, ArgTypes> = {};
@@ -99,21 +113,3 @@ if (undefined) {
 //
 //   return a;
 // };
-
-const _valueConverter = (defaultValue: ArgTypes, argValue: string | undefined) => {
-  if (argValue == null || argValue === '') {
-    return defaultValue != null ? defaultValue : undefined;
-  }
-
-  switch (typeof defaultValue) {
-    case 'number':
-      const n = Number(argValue);
-
-      return isNaN(n) ? defaultValue : n;
-    case 'boolean':
-      return argValue === 'false' || argValue === '0' || argValue == null ? false : true;
-    default:
-      return argValue;
-  }
-};
-

@@ -10,6 +10,7 @@
   "type": "module",
   "scripts": {
     "deno": "deno run --allow-read",
+    "packadd": "npm init --scope ppmdev -w packages/${npm_config_name}",
     "ppmver": "ppmversion",
     "test": "jest"
   },

@@ -1,9 +1,8 @@
 import {info} from '@ppmdev/modules/data.ts';
 
-export type properties = {[subid: string]: {sep: ',' | '='; value: string[]}};
-export const properties = (id: string): properties => {
+export const properties = (id: string) => {
   const rawProps = PPx.Extract(`%*getcust(${id})`).split(info.nlcode);
-  const props: properties = {};
+  const props: {[subid: string]: {sep: ',' | '='; value: string[]}} = {};
   const rgx = /^([^,=]+)([,=])\s*(.*)/;
   let subid = '';
 
