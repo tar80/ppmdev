@@ -30,6 +30,15 @@ export const isInteger = (value: unknown): value is number => {
 
 export const isBottom = (value: unknown): value is undefined|null => value == null;
 
+export const isZero = (value: string | number): boolean => {
+  if (typeof value === 'string') {
+    return value === '0';
+  }
+
+  return value === 0;
+};
+
+/** @deprecated */
 export const isNonZero = (value: string | number): boolean => {
   if (typeof value === 'string') {
     return !isEmptyStr(value) && value !== '0';

@@ -49,6 +49,22 @@ listfile.ts
 		時刻を指す文字列をFILETIME構造体に変換し、"<上位32bit>.<下位32bit>"
 		の文字列として返す
 
+	type HlRange = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+	type MarkRange = -1 | 0 | 1;
+	type LfItem = {
+		name: string;
+		sname: string;
+		att?: number;
+		date?: string;
+		ext?: string;
+		hl?: HlRange;
+		mark?: MarkRange;
+		comment?: string
+	};
+	buildLfItem({name, sname = '', att = 0, date, ext, hl, mark, comment}: LfItem)
+	 => string|undefined
+		引数をもとにリストファイル形式の行を構築して返す
+
 	formLfData(
 	  data: string,
 	  rgx: RegExp,

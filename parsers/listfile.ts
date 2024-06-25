@@ -1,5 +1,6 @@
 import '@ppmdev/polyfills/arrayRemoveEmpty.ts';
 import '@ppmdev/polyfills/json.ts';
+import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 
 const LF_HEADER = ';ListFile';
 const LF_CHARSET = ';charset';
@@ -34,6 +35,10 @@ export const getFiletime = (data: string): string => {
   const arr: number[] = [];
   const elements = data.split(',') ?? [0];
 
+  if (~data.indexOf('.')) {
+    return data;
+  }
+
   for (const element of elements) {
     arr.push(Number(element));
   }
@@ -43,9 +48,46 @@ export const getFiletime = (data: string): string => {
   return `${bit.high}.${bit.low}`;
 };
 
+type HlRange = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type MarkRange = -1 | 0 | 1;
+type LfItem = {name: string; sname?: string; att?: number; date?: string; ext?: string; hl?: HlRange; mark?: MarkRange; comment?: string};
+export const buildLfItem = ({name, sname = '', att = 0, date, ext, hl, mark, comment}: LfItem) => {
+  if (!name || isEmptyStr(name)) {
+    return;
+  }
+
+  if (!date) {
+    date = new Date().toLocaleString().replace(/\D+/g, ',');
+  }
+
+  if (isNaN(att)) {
+    att = 0;
+  }
+
+  const ft = getFiletime(date);
+  const x = ext ? `,X:${ext}` : '';
+  const h = hl ? `,H:${hl}` : '';
+  const m = mark ? `,M:${mark}` : '';
+  const t = comment ? `,T:"${comment.replace(/"/g, '""')}"` : '';
+
+  return `"${name}","${sname}",A:H${att},C:${ft},L:${ft},W:${ft},S:0.0${x}${h}${m}${t}`;
+};
+
 export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: boolean = false): string => {
   let comment: string | undefined = undefined;
+  let csv: string | undefined = undefined;
   data = data.replace(rgx, rep);
+
+  if (~data.indexOf(',Size,')) {
+    data = data.replace(/(,Size,.+)}$/, (_, m) => {
+      csv = m;
+      return '}';
+    });
+  }
+
+  if (~data.indexOf(',"ext":,')) {
+    data = data.replace(',"ext":', '');
+  }
 
   if (~data.indexOf(',"comment":')) {
     data = data.replace(/,"comment":\s?"(.*)"/, (_, m) => {
@@ -66,6 +108,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
     }
   })();
   const att = o.att != undefined && o.att !== '' ? o.att : '0';
+  const reparse = o.reparse != undefined ? `R:${o.reparse}` : undefined;
   const ext = o.ext != undefined ? `X:${o.ext}` : undefined;
   const highlight = o.hl ? `H:${o.hl}` : undefined;
   const mark = o.mark ? `M:${o.mark}` : undefined;
@@ -99,12 +142,13 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
     `L:${access}`,
     `W:${write}`,
     `S:${o.size ?? '0.0'}`,
-    `R:${o.reparse ?? '0.0'}`,
+    reparse,
     ext,
     highlight,
     mark,
     exitem,
-    comment
+    comment,
+    csv
   ];
 
   return tbl.removeEmpty().join(',');
@@ -122,6 +166,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
  * - For date information, specify the year, month, day, hour, minute, and second, separated by commas
  * - If "date" is specified, all dates will be set to the same value
  * - "comment" must be specified at the end of the string
+ * - The string after the "comment" is collectively considered as CSV information
  *  example:
  *    neme-only
  *      '{"name":"$1"}'
@@ -129,7 +174,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
  *      '{"name":"$1","date":"$2,$3,$4"}'
  *    all parameters
  *      '{"name":"$1","sname":"","att":"$2","create":"$3,$4,$5,$6,$7,$8","write":"$3,$4,$5,$6,$7,$8","access":"$3,$4,$5,$6,$7,$8",
- *      "size":"0.0","reparse":"0.0","ext":16777215,"hl":1,"mark":1,"oid":"id","ovalue":"value","comment":"words"}'
+ *      "size":"0.0","reparse":"0.0","ext":16777215,"hl":1,"mark":1,"oid":"id","ovalue":"value","comment":"words",$9}'
  */
 export const createLfItems = ({
   lines,
@@ -219,7 +264,22 @@ type Elements = {
 };
 type ExElements = Record<string, string>;
 export type EntryElements = Elements & Partial<ExElements>;
-export const parseLfData = (ele: string[]): EntryElements => {
+export const parseLfData = (
+  ele: string[]
+): {
+  name: string;
+  sname?: string;
+  A?: string;
+  C?: string;
+  L?: string;
+  W?: string;
+  S?: string;
+  R?: string;
+  X?: string;
+  H?: string;
+  M?: string;
+  T?: string;
+} => {
   if (ele.length === 1) {
     return {name: ele[0].slice(1, -1)};
   }
@@ -269,7 +329,22 @@ export const splitLfData = () => {
   };
 };
 
-export const getLfLines = (lines: string[]): EntryElements[] => {
+export const getLfLines = (
+  lines: string[]
+): {
+  name: string;
+  sname?: string;
+  A?: string;
+  C?: string;
+  L?: string;
+  W?: string;
+  S?: string;
+  R?: string;
+  X?: string;
+  H?: string;
+  M?: string;
+  T?: string;
+}[] => {
   const items = [];
   const decompLine = splitLfData();
 

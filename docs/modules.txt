@@ -335,8 +335,12 @@ isString(value:unknown): value is string => boolean
 isBottom(value:unknown): value is undefined|null => boolean
 	<value>がnullかundefinedなら<value>はundefined|null型
 
-isNonZero(value:string|number) => boolean
-	<value>が 0 か"0"か""(空文字)以外なら true を返す
+isZero(value: string|number) => boolean
+	<value>が 0 か "0" なら true を返す
+
+@deprecated
+isNonZero(value: string|number) => boolean
+	<value>が 0 か "0" か ""(空文字) 以外なら true を返す
 
 isEmptyStr(value: string) => boolean
 	<value>が空文字なら true を返す
