@@ -77,6 +77,7 @@ Letters		LowerLetters | UpperLetters
 LowerLetters	[a-z]
 UpperLetters	[A-Z]
 ScriptEngine	'JScript' | 'ClearScriptV8' | 'QuickJS'
+HighlightNumber	ZeroTo<7>
 Mutable<T extends {}>	オブジェクトの全プロパティからreadonlyを省いた型
 Flatten<T extends string|string[]>	配列の要素を並べたunion型
 ZeroTo<T extends number>	0からTまでの数字を並べたunion型
@@ -140,6 +141,9 @@ info
 
 	.language: 'ja'
 		メッセージの言語
+
+	.encode: 'utf16le'
+		デフォルトファイルエンコーディング
 
 	.nlcode: '\r\n'
 		デフォルト改行コード
@@ -807,18 +811,42 @@ sourceComp
 ===============================================================================
 staymode.ts
 
+@deprecated
 discardInstance(debounce: string, debug?: string) => void
-	ppx_Discardと一緒に使う。非表示状態のPPb上で<debounce>ミリ秒待機したあと
+	atDebounce.holdへと変更
+
+ppx_Discard(debug?: string, info?: string) => void
+	PPx.StayMode=0を設定しインスタンスを破棄する。Importするだけで機能する
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+	<info>にはデバッグメッセージの追加情報を指定する。
+
+atDebounce = {
+  hold(debounce: string, debug?: string) => void
+	非表示状態のPPb上で<debounce>ミリ秒待機したあと
 	%sgu'ppmlib'\discardStayMode.jsを実行する
 	discardStayMode.jsは<debounce>ミリ秒待機したあと、_User:ppm_sm<instance>
 	をチェックし、値が0ならppx_Discard経由でインスタンスを廃棄し、0以上で
-	あれば実行維持状態を延期する
+	あれば実行維持状態を<debounce>ミリ秒延期する
 	_User:ppm_sm<instance>には最初<debounce>が代入され、延期するごとに
 	0に更新される
-	具体的な使用方法はadjacentDirのmoveDirectory.tsを参照
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+	具体的な使用方法はadjacentDirのmoveDirectory.stay.tsを参照
 
-ppx_Discard(debug?: string) => void
-	discardInstanceと一緒に使う。Importするだけで機能する
+  ppx_Discard: ppx_Discard
+	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
+	メソッド名だけを指定する。
+}
+
+atLoadEvent = {
+  hold(label: string, debug: string) => void
+	KC_main:LOADEVENTにワンショットの*linecust <label>_%nを設定する。
+	ディレクトリ移動時にppx_Discardが実行される。
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+
+  ppx_Discard: ppx_Discard
+	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
+	メソッド名だけを指定する。
+}
 
 ===============================================================================
 util.ts

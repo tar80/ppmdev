@@ -1,6 +1,7 @@
 import '@ppmdev/polyfills/arrayRemoveEmpty.ts';
 import '@ppmdev/polyfills/json.ts';
-import {isEmptyStr} from '@ppmdev/modules/guard.ts';
+import type {HighlightNumber} from '@ppmdev/modules/types.ts';
+import {isEmptyStr, isInteger} from '@ppmdev/modules/guard.ts';
 
 const LF_HEADER = ';ListFile';
 const LF_CHARSET = ';charset';
@@ -48,9 +49,16 @@ export const getFiletime = (data: string): string => {
   return `${bit.high}.${bit.low}`;
 };
 
-type HlRange = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+const _rangeProp = (prop: 'H' | 'M', num: HighlightNumber | MarkRange | undefined, min: number, max: number) => {
+  if (!isInteger(num)) {
+    return '';
+  }
+
+  return min <= num && num <= max ? `,${prop}:${num}` : '';
+};
+
 type MarkRange = -1 | 0 | 1;
-type LfItem = {name: string; sname?: string; att?: number; date?: string; ext?: string; hl?: HlRange; mark?: MarkRange; comment?: string};
+type LfItem = {name: string; sname?: string; att?: number; date?: string; ext?: number; hl?: HighlightNumber; mark?: MarkRange; comment?: string};
 export const buildLfItem = ({name, sname = '', att = 0, date, ext, hl, mark, comment}: LfItem) => {
   if (!name || isEmptyStr(name)) {
     return;
@@ -65,9 +73,9 @@ export const buildLfItem = ({name, sname = '', att = 0, date, ext, hl, mark, com
   }
 
   const ft = getFiletime(date);
-  const x = ext ? `,X:${ext}` : '';
-  const h = hl ? `,H:${hl}` : '';
-  const m = mark ? `,M:${mark}` : '';
+  const x = isInteger(ext) ? `,X:${ext}` : '';
+  const h = _rangeProp('H', hl, 1, 7);
+  const m = _rangeProp('M', mark, -1, 1);
   const t = comment ? `,T:"${comment.replace(/"/g, '""')}"` : '';
 
   return `"${name}","${sname}",A:H${att},C:${ft},L:${ft},W:${ft},S:0.0${x}${h}${m}${t}`;

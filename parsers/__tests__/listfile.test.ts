@@ -1,15 +1,6 @@
 import PPx from '@ppmdev/modules/ppx';
 global.PPx = Object.create(PPx);
-import {
-  bitToDate,
-  dateToBit,
-  getFiletime,
-  formLfData,
-  createLfMeta,
-  getLfMeta,
-  splitLfData,
-  parseLfData
-} from '../listfile';
+import {bitToDate, dateToBit, getFiletime, buildLfItem, formLfData, createLfMeta, getLfMeta, splitLfData, parseLfData} from '../listfile';
 import {readLines} from '@ppmdev/modules/io';
 import {isError} from '@ppmdev/modules/guard';
 
@@ -36,38 +27,78 @@ describe('getFiletime()', function () {
   });
 });
 
+describe('buildLfItem()', function () {
+  const date = new Date(0).toLocaleString().replace(/\D+/g, ',');
+  it('empty names, must return undefined', () => {
+    expect(buildLfItem({name: ''})).toBeUndefined();
+  });
+  it('the return value must be a string in ListFile format', () => {
+    //NOTE: file size always outputs 0.0
+    const table = {name: 'name', sname: 'SNAME', att: 10, date};
+    const resp = `"name","SNAME",A:H10,C:${bit},L:${bit},W:${bit},S:0.0`;
+    expect(buildLfItem(table)).toBe(resp);
+  });
+  it('"att" is not a number type, returns 0', () => {
+    const table = {name: 'name', sname: 'SNAME', att: NaN, date};
+    const resp = `"name","SNAME",A:H0,C:${bit},L:${bit},W:${bit},S:0.0`;
+    expect(buildLfItem(table)).toBe(resp);
+  });
+  it('"ext" is not a integer, returns nothing', () => {
+    const table = {name: 'name', sname: 'SNAME', att: NaN, date, ext: 1.1};
+    const resp = `"name","SNAME",A:H0,C:${bit},L:${bit},W:${bit},S:0.0`;
+    expect(buildLfItem(table)).toBe(resp);
+  });
+  it('"hl" is not between 1 and 7, returns nothing', () => {
+    const table = {name: 'name', sname: 'SNAME', att: NaN, date, ext: 1000, hl: 0};
+    const resp = `"name","SNAME",A:H0,C:${bit},L:${bit},W:${bit},S:0.0,X:1000`;
+    // @ts-ignore
+    expect(buildLfItem(table)).toBe(resp);
+  });
+  it('"mark" is not between -1 and 1, returns nothing', () => {
+    const table = {name: 'name', sname: 'SNAME', att: NaN, date, ext: 1000, hl: 1, mark: 2};
+    const resp = `"name","SNAME",A:H0,C:${bit},L:${bit},W:${bit},S:0.0,X:1000,H:1`;
+    // @ts-ignore
+    expect(buildLfItem(table)).toBe(resp);
+  });
+  it('double quotes ins "comment" must be escaped', () => {
+    const comment = '"comment"'
+    const table = {name: 'name', sname: 'SNAME', att: NaN, date, ext: 1000, hl: 1, mark: 1, comment};
+    const resp = `"name","SNAME",A:H0,C:${bit},L:${bit},W:${bit},S:0.0,X:1000,H:1,M:1,T:"${comment.replace(/"/g,'""')}"`;
+    // @ts-ignore
+    expect(buildLfItem(table)).toBe(resp);
+  });
+});
+
 describe('formLfData()', function () {
   it('name-only pattern', () => {
     const line = `name = value`;
     const rgx = /^(\w+)\s=.*$/;
     const rep = '{"name":"$1"}';
-    expect(formLfData(line, rgx, rep)).toBe('"name","",A:H0,C:0.0,L:0.0,W:0.0,S:0.0,R:0.0');
+    const resp = '"name","",A:H0,C:0.0,L:0.0,W:0.0,S:0.0';
+    expect(formLfData(line, rgx, rep)).toBe(resp);
   });
   it('date pattern', () => {
     const line = `name = value, time = 1970/1/1 GMT+0900`;
     const rgx = /^(\w+)\s=.+time\s=\s(\d+)\/(\d+)\/(\d+)\sGMT\+(\d{2})\d{2}$/;
     const rep = '{"name":"$1","date":"$2,$3,$4,$5"}';
-    expect(formLfData(line, rgx, rep)).toBe(`"name","",A:H0,C:${bit},L:${bit},W:${bit},S:0.0,R:0.0`);
+    const resp = `"name","",A:H0,C:${bit},L:${bit},W:${bit},S:0.0`;
+    expect(formLfData(line, rgx, rep)).toBe(resp);
   });
   it('all parameters pattern. consecutive double quotes("") in comments must be converted to tilde(`)', () => {
     const line = `name = long name, short name = short name, time = 1970/1/1 GMT+0900, size = 100`;
-    const rgx =
-      /^name\s=\s([^,]+),\sshort\sname\s=\s([^,]+),\stime\s=\s(\d+)\/(\d+)\/(\d+)\sGMT\+(\d{2})\d{2},\ssize\s=\s(\d+)$/;
+    const rgx = /^name\s=\s([^,]+),\sshort\sname\s=\s([^,]+),\stime\s=\s(\d+)\/(\d+)\/(\d+)\sGMT\+(\d{2})\d{2},\ssize\s=\s(\d+)$/;
     const rep =
       '{"name":"$1","sname":"$2","create":"$3,$4,$5,$6","access":"$3,$4,$5,$6","write":"$3,$4,$5,$6","size":"0.$7","ext":0,"hl":1,"mark":1,"comment":"abc\\""123"}';
-    expect(formLfData(line, rgx, rep)).toBe(
-      `"long name","short name",A:H0,C:${bit},L:${bit},W:${bit},S:0.100,R:0.0,X:0,H:1,M:1,T:"abc\\\`123"`
-    );
+    const resp = `"long name","short name",A:H0,C:${bit},L:${bit},W:${bit},S:0.100,X:0,H:1,M:1,T:"abc\\\`123"`;
+    expect(formLfData(line, rgx, rep)).toBe(resp);
   });
   it('comment parameter must be specified last. otherwise, it contains useless parameters', () => {
     const line = `name = long name, short name = short name, time = 1970/1/1 GMT+0900, size = 100`;
-    const rgx =
-      /^name\s=\s([^,]+),\sshort\sname\s=\s([^,]+),\stime\s=\s(\d+)\/(\d+)\/(\d+)\sGMT\+(\d{2})\d{2},\ssize\s=\s(\d+)$/;
+    const rgx = /^name\s=\s([^,]+),\sshort\sname\s=\s([^,]+),\stime\s=\s(\d+)\/(\d+)\/(\d+)\sGMT\+(\d{2})\d{2},\ssize\s=\s(\d+)$/;
     const rep =
       '{"name":"$1","sname":"$2","create":"$3,$4,$5,$6","access":"$3,$4,$5,$6","write":"$3,$4,$5,$6","size":"0.$7","ext":0,"hl":1,"mark":1,"comment":"abc\\""123","unknown":"item"}';
-    expect(formLfData(line, rgx, rep)).toBe(
-      `"long name","short name",A:H0,C:${bit},L:${bit},W:${bit},S:0.100,R:0.0,X:0,H:1,M:1,T:"abc\\\`123","unknown":"item"`
-    );
+    const resp = `"long name","short name",A:H0,C:${bit},L:${bit},W:${bit},S:0.100,X:0,H:1,M:1,T:"abc\\\`123","unknown":"item"`;
+    expect(formLfData(line, rgx, rep)).toBe(resp);
   });
 });
 
@@ -133,8 +164,8 @@ describe('splitLfData()', function () {
 
 describe('parseLfData()', function () {
   it('pass entry information as an array. the return value. the return value must be of type string and the parentheses must be removed.', () => {
-    const data = ['filepath.txt',  '', 'A:H2000', 'C:0.0', 'L:0.0', 'W:0.0', 'S:0.0', 'T:"comment"'];
-    const resp = {name: 'filepath.txt', sname: '', A: '2000', 'C': '0.0', 'L': '0.0', 'W': '0.0', 'S': '0.0', 'T': 'comment'}
+    const data = ['filepath.txt', '', 'A:H2000', 'C:0.0', 'L:0.0', 'W:0.0', 'S:0.0', 'T:"comment"'];
+    const resp = {name: 'filepath.txt', sname: '', A: '2000', 'C': '0.0', 'L': '0.0', 'W': '0.0', 'S': '0.0', 'T': 'comment'};
     expect(parseLfData(data)).toEqual(resp);
   });
 });

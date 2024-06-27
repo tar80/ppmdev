@@ -28,7 +28,7 @@ export const isInteger = (value: unknown): value is number => {
   return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
 };
 
-export const isBottom = (value: unknown): value is undefined|null => value == null;
+export const isBottom = (value: unknown): value is undefined|null|void => value == null;
 
 export const isZero = (value: string | number): boolean => {
   if (typeof value === 'string') {
@@ -47,4 +47,4 @@ export const isNonZero = (value: string | number): boolean => {
   return value !== 0;
 };
 
-export const withinRange = <T extends number>(n: number, max: T): n is ZeroTo<T> => n >= 0 && n <= max;
+export const withinRange = <T extends number>(n: number, max: T): n is ZeroTo<T> => 0 <= n && n <= max;

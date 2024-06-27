@@ -2,6 +2,7 @@ const info = {
   ppmName: 'ppx-plugin-manager',
   ppmVersion: 0.95,
   language: 'ja',
+  encode: 'utf16le',
   nlcode: '\r\n',
   nltype: 'crlf',
   ppmID: 'P',

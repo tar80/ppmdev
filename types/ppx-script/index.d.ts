@@ -2,6 +2,7 @@
 // Definitions by: tar80 (https://github.com/tar80)
 
 declare var PPx: PPx;
+type ZeroTo<T extends number, A extends number[] = []> = A['length'] extends T ? A[number] | T : ZeroTo<T, [...A, A['length']]>;
 
 interface PPxArguments {
   atEnd(): boolean;
@@ -87,7 +88,7 @@ declare interface PPx {
   readonly EntryDisplayCount: number;
   readonly EntryDisplayFiles: number;
   readonly EntryDisplayDirectories: number;
-  EntryHighlight: number;
+  EntryHighlight: ZeroTo<7>;
   EntryIndex: number;
   readonly EntryName: string;
   EntryMark: number;
@@ -117,10 +118,10 @@ declare namespace entry {
   function moveNext(): typeof entry;
   function Hide(): void;
   function IndexFrom(name: string): number;
-  function information(): string;
+  function Information(): string;
   function Item(index: number | string): typeof entry;
-  function getComment(id: number | string): string;
-  function setComment(id: number | string, value: string): void;
+  function GetComment(id: number | string): string;
+  function SetComment(id: number | string, value: string): void;
   function FirstMark(): number;
   function NextMark(): number;
   function PrevMark(): number;
@@ -134,9 +135,9 @@ declare namespace entry {
   var DateLastAccessed: Date;
   var DateLastModified: Date;
   var ExtColor: number;
-  var Highlight: number;
+  var Highlight: ZeroTo<7>;
   var length: number;
-  var index: number;
+  var Index: number;
   var Mark: number;
   var Name: string;
   var ShortName: string;
