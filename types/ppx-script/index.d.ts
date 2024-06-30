@@ -57,7 +57,7 @@ declare interface PPx {
   EntryLastMark(): number;
   Execute(param: string): number;
   Extract(param?: string): string;
-  getComboItemCount(id: number | undefined): number;
+  GetComboItemCount(id: number | undefined): number;
   getValue(key: string): string;
   setValue(key: string, value: string | number): void;
   getIValue(key: string): string;
@@ -109,14 +109,13 @@ declare interface PPx {
   SlowMode: number;
   SyncView: number;
   readonly WindowDirection: number;
-  windowIDName: string;
+  WindowIDName: string;
 }
 
 declare namespace entry {
   var Entry: Object;
   function atEnd(): typeof entry;
   function moveNext(): typeof entry;
-  function Hide(): void;
   function IndexFrom(name: string): number;
   function Information(): string;
   function Item(index: number | string): typeof entry;
@@ -135,9 +134,10 @@ declare namespace entry {
   var DateLastAccessed: Date;
   var DateLastModified: Date;
   var ExtColor: number;
+  var Hide: number;
   var Highlight: ZeroTo<7>;
   var length: number;
-  var Index: number;
+  var index: number;
   var Mark: number;
   var Name: string;
   var ShortName: string;
@@ -149,7 +149,7 @@ declare namespace pane {
   function atEnd(): number;
   function moveNext(): number;
   function Reset(): number;
-  function item(index: number | string): number;
+  function Item(index: number | string): typeof pane;
   var Count: number;
   var length: number;
   var index: number;
@@ -169,7 +169,7 @@ declare namespace tab {
   var Count: number;
   var length: number;
   var Lock: number;
-  var idname: string;
+  var IDName: string;
   var index: number;
   var IndexFrom: void;
   var Name: string;

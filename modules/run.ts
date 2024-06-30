@@ -161,11 +161,29 @@ export const runPPb = ({
   }
 };
 
-type Stdout = {cmdline: string; extract?: boolean; startmsg?: boolean, hide?: boolean};
+type Stdout = {cmdline: string; wd?: string; extract?: boolean; startmsg?: boolean, hide?: boolean};
+
+/** @deprecated */
 export const stdout = ({cmdline, extract = false, startmsg = false, hide = false}: Stdout): Level_String => {
   const def = hide ? '-noppb -hide' : '-min';
   const msg = startmsg ? '' : '-nostartmsg';
   const opts = [def, msg].join(' ');
+
+  if (extract) {
+    cmdline = PPx.Extract(cmdline);
+  }
+
+  const data = PPx.Extract(`%*run(${opts} %(${cmdline}%))`);
+  const errorlevel = Number(PPx.Extract());
+
+  return [errorlevel, data]
+};
+
+export const runStdout = ({cmdline, wd, extract = false, startmsg = false, hide = false}: Stdout): Level_String => {
+  const def = hide ? '-noppb -hide' : '-min';
+  const msg = startmsg ? '' : '-nostartmsg';
+  const dir = wd ? `-d:${wd}` : '';
+  const opts = [def, msg, dir].join(' ');
 
   if (extract) {
     cmdline = PPx.Extract(cmdline);

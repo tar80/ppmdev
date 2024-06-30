@@ -740,8 +740,15 @@ runPPb(
 	<fg>、<bg>は<desc>の文字色と背景白をAnsiColors型で指定する
 	戻り値は正常起動なら true 
 
-type Stdout = {cmdline: string; extract?: boolean; startmsg?: boolean, hide?: boolean};
-stdout({cmdline, extract = false, startmsg = false, hide = false}: Stdout) => Level_String
+type Stdout = {cmdline: string; wd?: string, extract?: boolean; startmsg?: boolean, hide?: boolean};
+
+@deprecated
+stdout({cmdline, extract = false, startmsg = false, hide = false}: Stdout)
+ => Level_String
+ 	runStdout()に改名した
+
+runStdout({cmdline, wd, extract = false, startmsg = false, hide = false}: Stdout)
+ => Level_String
 	%*runを実行する
 	引数にはオブジェクトを渡す
 	<extract>に true を指定すると%macroが展開される
