@@ -4,7 +4,7 @@ type ReplaceChars = '"' | '\\';
 export const valueEscape = (value: string) => value.replace(/["\\]/g, (c) => ({'"': '\\"', '\\': '\\\\'})[c as ReplaceChars]);
 
 export const argParse = (): false | string => {
-  const arg = PPx.Arguments.length > 0 && PPx.Argument(0).replace(/['\\]/g, (c) => ({"'": '"', '\\': '\\\\'})[c] as string);
+  const arg = PPx.Arguments.length > 0 && PPx.Argument(0).replace(/'/g, '"');
 
   return arg && parseString(arg);
 };

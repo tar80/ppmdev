@@ -38,6 +38,8 @@ export const isZero = (value: string | number): boolean => {
   return value === 0;
 };
 
+export const withinRange = <T extends number>(n: number, max: T): n is ZeroTo<T> => 0 <= n && n <= Number(max);
+
 /** @deprecated */
 export const isNonZero = (value: string | number): boolean => {
   if (typeof value === 'string') {
@@ -47,4 +49,3 @@ export const isNonZero = (value: string | number): boolean => {
   return value !== 0;
 };
 
-export const withinRange = <T extends number>(n: number, max: T): n is ZeroTo<T> => 0 <= n && n <= max;
