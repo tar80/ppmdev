@@ -51,12 +51,8 @@ const createCache = (key: string): string => {
 
 /** register temporary keys and return the command line for the input post command */
 const autoselectEnter = (cmdline: string): string => {
-  PPx.Execute(
-    `%OC *setcust ${uniqID.tempKey}:ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`
-  );
-  PPx.Execute(
-    `%OC *setcust ${uniqID.tempKey}:\\ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`
-  );
+  PPx.Execute(`%OC *setcust ${uniqID.tempKey}:ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`);
+  PPx.Execute(`%OC *setcust ${uniqID.tempKey}:\\ENTER,*if -1==%%*sendmessage(%%N-L,392,0,0)%%:%%K"@DOWN"%bn%bt%%K"@ENTER"`);
 
   return `*mapkey use,${uniqID.tempKey}%%:${cmdline}`;
 };
@@ -124,9 +120,7 @@ export const ppm = {
     type Code = keyof typeof answer;
     const answer = {'0': 'cancel', '1': 'yes', '2': 'no'} as const;
     const id = isSelfId ? '' : ppxid;
-    const code = PPx.Extract(
-      `%OCP %*extract(${id}"%%*choice(-text""${message}"" -title:""${title}"" -type:${type})")`
-    ) as Code;
+    const code = PPx.Extract(`%OCP %*extract(${id}"%%*choice(-text""${message}"" -title:""${title}"" -type:${type})")`) as Code;
 
     if (load) {
       !!imye && PPx.Execute(`*setcust ${mes.yes}=${imye}`);
@@ -156,11 +150,21 @@ export const ppm = {
       return PPx.Execute(`*pptray -c ${command}`);
     } else {
       if (hasTargetId(ppxid)) {
-        return wait
-          ? Number(PPx.Extract(`%*extract(${ppxid},"${command}%%:0")`))
-          : PPx.Execute(`*execute ${ppxid},${command}`);
+        if (wait) {
+          const n = PPx.Extract(`%*extract(${ppxid},"${command}%%&0")`);
+
+          return isEmptyStr(n) ? 1 : Number(n);
+        } else {
+          return PPx.Execute(`*execute ${ppxid},${command}`);
+        }
       } else {
-        return PPx.Execute(command);
+        if (wait) {
+          const n = PPx.Extract(`${command}%&0`);
+
+          return isEmptyStr(n) ? 1 : Number(n);
+        } else {
+          return PPx.Execute(command);
+        }
       }
     }
   },
@@ -434,9 +438,7 @@ export const ppm = {
       return [1, ''];
     }
 
-    const value = hasTargetId(ppxid)
-      ? PPx.Extract(`%*extract(${ppxid},"%%s${type}'${key}'")`)
-      : PPx.Extract(`%s${type}'${key}'`);
+    const value = hasTargetId(ppxid) ? PPx.Extract(`%*extract(${ppxid},"%%s${type}'${key}'")`) : PPx.Extract(`%s${type}'${key}'`);
     const errorlevel = isEmptyStr(value) ? 13 : 0;
 
     return [errorlevel, value];
@@ -489,9 +491,7 @@ export const ppm = {
       return [errorlevel, ''];
     }
 
-    const input = PPx.Extract(
-      `%OCP %*input("${message}" -title:"${title}" -mode:${mode} -select:${select}${m}${l}${fp}${fd}${k_})`
-    );
+    const input = PPx.Extract(`%OCP %*input("${message}" -title:"${title}" -mode:${mode} -select:${select}${m}${l}${fp}${fd}${k_})`);
     errorlevel = Number(PPx.Extract());
     this.deletemenu();
     this.deletekeys();
