@@ -8,9 +8,11 @@ export const echoExe = ((): string => {
     return isEmptyStr(gitDir) ? 'echo' : `"${gitDir}\\usr\\bin\\echo.exe"`;
 })();
 
-export const coloredEcho = (ppbid: string, message: string): ErrorLevel => {
+export const coloredEcho = (ppbid: string, message: string, wait = false): ErrorLevel => {
   message = message.replace(/\\/g, '\\\\')
+  const wait_ = wait ? 'W' : '';
   const cmdline =
-    ppbid === '.' ? `%OP ${echoExe} -ne '%(${message}%)'` : `*execute ${ppbid},%%OP ${echoExe} -ne '%%(${message}%%)'`;
+    ppbid === '.' ? `%OP${wait_} ${echoExe} -ne '%(${message}%)'` : `*execute ${ppbid},%%OP ${echoExe} -ne '%%(${message}%%)'`;
+
   return PPx.Execute(cmdline);
 };

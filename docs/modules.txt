@@ -270,8 +270,9 @@ echoExe
 	S_ppm#global:gitが設定されていれば"<git>\\usr\\bin\\echo.exe"を、
 	設定されていなければ"echo"を返す
 
-coloredEcho(ppbid: string, message: string) => ErrorLevel
+coloredEcho(ppbid: string, message: string, wait: boolean) => ErrorLevel
 	echoExeを経由して、PPb上に色付きメッセージを出力する
+	<wait>が true なら、%OWを設定する
 
 ===============================================================================
 filesystem.ts
