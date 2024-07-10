@@ -12,7 +12,7 @@ export const coloredEcho = (ppbid: string, message: string, wait = false): Error
   message = message.replace(/\\/g, '\\\\')
   const wait_ = wait ? 'W' : '';
   const cmdline =
-    ppbid === '.' ? `%OP${wait_} ${echoExe} -ne '%(${message}%)'` : `*execute ${ppbid},%%OP ${echoExe} -ne '%%(${message}%%)'`;
+    ppbid === '.' ? `%OP${wait_} ${echoExe} -ne '%(${message}%)'` : `*execute ${ppbid},%%OP${wait_} ${echoExe} -ne '%%(${message}%%)'`;
 
   return PPx.Execute(cmdline);
 };
