@@ -24,15 +24,28 @@ export const atDebounce = {
   ppx_Discard
 };
 
+export const atActiveEvent = {
+  hold: (label: string, debug = '0'): void => {
+    const handle = PPx.Extract('%N');
+    const instance = PPx.StayMode;
+    const cmd =
+      'KC_main:ACTIVEEVENT,' +
+      `*script ":${instance},ppx_Discard",${debug},${label}` +
+      `%%:*linecust ${label}_${handle},KC_main:ACTIVEEVENT,`;
+    PPx.Execute(`*linecust ${label}_${handle},${cmd}%K"@LOADEVENT"`);
+  },
+  ppx_Discard
+};
+
 export const atLoadEvent = {
-  hold: (label: string, debug: string): void => {
+  hold: (label: string, debug = '0'): void => {
     const ppcid = PPx.Extract('%n');
     const instance = PPx.StayMode;
     const cmd =
       'KC_main:LOADEVENT,' +
       `*if ("${ppcid}"=="%n")%:*script ":${instance},ppx_Discard",${debug},${label}` +
       `%:*linecust ${label}_${ppcid},KC_main:LOADEVENT,`;
-    PPx.Extract(`*linecust ${label}_${ppcid},%(${cmd}%)%:%K"@LOADCUST"`);
+    PPx.Execute(`*linecust ${label}_${ppcid},%(${cmd}%)%:%K"@LOADCUST"`);
   },
   ppx_Discard
 };

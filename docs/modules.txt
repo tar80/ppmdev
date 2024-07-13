@@ -842,7 +842,21 @@ atDebounce = {
 
   ppx_Discard: ppx_Discard
 	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
-	メソッド名だけを指定する。
+	メソッド名を指定する。
+	<args>にはppx_Discardの引数debug,infoを指定できる
+}
+
+atActiveEvent = {
+  hold(label: string, debug: string) => void
+	KC_main:ACTIVEEVENTにワンショットの*linecust <label>_%Nを設定する。
+	一行編集上で使用するスクリプトのStayMode解除を想定しており、
+	一行編集を閉じた(PPcがアクティブになった)ときにppx_Discardが実行される。
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+
+  ppx_Discard: ppx_Discard
+	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
+	メソッド名を指定する。
+	<args>にはppx_Discardの引数debug,infoを指定できる
 }
 
 atLoadEvent = {
@@ -853,7 +867,8 @@ atLoadEvent = {
 
   ppx_Discard: ppx_Discard
 	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
-	メソッド名だけを指定する。
+	メソッド名を指定する。
+	<args>にはppx_Discardの引数debug,infoを指定できる
 }
 
 ===============================================================================

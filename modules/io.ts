@@ -68,7 +68,15 @@ type ReadLines = [true, string] | [false, {lines: string[]; nl: NlCodes}];
  * @param linefeed "\r\n"|"\r"|"\n"
  * @return [error, "error message"|{lines: file contents, nl: newline code}]
  */
-export const readLines = ({path, enc = 'utf8', linefeed}: {path: string; enc?: FileEncode; linefeed?: NlCodes}): ReadLines => {
+export const readLines = ({
+  path,
+  enc = 'utf8',
+  linefeed
+}: {
+  path: string;
+  enc?: FileEncode;
+  linefeed?: NlCodes;
+}): [true, string] | [false, {lines: string[]; nl: NlCodes}] => {
   const [error, stdout] = read({path, enc});
 
   if (error) {
