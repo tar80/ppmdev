@@ -7,7 +7,7 @@ type ZeroTo<T extends number, A extends number[] = []> = A['length'] extends T ?
 interface PPxArguments {
   atEnd(): boolean;
   moveNext(): void;
-  reset(): void;
+  Reset(): void;
   Item(int: number): string;
   value: string;
   length: number;
@@ -116,6 +116,7 @@ declare namespace entry {
   var Entry: Object;
   function atEnd(): typeof entry;
   function moveNext(): typeof entry;
+  function Reset(): typeof entry;
   function IndexFrom(name: string): number;
   function Information(): string;
   function Item(index: number | string): typeof entry;
@@ -137,7 +138,7 @@ declare namespace entry {
   var Hide: number;
   var Highlight: ZeroTo<7>;
   var length: number;
-  var index: number;
+  var Index: number;
   var Mark: number;
   var Name: string;
   var ShortName: string;
