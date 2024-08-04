@@ -101,3 +101,22 @@ export const rgxEscape = {
     '\\\\': '\\'
   }
 };
+
+export type Encodes = (typeof fileEnc)[number];
+export const fileEnc = [
+  'sjis',
+  'euc',
+  'utf8',
+  'utf8bom',
+  'unicode',
+  'utf16',
+  'unicodeb',
+  'utf16be',
+  'unicodebom',
+  'unicodebbom',
+  'ibm',
+  'us',
+  'ansi',
+  'latin1',
+  'system'
+] as const;

@@ -27,7 +27,7 @@ class DummyArguments implements PPxArguments {
   moveNext(): void {
     this.num++;
   }
-  reset(): void {
+  Reset(): void {
     this.num = 4;
   }
   value: string = this.Item()

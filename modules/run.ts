@@ -1,10 +1,13 @@
 import '@ppmdev/polyfills/arrayRemoveEmpty.ts';
-import type {AnsiColors, Letters, Level_String} from '@ppmdev/modules/types.ts';
+import '@ppmdev/polyfills/arrayIndexOf.ts';
+import type {AnsiColors, Letters, Level_String, NlTypes} from '@ppmdev/modules/types.ts';
 import {ppm} from '@ppmdev/modules/ppm.ts';
 import {echoExe} from '@ppmdev/modules/echo.ts';
 import {colorlize} from '@ppmdev/modules/ansi.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {winpos, winsize} from '@ppmdev/modules/window.ts';
+import {type Encodes, fileEnc} from '@ppmdev/modules/meta.ts';
+import {getEncoder} from 'iconv-lite';
 
 type RunOptions = {
   startwith: '' | 'min' | 'max' | 'noactive' | 'bottom';
@@ -71,6 +74,76 @@ export const run = ({startwith = '', wait = '', priority, job, log, wd, x, y, wi
   } finally {
     return resp;
   }
+};
+
+type EditModify = (typeof editModify)[number];
+const editModify = ['query', 'save', 'silent', 'clear', 'modify', 'write', 'readonly'];
+
+const _getEditmode = (history = '', modify = '', encode = '', linefeed = ''): string => {
+  modify = editModify.indexOf(modify) !== -1 ? `-modify:${modify}` : '';
+
+  if (!isEmptyStr(encode)) {
+    encode = _getEncode(encode);
+  }
+
+  if (!isEmptyStr(linefeed)) {
+    linefeed = ['crlf', 'cr', 'lf'].indexOf(linefeed) !== -1 ? `-${linefeed}` : '-crlf';
+  }
+
+  const param = [history, encode, linefeed, modify].removeEmpty();
+
+  return param.length > 0 ? `*editmode ${param.join(' ')}` : '';
+};
+
+const _getEncode = (encode: string): string => {
+  if (!~encode.indexOf('codepage:')) {
+    encode = fileEnc.indexOf(encode as Encodes) !== -1 ? encode : 'utf8bom';
+  }
+
+  return `-${encode}`;
+};
+
+export const runPPe = ({
+  wait = false,
+  path = '',
+  encode = 'utf8bom',
+  linefeed = 'crlf',
+  title,
+  tab = 8,
+  history,
+  modify,
+  saveenc,
+  savelf,
+  k = ''
+}: {
+  wait?: boolean;
+  path?: string;
+  encode?: string;
+  linefeed?: NlTypes;
+  title?: string;
+  tab?: number;
+  history?: string;
+  modify?: EditModify;
+  saveenc?: string;
+  savelf?: NlTypes;
+  k?: string;
+}): void => {
+  const cmd = wait ? '*edit' : '*ppe';
+  const create = path ? '-new' : '';
+  const enc = _getEncode(encode);
+  const lf = ['crlf', 'cr', 'lf'].indexOf(linefeed) !== -1 ? `-${linefeed}` : '-crlf';
+  const tw = `-tab:${tab}`;
+  title = title ? `*setcaption ${title}` : '';
+  const editmode = _getEditmode(history, modify, saveenc, savelf);
+  const postCmd = [title, editmode, k].removeEmpty();
+
+  if (postCmd.length > 0) {
+    k = `-k %(${postCmd.join('%:')}%)`;
+  }
+
+  const cmdline = [cmd, create, enc, lf, tw, path, k].removeEmpty().join(' ');
+
+  PPx.Execute(cmdline);
 };
 
 type PPbOptionsSpec = {bootid?: Letters; bootmax?: Letters; q?: boolean; c?: string; k?: string};
@@ -161,7 +234,7 @@ export const runPPb = ({
   }
 };
 
-type Stdout = {cmdline: string; wd?: string; extract?: boolean; startmsg?: boolean, hide?: boolean};
+type Stdout = {cmdline: string; wd?: string; extract?: boolean; startmsg?: boolean; hide?: boolean};
 
 /** @deprecated */
 export const stdout = ({cmdline, extract = false, startmsg = false, hide = false}: Stdout): Level_String => {
@@ -176,7 +249,7 @@ export const stdout = ({cmdline, extract = false, startmsg = false, hide = false
   const data = PPx.Extract(`%*run(${opts} %(${cmdline}%))`);
   const errorlevel = Number(PPx.Extract());
 
-  return [errorlevel, data]
+  return [errorlevel, data];
 };
 
 export const runStdout = ({cmdline, wd, extract = false, startmsg = false, hide = false}: Stdout): Level_String => {
@@ -185,12 +258,12 @@ export const runStdout = ({cmdline, wd, extract = false, startmsg = false, hide 
   const dir = wd ? `-d:${wd}` : '';
   const opts = [def, msg, dir].join(' ');
 
-  if (extract) {
-    cmdline = PPx.Extract(cmdline);
+  if (!extract) {
+    cmdline = `%(${cmdline}%)`;
   }
 
-  const data = PPx.Extract(`%*run(${opts} %(${cmdline}%))`);
+  const data = PPx.Extract(`%*run(${opts} ${cmdline})`);
   const errorlevel = Number(PPx.Extract());
 
-  return [errorlevel, data]
+  return [errorlevel, data];
 };

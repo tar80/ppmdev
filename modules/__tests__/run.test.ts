@@ -1,6 +1,7 @@
 import PPx from '../ppx';
 global.PPx = Object.create(PPx);
-import {runPPb} from '../run';
+import type {NlTypes} from '@ppmdev/modules/types.ts';
+import {runPPb, runPPe} from '../run';
 import {echoExe} from '../echo';
 
 describe('runPPb()', function () {
@@ -39,7 +40,7 @@ describe('runPPb()', function () {
     runPPb({startwith: 'bottom', x: 0, y: 0, c: '*linemessage test'});
     runPPb({startwith: 'bottom', width: 200, height: 200, c: '*linemessage test'});
     // no window adjustments are made when the option "-c" is specified
-    const received = `*run -noppb -noactive %0ppbw.exe -c *linemessage test%:*wait 500,2`
+    const received = `*run -noppb -noactive %0ppbw.exe -c *linemessage test%:*wait 500,2`;
     expect(spy).toHaveBeenCalledWith(received);
     expect(spy).toHaveBeenCalledWith(received);
   });
@@ -73,7 +74,7 @@ describe('runPPb()', function () {
   it('not enough position and size options. no window operations', () => {
     expect(runPPb({x: 0})).toBeTruthy();
     runPPb({width: 20});
-    const received = '*run -noppb %0ppbw.exe %:*wait 500,2'
+    const received = '*run -noppb %0ppbw.exe %:*wait 500,2';
     expect(spy).toHaveBeenCalledWith(received);
     expect(spy).toHaveBeenLastCalledWith(received);
   });
@@ -124,5 +125,93 @@ describe('runPPb()', function () {
     expect(spy).toHaveBeenCalledWith(
       `*run -noppb -noactive -wait -normal -breakjob -log %0ppbw.exe -bootid:A -bootmax:Z -q -k *windowposition %%n,20,20%%:*windowsize %%n,200,200%%:*selectppx %n%%:${echoExe} -e "\\x1b[40;37mtest\\x1b[49;39m \\n"%%:%%I"full options"%:*wait 500,2`
     );
+  });
+});
+
+describe('runPPe()', function () {
+  let spy = jest.spyOn(PPx, 'Execute').mockImplementation(() => 0);
+  afterEach(() => spy.mockClear());
+
+  const title = 'test';
+  const path = 'test/path';
+  const history = 'e,g';
+  const modify = 'save';
+
+  it('no arguments specified', () => {
+    runPPe({});
+    expect(spy).toHaveBeenCalledWith('*ppe -utf8bom -crlf -tab:8');
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('the wait option is true, "*edit" must be executed', () => {
+    runPPe({wait: true});
+    expect(spy).toHaveBeenCalledWith('*edit -utf8bom -crlf -tab:8');
+  });
+
+  it('a path is specified, "-new" must be added', () => {
+    runPPe({wait: true, path});
+    expect(spy).toHaveBeenCalledWith(`*edit -new -utf8bom -crlf -tab:8 ${path}`);
+  });
+
+  it('specifying an incorrect encodeing, it must be corrected to "-utf8bom"', () => {
+    const correct = 'sjis';
+    runPPe({wait: true, encode: correct, path});
+    expect(spy).toHaveBeenCalledWith(`*edit -new -${correct} -crlf -tab:8 ${path}`);
+
+    const incorrect = 'sji';
+    // @ts-ignore
+    runPPe({wait: true, encode: incorrect, path});
+    expect(spy).toHaveBeenCalledWith(`*edit -new -utf8bom -crlf -tab:8 ${path}`);
+  });
+
+  it('specifying an incorrect linefeed, it must be corrected to "-crlf"', () => {
+    const correct = 'lf';
+    runPPe({linefeed: correct, path});
+    expect(spy).toHaveBeenCalledWith(`*ppe -new -utf8bom -${correct} -tab:8 ${path}`);
+
+    const incorrect = 'lr';
+    // @ts-ignore
+    runPPe({linefeed: incorrect, path});
+    expect(spy).toHaveBeenCalledWith(`*ppe -new -utf8bom -crlf -tab:8 ${path}`);
+  });
+
+  it('the title option is specified, "*setcaption" must be added into the "-k" option', () => {
+    runPPe({title, path});
+    expect(spy).toHaveBeenCalledWith(`*ppe -new -utf8bom -crlf -tab:8 ${path} -k %(*setcaption ${title}%)`);
+  });
+
+  it('history and modify options must be set as options of "*editmode"', () => {
+    runPPe({title, path, history, modify});
+    expect(spy).toHaveBeenCalledWith(
+      `*ppe -new -utf8bom -crlf -tab:8 ${path} -k %(*setcaption ${title}%:*editmode ${history} -modify:${modify}%)`
+    );
+  });
+
+  it('saveenc and savelf options must be set as options of "*editmode"', () => {
+    // default value of saveenc is "-utf8bom"
+    // default value of savelf is "-crlf"
+    let saveenc = 'test';
+    let savelf: NlTypes | 'test' = 'test';
+
+    // @ts-ignore
+    runPPe({title, path, history, modify, saveenc, savelf});
+    expect(spy).toHaveBeenCalledWith(
+      `*ppe -new -utf8bom -crlf -tab:8 ${path} -k %(*setcaption ${title}%:*editmode ${history} -utf8bom -crlf -modify:${modify}%)`
+    );
+
+    saveenc = 'utf8';
+    savelf = 'lf';
+
+    runPPe({title, path, history, modify, saveenc, savelf});
+    expect(spy).toHaveBeenCalledWith(
+      `*ppe -new -utf8bom -crlf -tab:8 ${path} -k %(*setcaption ${title}%:*editmode ${history} -${saveenc} -${savelf} -modify:${modify}%)`
+    );
+  });
+
+  it('the k option is macro enpanded', () => {
+    let k = '*insert %FDC';
+
+    runPPe({title, path, k});
+    expect(spy).toHaveBeenCalledWith(`*ppe -new -utf8bom -crlf -tab:8 ${path} -k %(*setcaption ${title}%:${k}%)`);
   });
 });

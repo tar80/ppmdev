@@ -430,6 +430,13 @@ rgxEscape
 	.exclude
 		文字から正規表現エスケープを除去する
 
+type Encodes = (typeof fileEnc)[number]
+fileEnc = [
+  'sjis', 'euc', 'utf8', 'utf8bom', 'unicode', 'utf16', 'unicodeb', 'utf16be', 'unicodebom', 'unicodebbom',
+  'ibm', 'us', 'ansi', 'latin1', 'system'
+]
+	PPxで指定できるファイルエンコーディングの配列
+
 ===============================================================================
 path.ts
 
@@ -730,9 +737,23 @@ run(
 	引数にはオブジェクトを渡す
 	戻り値は正常起動なら true 
 
+runPPe({
+  wait = false, path = '', encode = 'utf8bom', linefeed = 'crlf', tab = 8,
+  title, history, modify, saveenc, savelf, k = ''
+}) => void
+	*ppeを実行する
+	引数にはオブジェクトを渡す
+	<wait>が true のとき"*edit"を、false のとき"*ppe"を実行する
+	<path>が指定されたとき"-new"オプションが付加される
+	<title>は"-k *setcaption <title>"を設定する
+	<history>,<modify>,<saveenc>,<savelf>はそれぞれ
+	 *editmode <history> -modify:<modify> -<saveenc> -<savelf>に設定される
+	<k>は"-k %(*setcaption <title>%:*editmode <options>%:<k>%)のように設定される
+
 type RunPPb = Partial<PPbOptionsSpec> & Partial<RunOptions> & Partial<Description>;
-runPPb(
-  { bootid, bootmax, q, c, k, startwith = '', wait = '', priority, job, log, wd, x, y, width, height, desc, fg, bg }: RunPPb
+runPPb({
+  bootid, bootmax, q, c, k, startwith = '', wait = '', priority, job, log, wd, x, y, width, height, desc, fg, bg
+  }: RunPPb
 ) => boolean
 	PPbを*run経由で実行する
 	引数にはオブジェクトを渡す
