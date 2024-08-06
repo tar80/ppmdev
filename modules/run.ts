@@ -234,10 +234,8 @@ export const runPPb = ({
   }
 };
 
-type Stdout = {cmdline: string; wd?: string; extract?: boolean; startmsg?: boolean; hide?: boolean};
-
 /** @deprecated */
-export const stdout = ({cmdline, extract = false, startmsg = false, hide = false}: Stdout): Level_String => {
+export const stdout = ({cmdline, extract = false, startmsg = false, hide = false, utf8 = true, single, multi}: Stdout): Level_String => {
   const def = hide ? '-noppb -hide' : '-min';
   const msg = startmsg ? '' : '-nostartmsg';
   const opts = [def, msg].join(' ');
@@ -252,17 +250,49 @@ export const stdout = ({cmdline, extract = false, startmsg = false, hide = false
   return [errorlevel, data];
 };
 
-export const runStdout = ({cmdline, wd, extract = false, startmsg = false, hide = false}: Stdout): Level_String => {
+type Stdout = {
+  cmdline: string;
+  wd?: string;
+  extract?: boolean;
+  startmsg?: boolean;
+  hide?: boolean;
+  utf8?: boolean;
+  single?: string;
+  multi?: string[];
+};
+
+const _setStdin = (s?: string, m?: string[]): string => {
+  if (!!s) {
+    return `-io:string,"${s}"`;
+  } else if (!!m) {
+    return `io:send,"${m.join('%bl')}"`;
+  }
+
+  return ``;
+};
+
+export const runStdout = ({
+  cmdline,
+  wd,
+  extract = false,
+  startmsg = false,
+  hide = false,
+  utf8 = true,
+  single,
+  multi
+}: Stdout): Level_String => {
   const def = hide ? '-noppb -hide' : '-min';
   const msg = startmsg ? '' : '-nostartmsg';
   const dir = wd ? `-d:${wd}` : '';
-  const opts = [def, msg, dir].join(' ');
+  const enc = utf8 ? '-io:utf8' : '';
+  const stdin = _setStdin(single, multi);
+  const opts = [def, msg, dir, enc, stdin].join(' ');
 
   if (!extract) {
     cmdline = `%(${cmdline}%)`;
   }
 
-  const data = PPx.Extract(`%*run(${opts} ${cmdline})`);
+  const data = PPx.Extract(`%OC %*run(${opts} ${cmdline})`);
   const errorlevel = Number(PPx.Extract());
 
   return [errorlevel, data];

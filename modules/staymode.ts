@@ -1,5 +1,7 @@
 import debug from '@ppmdev/modules/debug.ts';
 
+const SCRIPT_PATH = "%sgu'ppmlib'\\discardStayMode.js";
+
 export const ppx_Discard = (debug?: string, info?: string) => {
   PPx.StayMode = 0;
   info = info ?? '';
@@ -10,16 +12,14 @@ export const ppx_Discard = (debug?: string, info?: string) => {
 export const discardInstance = (debounce: string, debug?: string): void => {
   const instance = PPx.StayMode;
   const propName = `ppm_sm${instance}`;
-  const path = "%sgu'ppmlib'\\discardStayMode.js";
-  PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script ${path},${propName},${instance},${debug}`);
+  PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script ${SCRIPT_PATH},${propName},${instance},${debug}`);
 };
 
 export const atDebounce = {
   hold: (debounce: string, debug?: string): void => {
     const instance = PPx.StayMode;
     const propName = `ppm_sm${instance}`;
-    const path = "%sgu'ppmlib'\\discardStayMode.js";
-    PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script ${path},${propName},${instance},${debug}`);
+    PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script ${SCRIPT_PATH},${propName},${instance},${debug}`);
   }
 };
 

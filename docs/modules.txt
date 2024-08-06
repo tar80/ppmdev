@@ -762,18 +762,26 @@ runPPb({
 	<fg>、<bg>は<desc>の文字色と背景白をAnsiColors型で指定する
 	戻り値は正常起動なら true 
 
-type Stdout = {cmdline: string; wd?: string, extract?: boolean; startmsg?: boolean, hide?: boolean};
-
 @deprecated
 stdout({cmdline, extract = false, startmsg = false, hide = false}: Stdout)
  => Level_String
  	runStdout()に改名した
 
-runStdout({cmdline, wd, extract = false, startmsg = false, hide = false}: Stdout)
- => Level_String
+type Stdout = {
+  cmdline: string; wd?: string,
+  extract?: boolean; startmsg?: boolean,
+  hide?: boolean,
+  utf8: boolean,
+  single: string,
+  multi: string[]
+};
+runStdout({cmdline, wd, extract = false, startmsg = false, hide = false, utf8 = true, single, multi}: Stdout)
+=> Level_String
 	%*runを実行する
 	引数にはオブジェクトを渡す
 	<extract>に true を指定すると%macroが展開される
+	<utf8>は出力の文字コード(default:utf8)
+	<single>,<multi>はそれぞれ、単一行、複数行の標準入力を指定できる
 	戻り値は[errorlevel, stdout]の配列
 
 ===============================================================================
@@ -845,7 +853,8 @@ discardInstance(debounce: string, debug?: string) => void
 	atDebounce.holdへと変更
 
 ppx_Discard(debug?: string, info?: string) => void
-	PPx.StayMode=0を設定しインスタンスを破棄する。Importするだけで機能する
+	atXXX関数を読み込んだときに自動的に設定される。
+	PPx.StayMode=0を設定しインスタンスを破棄する。
 	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
 	<info>にはデバッグメッセージの追加情報を指定する。
 
@@ -856,15 +865,12 @@ atDebounce = {
 	discardStayMode.jsは<debounce>ミリ秒待機したあと、_User:ppm_sm<instance>
 	をチェックし、値が0ならppx_Discard経由でインスタンスを廃棄し、0以上で
 	あれば実行維持状態を<debounce>ミリ秒延期する
-	_User:ppm_sm<instance>には最初<debounce>が代入され、延期するごとに
-	0に更新される
+	_User:ppm_sm<instance>は延期するごとに0に更新される
 	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+	使用例は、実行元のスクリプト内でatDebouncd(<debounce>)を実行し、
+	_User:ppm_sm<instance>=<debouce>を設定する。
+	<debounce>ミリ秒内にスクリプトが再実行されれば実行維持状態が延期される
 	具体的な使用方法はadjacentDirのmoveDirectory.stay.tsを参照
-
-  ppx_Discard: ppx_Discard
-	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
-	メソッド名を指定する。
-	<args>にはppx_Discardの引数debug,infoを指定できる
 }
 
 atActiveEvent = {
@@ -873,11 +879,6 @@ atActiveEvent = {
 	一行編集上で使用するスクリプトのStayMode解除を想定しており、
 	一行編集を閉じた(PPcがアクティブになった)ときにppx_Discardが実行される。
 	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
-
-  ppx_Discard: ppx_Discard
-	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
-	メソッド名を指定する。
-	<args>にはppx_Discardの引数debug,infoを指定できる
 }
 
 atLoadEvent = {
@@ -885,11 +886,6 @@ atLoadEvent = {
 	KC_main:LOADEVENTにワンショットの*linecust <label>_%nを設定する。
 	ディレクトリ移動時にppx_Discardが実行される。
 	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
-
-  ppx_Discard: ppx_Discard
-	外部からの利用を想定。*script ":<instance>",ppx_Discard,<args>のように
-	メソッド名を指定する。
-	<args>にはppx_Discardの引数debug,infoを指定できる
 }
 
 ===============================================================================
