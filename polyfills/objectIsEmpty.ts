@@ -11,7 +11,7 @@ declare global {
 if (!Object.isEmpty) {
   Object.isEmpty = function (obj: Record<string, any>) {
     if (typeof obj !== 'function' && (typeof obj !== 'object' || obj == null)) {
-      throw new TypeError('Object.isEmpty: called on non-object');
+      throw new Error('Object.isEmpty: called on non-object');
     }
 
     for (var _ in obj) {

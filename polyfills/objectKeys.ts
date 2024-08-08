@@ -17,7 +17,7 @@ if (!Object.keys) {
 
     return function (obj: Record<string, any>) {
       if (typeof obj !== 'function' && (typeof obj !== 'object' || obj == null)) {
-        throw new TypeError('Object.keys: called on non-object');
+        throw new Error('Object.keys: called on non-object');
       }
 
       var result: string[] = [];

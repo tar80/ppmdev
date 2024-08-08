@@ -2,7 +2,7 @@ if (!Array.prototype.includes) {
   Array.prototype.includes = function (searchElement: string, fromIndex?: number): boolean {
     // 1. Let O be ? ToObject(this value).
     if (this == null) {
-      throw new TypeError('Array.includes: "this" is null or not defined');
+      throw new Error('Array.includes: "this" is null or not defined');
     }
 
     var o = Object(this);

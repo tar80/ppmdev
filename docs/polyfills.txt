@@ -25,6 +25,9 @@ stringPrecedes.ts (独自)
 		文字列の先頭から"str"までを返す
 		文字列中に"str"が存在しない場合はそのまま返す
 
+stringRepeat.ts
+	String.prototype.repeat();
+
 Array
 
 arrayIsArray.ts

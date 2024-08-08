@@ -7,7 +7,7 @@ if (!Array.prototype.indexOf) {
     // 1. Let o be the result of calling ToObject passing
     //    the this value as the argument.
     if (this == null) {
-      throw new TypeError('Array.indexOf: "this" is null or not defined');
+      throw new Error('Array.indexOf: "this" is null or not defined');
     }
 
     var o = Object(this);
