@@ -208,7 +208,7 @@ describe('runPPe()', function () {
     );
   });
 
-  it('the k option is macro enpanded', () => {
+  it('the k option is macro expanded', () => {
     let k = '*insert %FDC';
 
     runPPe({title, path, k});

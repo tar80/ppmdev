@@ -56,10 +56,23 @@ export const waitUntil = (
       return true;
     }
 
-    PPx.Execute('*wait 300,2');
+    PPx.Execute(`*wait ${interval},2`);
   }
 
   return false;
+};
+
+/** Wait for `callback` to returns `true` for a moment. */
+export const waitMoment = (callback: () => boolean): void => {
+  let count = 10;
+
+  while (callback()) {
+    PPx.Sleep(100);
+
+    if (0 >= --count) {
+      break;
+    }
+  }
 };
 
 /** Whether the library used by JavaScript is ClearScriptV8 */

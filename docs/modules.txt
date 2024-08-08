@@ -916,6 +916,9 @@ waitUntil(
 	<interval>ごとに<callback>の成否を確認して true になるまで繰り返す
 	<timeout>を過ぎたら"false"を返して終了する
 
+waitMoment(callback: () => boolean) => void
+	極短い時間(1秒強)、<callback>が true を返すのを待つ
+
 isCV8() => boolean
 	現在使用しているJavaScriptライブラリが"ClearScriptV8"なら true を返す
 
