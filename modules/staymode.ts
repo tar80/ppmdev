@@ -23,15 +23,19 @@ export const atDebounce = {
   }
 };
 
+type Event = 'ACTIVEEVENT' | 'LOADEVENT';
+const _oneshot = (event: Event, label: string, cmd: string): void => {
+  const linecust = `*linecust ${label},KC_main:${event},`;
+  PPx.Execute(`${linecust}${linecust}%%:${cmd}`);
+  PPx.Execute('%K"@LOADCUST"');
+};
+
 export const atActiveEvent = {
   hold: (label: string, debug = '0'): void => {
     const handle = PPx.Extract('%N');
     const instance = PPx.StayMode;
-    const cmd =
-      'KC_main:ACTIVEEVENT,' +
-      `*script ":${instance},ppx_Discard",${debug},${label}` +
-      `%%:*linecust ${label}_${handle},KC_main:ACTIVEEVENT,`;
-    PPx.Execute(`*linecust ${label}_${handle},${cmd}`);
+    const cmd = `*script ":${instance},ppx_Discard",${debug},${label}`;
+    _oneshot('ACTIVEEVENT', `${label}_${handle}`, cmd);
   }
 };
 
@@ -39,11 +43,7 @@ export const atLoadEvent = {
   hold: (label: string, debug = '0'): void => {
     const ppcid = PPx.Extract('%n');
     const instance = PPx.StayMode;
-    const cmd =
-      'KC_main:LOADEVENT,' +
-      `*if ("${ppcid}"=="%n")%:*script ":${instance},ppx_Discard",${debug},${label}` +
-      `%:*linecust ${label}_${ppcid},KC_main:LOADEVENT,`;
-    PPx.Execute(`*linecust ${label}_${ppcid},%(${cmd}%)`);
-    PPx.Execute('%K"@LOADCUST"');
+    const cmd = `*if ("${ppcid}"=="%n")%:*script ":${instance},ppx_Discard",${debug},${label}`;
+    _oneshot('LOADEVENT', `${label}_${ppcid}`, `%(${cmd}%)`);
   }
 };
