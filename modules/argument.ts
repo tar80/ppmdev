@@ -3,14 +3,18 @@ import debug from '@ppmdev/modules/debug.ts';
 // type ValueObj = (string | number | boolean)[];
 // type Return<T extends ArgTypes> = T extends string ? string : T extends number ? number : T extends boolean ? boolean : never;
 type ArgTypes = string | number | boolean | undefined | null;
-type Ret<T extends ArgTypes[], A extends ArgTypes[] = []> =
-  T['length'] extends A['length'] ? A : Ret<T, [...A, DetectType<T[A['length']]>]>;
-type DetectType<T extends ArgTypes> =
-  T extends undefined ? string | undefined :
-  T extends string ? T | string :
-  T extends number ? T | number :
-  T extends boolean ? T | boolean :
-  T;
+type Ret<T extends ArgTypes[], A extends ArgTypes[] = []> = T['length'] extends A['length']
+  ? A
+  : Ret<T, [...A, DetectType<T[A['length']]>]>;
+type DetectType<T extends ArgTypes> = T extends undefined
+  ? string | undefined
+  : T extends string
+    ? T | string
+    : T extends number
+      ? T | number
+      : T extends boolean
+        ? T | boolean
+        : T;
 
 export const hasArg = (spec: string): boolean => {
   if (PPx.Arguments.length === 0) {
@@ -53,12 +57,13 @@ const _valueConverter = (defaultValue: ArgTypes, argValue: string | undefined) =
   }
 
   switch (typeof defaultValue) {
-    case 'number':
+    case 'number': {
       const n = Number(argValue);
 
-      return isNaN(n) ? defaultValue : n;
+      return Number.isNaN(n) ? defaultValue : n;
+    }
     case 'boolean':
-      return argValue === 'false' || argValue === '0' || argValue == null ? false : true;
+      return argValue !== 'false' && argValue !== '0'
     default:
       return argValue;
   }

@@ -140,8 +140,6 @@
 */
 
 (function () {
-  'use strict';
-
   if (typeof JSON !== 'object') {
     // @ts-ignore
     JSON = {};
@@ -209,8 +207,8 @@
     // Produce a string from holder[key].
 
     var i: number; // The loop counter.
-    var k; // The member key.
-    var v; // The member value.
+    var k: string; // The member key.
+    var v: string; // The member value.
     var length: number;
     var mind = gap;
     var partial: string[];
@@ -302,17 +300,12 @@
 
         // Join all of the member texts together, separated with commas,
         // and wrap them in braces.
-        v =
-          partial.length === 0
-            ? '{}'
-            : gap
-            ? '{\n' + gap + partial.join(',\n' + gap) + '\n' + mind + '}'
-            : '{' + partial.join(',') + '}';
+        v = partial.length === 0 ? '{}' : gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' + mind + '}' : '{' + partial.join(',') + '}';
         gap = mind;
         return v;
     }
 
-    return 'null'
+    return 'null';
   }
 
   // If the JSON object does not yet have a stringify method, give it one.
@@ -324,7 +317,7 @@
       // that can replace values, or an array of strings that will select the keys.
       // A default replacer method can be provided. Use of the space parameter can
       // produce text that is more easily readable.
-      var i;
+      var i: number;
       gap = '';
       indent = '';
 
@@ -364,14 +357,14 @@
       // The parse method takes a text and an optional reviver function, and returns
       // a JavaScript value if the text is a valid JSON text.
 
-      var j;
+      var j: Function;
 
       function walk(holder: Record<string, any>, key: any): any {
         // The walk method is used to recursively walk the resulting structure so
         // that modifications can be made.
 
-        var k;
-        var v;
+        var k: string;
+        var v: string;
         var value = holder[key];
         if (value && typeof value === 'object') {
           for (k in value) {

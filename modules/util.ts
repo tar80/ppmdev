@@ -1,5 +1,5 @@
-import {NlCodes} from '@ppmdev/modules/types.ts';
 import debug from '@ppmdev/modules/debug.ts';
+import type {NlCodes} from '@ppmdev/modules/types.ts';
 
 /** Extract and expand Newline code in `data`. */
 export const expandNlCode = (data: string): NlCodes => {
@@ -7,13 +7,13 @@ export const expandNlCode = (data: string): NlCodes => {
   const indexCr = data.indexOf('\r');
 
   if (~indexCr) {
-    nl = data.substring(indexCr, indexCr + 2) == '\r\n' ? '\r\n' : '\r';
+    nl = data.substring(indexCr, indexCr + 2) === '\r\n' ? '\r\n' : '\r';
   }
 
   return nl;
 };
 
-const partOfVersion = (part: string | undefined, major: boolean = false): string => {
+const partOfVersion = (part: string | undefined, major = false): string => {
   let part_ = '00';
 
   if (part) {
@@ -45,12 +45,7 @@ export const checkUpdate = (newversion: string, oldversion: string): boolean => 
 type targetValue = unknown;
 
 /** Waits `timeout` until `callback` returns `true`. */
-export const waitUntil = (
-  value: targetValue,
-  callback: (value: targetValue) => boolean,
-  timeout: number = 6000,
-  interval: number = 300
-): boolean => {
+export const waitUntil = (value: targetValue, callback: (value: targetValue) => boolean, timeout = 6000, interval = 300): boolean => {
   for (let i = 0; i < timeout; i = i + interval) {
     if (callback(value)) {
       return true;
@@ -109,10 +104,14 @@ export const codeToChar = (v: string): string => {
   return v;
 };
 
-export const hexToNum = (hex: string) => {
-  const num = parseInt(hex, 16);
+/** Convert hexadecimal to decimal */
+export const hexToNum = (hex: string): number | undefined => {
+  const num = Number.parseInt(hex, 16);
 
-  return isNaN(num) ? undefined : num;
+  return Number.isNaN(num) ? undefined : num;
 };
 
-export const numToHex = (num: number) => (isNaN(num) ? undefined : num.toString(16));
+/** Convert decimal to hexadecimal */
+export const numToHex = (num: number): string | undefined => (Number.isNaN(num) ? undefined : num.toString(16));
+
+

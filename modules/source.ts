@@ -1,10 +1,10 @@
 import '@ppmdev/polyfills/arrayIndexOf.ts';
 import '@ppmdev/polyfills/objectKeys.ts';
 import '@ppmdev/polyfills/json.ts';
-import type {Error_String} from '@ppmdev/modules/types.ts';
-import {isEmptyStr, isEmptyObj} from '@ppmdev/modules/guard.ts';
 import {info} from '@ppmdev/modules/data.ts';
+import {isEmptyObj, isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {readLines, writeLines} from '@ppmdev/modules/io.ts';
+import type {Error_String} from '@ppmdev/modules/types.ts';
 
 type SourceRequire = {
   name: string;
@@ -22,8 +22,7 @@ export type Source = SourceRequire & SourceOptional & {path: string};
 
 const parseSource = (name: string, source: string): typeof resp => {
   const plugin: Omit<Source, 'name'> = JSON.parse(source.replace(/\\/g, '\\\\'));
-  plugin.path =
-    plugin.location === 'remote' ? `${PPx.Extract('%*getcust(S_ppm#global:home)')}\\repo\\${name}` : plugin.path;
+  plugin.path = plugin.location === 'remote' ? `${PPx.Extract('%*getcust(S_ppm#global:home)')}\\repo\\${name}` : plugin.path;
   const resp = {name, ...plugin};
 
   return resp;
@@ -98,7 +97,7 @@ export const sourceNames = () => {
 
 export const sourceComplistPath = `${PPx.Extract('%sgu"ppmcache"')}\\complist\\ppmsources.txt`;
 export const sourceComp = {
-  prefix: {'installed': '!', 'enable': '', 'disable': '~'},
+  prefix: {installed: '!', enable: '', disable: '~'},
 
   /** Get plugin configuration state as prefix */
   getPrefix(source: Source): string {
@@ -173,7 +172,7 @@ export const sourceComp = {
   /**
    * Overwrite the plugin complete-list
    */
-  write(data: string[], add: boolean = false): Error_String {
+  write(data: string[], add = false): Error_String {
     const [overwrite, append] = add ? [false, true] : [true, false];
     return writeLines({path: sourceComplistPath, data, overwrite, append});
   }

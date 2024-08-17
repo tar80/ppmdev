@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import {execSync} from 'node:child_process';
-import readline from 'node:readline';
-import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
+import readline from 'node:readline';
 
-const INSTALL_FILE = 'install'
-const PACKAGE_FILE = 'package.json'
+const INSTALL_FILE = 'install';
+const PACKAGE_FILE = 'package.json';
 let initialVersion = '0.1.0';
 
 const main = () => {
@@ -85,8 +85,8 @@ const downVersion = (c, i) => {
 
 const conv = (t, v) => {
   const term = {
-    'ppm': [INSTALL_FILE, `VERSION=[0-9\\.]+`, `VERSION=${v}`],
-    'package': [PACKAGE_FILE, `"version": "[0-9\\.]+"`, `"version": "${v}"`]
+    ppm: [INSTALL_FILE, 'VERSION=[0-9\\.]+', `VERSION=${v}`],
+    package: [PACKAGE_FILE, `"version": "[0-9\\.]+"`, `"version": "${v}"`]
   }[t];
 
   return {path: term[0], rgx: RegExp(term[1]), rep: term[2]};

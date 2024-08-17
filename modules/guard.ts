@@ -1,6 +1,6 @@
 import type {ZeroTo} from '@ppmdev/modules/types.ts';
 
-export const isEmptyStr = (value: string): boolean => value === '';
+export const isEmptyStr = (value: string): value is '' => value === '';
 export const isEmptyObj = (obj: Record<string, any>): boolean => {
   if (obj === undefined) {
     return false;
@@ -17,22 +17,23 @@ export const isEmptyObj = (obj: Record<string, any>): boolean => {
   return true;
 };
 
-export const isError = (error: boolean, value: unknown): value is string => {
-  const isString = typeof value === 'string';
-  return error && isString;
-};
+export const isError = (error: boolean, value: unknown): value is string => error && typeof value === 'string';
 
 export const isString = (value: unknown): value is string => typeof value === 'string';
 
 export const isInteger = (value: unknown): value is number => {
-  return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+  return typeof value === 'number' && Number.isFinite(value) && Math.floor(value) === value;
 };
 
-export const isBottom = (value: unknown): value is undefined|null|void => value == null;
+export const isBottom = (value: unknown): value is undefined | null  => value == null;
 
 export const isZero = (value: string | number): boolean => {
-  if (typeof value === 'string') {
-    return value === '0';
+  if (value === null) {
+    return false;
+  }
+
+  if (value === '0') {
+    return true;
   }
 
   return value === 0;
@@ -48,4 +49,3 @@ export const isNonZero = (value: string | number): boolean => {
 
   return value !== 0;
 };
-

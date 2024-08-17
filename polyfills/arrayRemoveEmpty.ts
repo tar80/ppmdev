@@ -10,27 +10,24 @@ declare global {
 }
 
 if (!Array.prototype.removeEmpty) {
-  Array.prototype.removeEmpty = function <T>(this: T[]): typeof sortedArr {
-    const sortedArr: T[] = [];
+  Array.prototype.removeEmpty = function <T>(this: T[]): typeof cleanedArr {
+    const cleanedArr: T[] = [];
 
     for (let i = 0, k = this.length; i < k; i++) {
       let thisArr = this[i];
 
-      if (thisArr == null || thisArr === '') {
+      if (
+        thisArr == null ||
+        thisArr === '' ||
+        (thisArr instanceof Array && thisArr.length === 0) ||
+        (thisArr instanceof Object && isEmptyObj(thisArr))
+      ) {
         continue;
       }
 
-      if (thisArr instanceof Array && thisArr.length === 0) {
-        continue;
-      }
-
-      if (thisArr instanceof Object && isEmptyObj(thisArr)) {
-        continue;
-      }
-
-      sortedArr.push(thisArr);
+      cleanedArr.push(thisArr);
     }
 
-    return sortedArr;
+    return cleanedArr;
   };
 }

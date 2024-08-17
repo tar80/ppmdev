@@ -1,10 +1,10 @@
 /* This code based on vim-g(https://github.com/kana/vim-g/autoload/g/branch.vim)
  * Under the MIT license
  */
-import {Error_String} from '@ppmdev/modules/types.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {read, readLines} from '@ppmdev/modules/io.ts';
+import type {Error_String} from '@ppmdev/modules/types.ts';
 
 export type gitCmd = {
   subcmd: string;
@@ -29,10 +29,10 @@ export function gitCmd({wd, noquotepath, noeditor, config, subcmd, opts}: gitCmd
   }
 
   const pwd = wd ?? PPx.Extract('%*name(DL,"%FD")');
-  const quotepath = noquotepath ? ` -c core.quotepath=false` : '';
-  const editor = noeditor ? ` -c core.editor=false` : '';
-  const coreopts = !!config ? ` -c ${config}` : '';
-  const subopts = !!opts ? ` ${opts}` : '';
+  const quotepath = noquotepath ? ' -c core.quotepath=false' : '';
+  const editor = noeditor ? ' -c core.editor=false' : '';
+  const coreopts = config ? ' -c ${config}' : '';
+  const subopts = opts ? ` ${opts}` : '';
 
   return `git -C "${pwd}"${quotepath}${editor}${coreopts} ${subcmd}${subopts}`;
 }
@@ -42,7 +42,7 @@ export function gitCmd({wd, noquotepath, noeditor, config, subcmd, opts}: gitCmd
  * @param path Specify the path to check
  * @return Git repository root path
  */
-export function repoRoot(path: string = ''): string {
+export function repoRoot(path = ''): string {
   // ignore remote path
   let path_ = path.replace(/aux:([/\\])*[SM]_[^\\]*\\(.*)?/, (_, delim, cwd) => {
     return delim === '\\' ? cwd : '[url]';
@@ -160,7 +160,7 @@ export function branchName(path: string): string[] {
  * @param path Specify the root to the git repository
  * @return [error, "error message"|"origin HEAD hash"]
  */
-export function branchHead(path: string = ''): Error_String {
+export function branchHead(path = ''): Error_String {
   if (!fso.FolderExists(path)) {
     return [true, `${path} is not exists`];
   }

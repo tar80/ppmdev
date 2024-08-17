@@ -1,8 +1,8 @@
-import type {Level_String, ErrorLevel} from '@ppmdev/modules/types.ts';
+import {info, uniqID, uniqName} from '@ppmdev/modules/data.ts';
 import fso from '@ppmdev/modules/filesystem.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
-import {info, uniqName, uniqID} from '@ppmdev/modules/data.ts';
 import {readLines} from '@ppmdev/modules/io.ts';
+import type {ErrorLevel, Level_String} from '@ppmdev/modules/types.ts';
 
 type StringValues = 'e' | 'i' | 'p' | 'u';
 type StringExpandValues = 'ge' | 'gi' | 'gp' | 'gu';
@@ -87,26 +87,26 @@ export const ppm = {
     cancel?: string
   ): (typeof answer)[typeof code] {
     const tblId = 'Mes0411';
-    const mes = {'yes': `${tblId}:IMYE`, 'no': `${tblId}:IMNO`, 'cancel': `${tblId}:IMTC`};
+    const mes = {yes: `${tblId}:IMYE`, no: `${tblId}:IMNO`, cancel: `${tblId}:IMTC`};
     const isSelfId = ppxid === '.';
     const loadcust = isSelfId ? '%K"@LOADCUST"' : '%%K"@LOADCUST"';
     let [imye, imno, imtc]: string[] = [];
     let [y, n, c] = ['', '', ''];
     let load = false;
 
-    if (!!yes) {
+    if (yes) {
       imye = PPx.Extract(`%*getcust(${mes.yes})`);
       y = `*setcust ${mes.yes}=${yes}%:`;
       load = true;
     }
 
-    if (!!no) {
+    if (no) {
       imno = PPx.Extract(`%*getcust(${mes.no})`);
       n = `*setcust ${mes.no}=${no}%:`;
       load = true;
     }
 
-    if (!!cancel) {
+    if (cancel) {
       imtc = PPx.Extract(`%*getcust(${mes.cancel})`);
       c = `*setcust ${mes.cancel}=${cancel}%:`;
       load = true;
@@ -290,7 +290,7 @@ export const ppm = {
   },
 
   /** Expand %\*name(`format`, "`filename`"[, "`path`"]). */
-  getpath(format: string, filename: string, path: string = ''): Level_String {
+  getpath(format: string, filename: string, path = ''): Level_String {
     const rgxName = /^[CXTDHLKBNPRVSU]+$/;
     let errorlevel = rejectInvalidString(rgxName, format);
 
@@ -327,7 +327,7 @@ export const ppm = {
   },
 
   /** Set the property `prop`. */
-  setcust(prop: string, multiline: boolean = false): ErrorLevel {
+  setcust(prop: string, multiline = false): ErrorLevel {
     if (isEmptyStr(prop)) {
       return 1;
     }
@@ -536,13 +536,13 @@ export const ppm = {
    * Job.
    * @return () => ppm.execute(`ppxid`, '*job end')
    */
-  jobstart(ppxid: string): Function {
+  jobstart(ppxid: string): () => number {
     ppm.execute(ppxid, '*job start');
 
     return () => ppm.execute(ppxid, '*job end');
   },
 
-  getVersion(path: string): string | void {
+  getVersion(path: string): string | undefined {
     path = `${path}\\package.json`;
     const [error, data] = readLines({path});
 

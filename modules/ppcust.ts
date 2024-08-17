@@ -1,4 +1,4 @@
-import {ErrorLevel} from '@ppmdev/modules/types.ts';
+import type {ErrorLevel} from '@ppmdev/modules/types.ts';
 
 export const createBackup = ({
   path,

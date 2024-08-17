@@ -49,16 +49,14 @@ listfile.ts
 		時刻を指す文字列をFILETIME構造体に変換し、"<上位32bit>.<下位32bit>"
 		の文字列として返す
 
-	type HlRange = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-	type MarkRange = -1 | 0 | 1;
 	type LfItem = {
 		name: string;
 		sname: string;
 		att?: number;
 		date?: string;
 		ext?: string;
-		hl?: HlRange;
-		mark?: MarkRange;
+		hl?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+		mark?: -1 | 0 | 1;
 		comment?: string
 	};
 	buildLfItem({name, sname = '', att = 0, date, ext, hl, mark, comment}: LfItem)
@@ -93,7 +91,20 @@ listfile.ts
 		<opts>は、一つの要素が一行になる
 			ex) {opts: ['Search=XXX', 'option=directory', 'user=1']}
 
-	getLfMeta(lines: string[]): Record<string, string>
+	type LfMetadata = ReturnType<typeof getLfMeta>
+
+	getLfMeta(lines: string[]) => {
+		base?: string;
+		dirtype?: string;
+		search?: string;
+		charset?: string;
+		error?: string;
+		option?: string;
+		cmd?: string;
+		ppm?: string;
+		mapkey?: string;
+		[key in string]?: string
+	}
 		行情報からメタ情報を抽出して配列として返す
 
 	parseLfData(ele: string[]) => EntryElements

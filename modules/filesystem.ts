@@ -18,21 +18,14 @@ export const createTextFile = (path: string, overwrite = true, unicode = false):
   } catch (err: any) {
     [error, errormsg] = [true, err.message];
   } finally {
-    st && st.Close();
+    st?.Close();
   }
 
   return [error, errormsg];
 };
 
 type CopyMethod = 'CopyFile' | 'CopyFolder';
-const create = (
-  method: CopyMethod,
-  src: string,
-  dest: string,
-  isDelete: boolean,
-  pwd: string,
-  ow = false
-): Error_String => {
+const _create = (method: CopyMethod, src: string, dest: string, isDelete: boolean, pwd: string, ow = false): Error_String => {
   try {
     fso[method](src, dest, ow);
   } catch (e) {
@@ -69,7 +62,7 @@ export const copyFile = (source: string, destination: string, overwrite?: boolea
     createDir = true;
   }
 
-  return create('CopyFile', source, destination, createDir, destParent, overwrite);
+  return _create('CopyFile', source, destination, createDir, destParent, overwrite);
 };
 
 /**
@@ -95,7 +88,7 @@ export const copyFolder = (source: string, destination: string, overwrite?: bool
     createDir = true;
   }
 
-  return create('CopyFolder', source, destination, createDir, destParent, overwrite);
+  return _create('CopyFolder', source, destination, createDir, destParent, overwrite);
 };
 
 export default fso;

@@ -66,7 +66,7 @@ describe('isInteger()', function () {
     expect(isInteger(0b111)).toBeTruthy();
   });
   it('must return false it not an integer', () => {
-    expect(isInteger(NaN)).toBeFalsy();
+    expect(isInteger(Number.NaN)).toBeFalsy();
     expect(isInteger(Infinity)).toBeFalsy();
     expect(isInteger(1n)).toBeFalsy();
     expect(isInteger(1 / 0)).toBeFalsy();
@@ -108,6 +108,10 @@ describe('isZero()', function () {
     // @ts-ignore
     expect(isZero(true)).toBeFalsy()
   });
+  it('should return false for null', () => {
+    // @ts-ignore
+    expect(isZero(null)).toBeFalsy();
+  });
 });
 
 describe('withinRange()', function () {
@@ -124,8 +128,8 @@ describe('withinRange()', function () {
     expect(withinRange(-1, 2)).toBeFalsy();
     expect(withinRange(3, 2)).toBeFalsy();
     expect(withinRange(3, 2)).toBeFalsy();
-    expect(withinRange(NaN, 2)).toBeFalsy();
-    expect(withinRange(0, NaN)).toBeFalsy();
+    expect(withinRange(Number.NaN, 2)).toBeFalsy();
+    expect(withinRange(0, Number.NaN)).toBeFalsy();
     // @ts-ignore
     expect(withinRange('3', '2')).toBeFalsy();
     // @ts-ignore

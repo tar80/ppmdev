@@ -4,14 +4,15 @@ import {entryAttribute} from '@ppmdev/modules/meta.ts';
 /** Get information about the currently running script. */
 export const pathSelf = (): {scriptName: string; parentDir: string} => {
   const sn = PPx.ScriptName;
-  let scriptName: string, parentDir: string;
+  let scriptName: string;
+  let parentDir: string;
 
   if (~sn.indexOf('\\')) {
     scriptName = sn.replace(/^.*\\/, '');
     parentDir = PPx.Extract(`%*name(DKN,${sn})`);
   } else {
     scriptName = sn;
-    parentDir = PPx.Extract(`%FDN`);
+    parentDir = PPx.Extract('%FDN');
   }
 
   /* As a general rule, no trailing backslash. */
@@ -53,7 +54,7 @@ export const actualPaths = (): string[] => {
   const paths: string[] = [];
   let att: string;
 
-  for (var a = PPx.Entry.AllMark; !a.atEnd(); a.moveNext()) {
+  for (const a = PPx.Entry.AllMark; !a.atEnd(); a.moveNext()) {
     att = entryAttribute.alias & PPx.Entry.Attributes ? '%*linkedpath(%FDC)' : '%FDC';
     paths.push(PPx.Extract(att));
   }

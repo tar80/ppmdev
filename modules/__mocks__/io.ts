@@ -1,8 +1,8 @@
-import {NlCodes, FileEncode, Level_String, Error_String} from '@ppmdev/modules/types.ts';
-import {expandNlCode} from '@ppmdev/modules/util.ts';
-import {info} from '@ppmdev/modules/data.ts';
-import fs from 'node:fs';
 import {execSync} from 'node:child_process';
+import fs from 'node:fs';
+import {info} from '@ppmdev/modules/data.ts';
+import type {Error_String, FileEncode, Level_String, NlCodes} from '@ppmdev/modules/types.ts';
+import {expandNlCode} from '@ppmdev/modules/util.ts';
 import iconv from 'iconv-lite';
 
 export const read = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}): Error_String => {
@@ -43,7 +43,7 @@ export const readLines = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}
   const nl: NlCodes = expandNlCode(stdout.slice(0, 1000));
   const lines = stdout.split(nl);
 
-  if ((lines[lines.length - 1]) === '') {
+  if (lines[lines.length - 1] === '') {
     lines.pop();
   }
 

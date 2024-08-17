@@ -1,12 +1,12 @@
 import '@ppmdev/polyfills/json.ts';
 import '@ppmdev/polyfills/objectKeys.ts';
-import type {Error_String, ScriptEngine} from '@ppmdev/modules/types.ts';
-import fso from '@ppmdev/modules/filesystem.ts';
 import {colorlize} from '@ppmdev/modules/ansi.ts';
-import {semver} from '@ppmdev/modules/util.ts';
+import fso from '@ppmdev/modules/filesystem.ts';
+import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {ppm} from '@ppmdev/modules/ppm.ts';
 import {expandSource} from '@ppmdev/modules/source.ts';
-import {isEmptyStr} from '@ppmdev/modules/guard.ts';
+import type {Error_String, ScriptEngine} from '@ppmdev/modules/types.ts';
+import {semver} from '@ppmdev/modules/util.ts';
 
 const pass = colorlize({esc: false, message: ' PASS ', fg: 'green'});
 const drop = colorlize({esc: false, message: ' DROP ', fg: 'red'});
@@ -81,7 +81,7 @@ export const permission = {
   /** plugin version limit. */
   pluginVersion: (version: number | string, name: string): Error_String => {
     const pluginDetail = expandSource(name);
-    const m: Record<string, string> = {'false': `${name} version ${version}`, 'true': `${name} has not been updated`};
+    const m: Record<string, string> = {false: `${name} version ${version}`, true: `${name} has not been updated`};
 
     // not installed
     if (!pluginDetail) {

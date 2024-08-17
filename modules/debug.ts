@@ -14,12 +14,12 @@ const debug = {
   },
 
   /** Stop running script. */
-  break(): void {
+  break(): never {
     return PPx.Quit(-1);
   },
 
   /** Check for existence of the path */
-  exists(path: string, att: string = 'file'): void {
+  exists(path: string, att = 'file'): void {
     const fso = PPx.CreateObject('Scripting.FileSystemObject');
     const att_ = att === 'file' ? 'FileExists' : 'FolderExists';
 
@@ -32,7 +32,7 @@ const debug = {
   },
 
   /** Function executed when debugging. **/
-  func(callback: Function): void {
+  func(callback: () => any): void {
     callback();
   },
 

@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 class DummyArguments implements PPxArguments {
-  private num: number = 4;
+  private num = 4;
   public length: number = process.argv.length - 4;
   public Length: number = this.length;
   public count: number = this.length;
@@ -14,7 +14,7 @@ class DummyArguments implements PPxArguments {
 
   constructor(index?: number) {
     this.num = index || this.num;
-    this.length = process.argv.length - 4
+    this.length = process.argv.length - 4;
   }
   Item(int?: number): string {
     this.num = int || this.num;
@@ -30,7 +30,7 @@ class DummyArguments implements PPxArguments {
   Reset(): void {
     this.num = 4;
   }
-  value: string = this.Item()
+  value: string = this.Item();
 }
 
 const fso = {
@@ -72,7 +72,7 @@ const PPx = {
   ScriptName: __dirname + '\\this-is-jest-mock.js',
   Argument: (num = 0): string => String(process.argv[num + 4] || ''),
   //FIXME! wakarimasen
-  Arguments: new DummyArguments,
+  Arguments: new DummyArguments(),
   //FIXME! nanimowakarimasen
   CreateObject: (strProgID: string, strPrefix?: string): any => {
     strPrefix;

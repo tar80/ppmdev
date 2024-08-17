@@ -22,7 +22,7 @@ export const parseString = (arg: string) => {
   const rgx = /^("[a-z]+"):\s*(.+)$/;
   const DELIM = '@#delim#@';
 
-  for (let i = 0, k = elements.length, key, value; i < k; i++) {
+  for (let i = 0, k = elements.length, key: string, value: string; i < k; i++) {
     if (elements[i] == null) {
       break;
     }

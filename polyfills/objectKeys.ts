@@ -1,7 +1,6 @@
 // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
 if (!Object.keys) {
   Object.keys = (function () {
-    'use strict';
     var hasOwnProperty = Object.prototype.hasOwnProperty,
       hasDontEnumBug = !{toString: null}.propertyIsEnumerable('toString'),
       dontEnums: string[] = [

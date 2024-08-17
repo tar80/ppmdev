@@ -1,15 +1,22 @@
-import type {NlCodes, FileEncode, Error_String, Level_String} from '@ppmdev/modules/types.ts';
-import fso from '@ppmdev/modules/filesystem.ts';
-import {isCV8, expandNlCode} from '@ppmdev/modules/util.ts';
 import {info, tmp} from '@ppmdev/modules/data.ts';
+import fso from '@ppmdev/modules/filesystem.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {newline} from '@ppmdev/modules/meta.ts';
+import type {Error_String, FileEncode, Level_String, NlCodes} from '@ppmdev/modules/types.ts';
+import {expandNlCode, isCV8} from '@ppmdev/modules/util.ts';
+
+/**
+ * Returns a string of type FileEncode
+ * @param encspec - A string that seems to be FileEncode
+ * @return "utf8" | "utf16le" | "sjis" as FileEncode
+ */
+export const confirmFileEncoding = (encspec: string): FileEncode => (encspec === 'utf8' || encspec === 'sjis' ? encspec : info.encode);
 
 /**
  * Hub to get streams.
  * @return [error, "error message"|"file contents"]
  */
-const exec = (st: ADODB.Stream | Scripting.TextStream, callback: Function): Error_String => {
+const _exec = (st: ADODB.Stream | Scripting.TextStream, callback: () => string | undefined): Error_String => {
   try {
     const data = callback() ?? '';
     return [false, data];
@@ -41,7 +48,7 @@ export const read = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}): Er
   if (enc === 'utf8') {
     const st = PPx.CreateObject('ADODB.Stream');
 
-    [error, data] = exec(st, () => {
+    [error, data] = _exec(st, (): string => {
       st.Open();
       // st.Type = 2;
       st.Charset = 'UTF-8';
@@ -53,13 +60,11 @@ export const read = ({path, enc = 'utf8'}: {path: string; enc?: FileEncode}): Er
     const tristate = enc === 'utf16le' ? -1 : 0;
     const st = f.OpenAsTextStream(1, tristate);
 
-    [error, data] = exec(st, () => st.ReadAll());
+    [error, data] = _exec(st, (): string => st.ReadAll());
   }
 
   return error ? [true, `Unable to read ${path}`] : [false, data];
 };
-
-type ReadLines = [true, string] | [false, {lines: string[]; nl: NlCodes}];
 
 /**
  * Read lines from a file.
@@ -76,11 +81,11 @@ export const readLines = ({
   path: string;
   enc?: FileEncode;
   linefeed?: NlCodes;
-}): [true, string] | [false, {lines: string[]; nl: NlCodes}] => {
+}): Error_String | [false, {lines: string[]; nl: NlCodes}] => {
   const [error, stdout] = read({path, enc});
 
   if (error) {
-    return [true, stdout];
+    return [error, stdout];
   }
 
   linefeed = linefeed ?? expandNlCode(stdout.slice(0, 1000));
@@ -128,7 +133,7 @@ export const writeLines = ({
     PPx.Execute(`*makedir ${wd}`);
   }
 
-  let error;
+  let error: boolean;
 
   if (enc === 'utf8') {
     if (isCV8()) {
@@ -141,7 +146,7 @@ export const writeLines = ({
 
     const mode = overwrite || append ? 2 : 1;
     const st = PPx.CreateObject('ADODB.Stream');
-    [error] = exec(st, () => {
+    [error] = _exec(st, (): undefined => {
       st.Open();
       st.Charset = 'UTF-8';
       st.LineSeparator = Number(newline.Ascii[linefeed]);
@@ -168,7 +173,7 @@ export const writeLines = ({
     const tristate = enc === 'utf16le' ? -1 : 0;
     const st = f.OpenAsTextStream(mode, tristate);
 
-    [error] = exec(st, () => {
+    [error] = _exec(st, (): undefined => {
       st.Write(data.join(linefeed) + linefeed);
     });
   }

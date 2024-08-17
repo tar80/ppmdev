@@ -1,5 +1,5 @@
-import type {AnsiColors} from '@ppmdev/modules/types.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
+import type {AnsiColors} from '@ppmdev/modules/types.ts';
 
 export const colors = {
   fg: {
@@ -26,7 +26,7 @@ export const colors = {
   }
 } as const;
 
-const getEscSeq = (escape: boolean): string => (escape ? '\\x1b[' : '\x1b[');
+const getEscSeq = (esc: boolean): string => (esc ? '\\x1b[' : '\x1b[');
 
 /**
  * String colored using AnsiColor.
@@ -35,7 +35,7 @@ const getEscSeq = (escape: boolean): string => (escape ? '\\x1b[' : '\x1b[');
  */
 export const colorlize = ({
   message,
-  esc: esc = false,
+  esc = false,
   fg,
   bg
 }: {
@@ -49,7 +49,6 @@ export const colorlize = ({
   }
 
   const e = getEscSeq(esc);
-  message = message;
 
   if (!fg || isEmptyStr(fg)) {
     return `${message}`;

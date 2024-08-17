@@ -1,7 +1,7 @@
 import '@ppmdev/polyfills/arrayRemoveEmpty.ts';
 import '@ppmdev/polyfills/json.ts';
-import type {HighlightNumber} from '@ppmdev/modules/types.ts';
 import {isEmptyStr, isInteger} from '@ppmdev/modules/guard.ts';
+import type {HighlightNumber} from '@ppmdev/modules/types.ts';
 
 const LF_HEADER = ';ListFile';
 const LF_CHARSET = ';charset';
@@ -11,7 +11,7 @@ const LF_ERROR = ';Error';
 const LF_OPTION = ';Option=directory';
 
 export const bitToDate = (dwHigh: number, dwLow: number): Date => {
-  const sec = 1e-7 * (dwHigh * Math.pow(2, 32) + dwLow) - 11644473600;
+  const sec = 1e-7 * (dwHigh * 2 ** 32 + dwLow) - 11644473600;
   const date = new Date(0);
   date.setSeconds(sec);
   return date;
@@ -26,9 +26,9 @@ export const dateToBit = (...time: number[]): {high: number; low: number} => {
     sec = new Date(y, m - 1, ...rest).getTime();
   }
 
-  const dwHigh = (sec * 1e-3 + 11644473600) / 1e-7 / Math.pow(2, 32);
+  const dwHigh = (sec * 1e-3 + 11644473600) / 1e-7 / 2 ** 32;
   const dwHigh_ = Math.floor(dwHigh);
-  const dwLow = (dwHigh - dwHigh_) * Math.pow(2, 32);
+  const dwLow = (dwHigh - dwHigh_) * 2 ** 32;
   return {high: dwHigh_, low: dwLow};
 };
 
@@ -58,7 +58,16 @@ const _rangeProp = (prop: 'H' | 'M', num: HighlightNumber | MarkRange | undefine
 };
 
 type MarkRange = -1 | 0 | 1;
-type LfItem = {name: string; sname?: string; att?: number; date?: string; ext?: number; hl?: HighlightNumber; mark?: MarkRange; comment?: string};
+type LfItem = {
+  name: string;
+  sname?: string;
+  att?: number;
+  date?: string;
+  ext?: number;
+  hl?: HighlightNumber;
+  mark?: MarkRange;
+  comment?: string;
+};
 export const buildLfItem = ({name, sname = '', att = 0, date, ext, hl, mark, comment}: LfItem) => {
   if (!name || isEmptyStr(name)) {
     return;
@@ -68,7 +77,7 @@ export const buildLfItem = ({name, sname = '', att = 0, date, ext, hl, mark, com
     date = new Date().toLocaleString().replace(/\D+/g, ',');
   }
 
-  if (isNaN(att)) {
+  if (Number.isNaN(att)) {
     att = 0;
   }
 
@@ -81,7 +90,7 @@ export const buildLfItem = ({name, sname = '', att = 0, date, ext, hl, mark, com
   return `"${name}","${sname}",A:H${att},C:${ft},L:${ft},W:${ft},S:0.0${x}${h}${m}${t}`;
 };
 
-export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: boolean = false): string => {
+export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry = false): string => {
   let comment: string | undefined = undefined;
   let csv: string | undefined = undefined;
   data = data.replace(rgx, rep);
@@ -115,20 +124,20 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
       return {name: '---', sname: '-', att: '264'};
     }
   })();
-  const att = o.att != undefined && o.att !== '' ? o.att : '0';
-  const reparse = o.reparse != undefined ? `R:${o.reparse}` : undefined;
-  const ext = o.ext != undefined ? `X:${o.ext}` : undefined;
+  const att = o.att != null && o.att !== '' ? o.att : '0';
+  const reparse = o.reparse != null ? `R:${o.reparse}` : undefined;
+  const ext = o.ext != null ? `X:${o.ext}` : undefined;
   const highlight = o.hl ? `H:${o.hl}` : undefined;
   const mark = o.mark ? `M:${o.mark}` : undefined;
   const exitem = o.oid && o.ovalue ? `O${o.oid}:"${o.ovalue}"` : undefined;
   let name = o.name ?? '';
   let [create, access, write]: string[] = [];
 
-  if (!!virtualEntry) {
+  if (virtualEntry) {
     [name, comment] = name === '-' ? ['-', '---'] : [comment, name];
   }
 
-  if (!!o.date) {
+  if (o.date) {
     create = getFiletime(o.date);
     access = create;
     write = create;
@@ -138,7 +147,7 @@ export const formLfData = (data: string, rgx: RegExp, rep: any, virtualEntry: bo
     write = o.write ? getFiletime(o.write) : '0.0';
   }
 
-  if (!!comment) {
+  if (comment) {
     comment = `T:"${comment}"`;
   }
 
@@ -192,7 +201,7 @@ export const createLfItems = ({
 }: {
   lines: string[];
   rgx: RegExp;
-  rep: string | Function;
+  rep: string | ((substring: string, ...args: any[]) => string);
   virtualEntry?: boolean;
 }): typeof items => {
   const items: string[] = [];
@@ -231,11 +240,25 @@ export const createLfMeta = ({
   return meta;
 };
 
-export const getLfMeta = (lines: string[]): typeof metadata => {
+export type LfMetadata = ReturnType<typeof getLfMeta>
+
+export const getLfMeta = (
+  lines: string[]
+): {
+  base?: string;
+  dirtype?: string;
+  search?: string;
+  charset?: string;
+  error?: string;
+  option?: string;
+  cmd?: string;
+  ppm?: string;
+  mapkey?: string;
+} & {[key in string]?: string} => {
   const metadata: Record<string, string> = {};
   const rgx = /^;([^=]+)=(.+)$/;
 
-  for (let i = 0, k = lines.length; i < k; i++) {
+  for (let i = 1, k = lines.length; i < k; i++) {
     if (lines[i].indexOf(';') !== 0) {
       break;
     }
