@@ -1,6 +1,6 @@
 import type {ZeroTo} from '@ppmdev/modules/types.ts';
 
-export const isEmptyStr = (value: string): value is '' => value === '';
+export const isEmptyStr = (value: string): boolean => value === '';
 export const isEmptyObj = (obj: Record<string, any>): boolean => {
   if (obj === undefined) {
     return false;

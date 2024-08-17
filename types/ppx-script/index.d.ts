@@ -65,7 +65,7 @@ declare interface PPx {
   getProcessValue(key: string): string;
   setProcessValue(key: string, value: string | number): void;
   GetFileInformation(filename: string, mode?: number): string;
-  LoadCount(): number;
+  LoadCount(type: 0 | 1): number;
   Pane: typeof pane;
   SetPopLineMessage(message: any): void;
   Sleep(intTime: number): void;
