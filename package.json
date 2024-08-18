@@ -1,6 +1,6 @@
 {
   "name": "ppmdev",
-  "version": "0.3.16",
+  "version": "0.3.17",
   "private": true,
   "description": "development environment for ppx-plugin-manager",
   "author": "tar80",

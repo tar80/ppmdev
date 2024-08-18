@@ -63,7 +63,7 @@ const _valueConverter = (defaultValue: ArgTypes, argValue: string | undefined) =
       return Number.isNaN(n) ? defaultValue : n;
     }
     case 'boolean':
-      return argValue !== 'false' && argValue !== '0'
+      return  argValue != null && argValue !== 'false' && argValue !== '0'
     default:
       return argValue;
   }
