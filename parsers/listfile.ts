@@ -254,6 +254,7 @@ export const getLfMeta = (
   cmd?: string;
   ppm?: string;
   mapkey?: string;
+  freq?: string;
 } & {[key in string]?: string} => {
   const metadata: Record<string, string> = {};
   const rgx = /^;([^=]+)=(.+)$/;

@@ -81,11 +81,11 @@ export const readLines = ({
   path: string;
   enc?: FileEncode;
   linefeed?: NlCodes;
-}): Error_String | [false, {lines: string[]; nl: NlCodes}] => {
+}): [true, string] | [false, {lines: string[]; nl: NlCodes}] => {
   const [error, stdout] = read({path, enc});
 
   if (error) {
-    return [error, stdout];
+    return [true, stdout];
   }
 
   linefeed = linefeed ?? expandNlCode(stdout.slice(0, 1000));
