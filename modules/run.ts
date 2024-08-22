@@ -1,12 +1,13 @@
+import '@ppmdev/polyfills/stringTrim.ts';
 import '@ppmdev/polyfills/arrayRemoveEmpty.ts';
 import '@ppmdev/polyfills/arrayIndexOf.ts';
-import type {AnsiColors, Letters, Level_String, NlTypes} from '@ppmdev/modules/types.ts';
-import {ppm} from '@ppmdev/modules/ppm.ts';
-import {echoExe} from '@ppmdev/modules/echo.ts';
 import {colorlize} from '@ppmdev/modules/ansi.ts';
+import {echoExe} from '@ppmdev/modules/echo.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
-import {winpos, winsize} from '@ppmdev/modules/window.ts';
 import {type Encodes, fileEnc} from '@ppmdev/modules/meta.ts';
+import {ppm} from '@ppmdev/modules/ppm.ts';
+import type {AnsiColors, Letters, Level_String, NlTypes} from '@ppmdev/modules/types.ts';
+import {winpos, winsize} from '@ppmdev/modules/window.ts';
 import {getEncoder} from 'iconv-lite';
 
 type RunOptions = {
@@ -25,12 +26,12 @@ type RunOptions = {
  * run command details.
  * @return ["success or not", ["run details or error message"]]
  */
-const runCmdline = ({startwith = '', wait = '', priority, job, log, wd, x, y, width, height}: Partial<RunOptions>): [boolean, String[]] => {
+const runCmdline = ({startwith = '', wait = '', priority, job, log, wd, x, y, width, height}: Partial<RunOptions>): [boolean, string[]] => {
   const startwith_ = {'': '', min: '-min', max: '-max', noactive: '-noactive', bottom: '-noactive'}[startwith];
   const wait_ = {'': '', wait: '-wait', idle: '-wait:idle', later: '-wait:later', no: '-wait:no'}[wait];
   let wd_ = '';
 
-  if (!!wd) {
+  if (wd) {
     const fso = PPx.CreateObject('Scripting.FileSystemObject');
 
     if (fso.FolderExists(wd)) {
@@ -40,8 +41,8 @@ const runCmdline = ({startwith = '', wait = '', priority, job, log, wd, x, y, wi
     }
   }
 
-  const priority_ = !!priority ? `-${priority}` : '';
-  const job_ = !!job ? `-${job}` : '';
+  const priority_ = priority ? `-${priority}` : '';
+  const job_ = job ? `-${job}` : '';
   const log_ = log ? '-log' : '';
 
   if (x && x > Number(ppm.global('disp_width'))) {
@@ -71,9 +72,9 @@ export const run = ({startwith = '', wait = '', priority, job, log, wd, x, y, wi
     PPx.Execute(`${runCmd} ${cmd}`);
   } catch (err) {
     resp = false;
-  } finally {
-    return resp;
   }
+
+  return resp;
 };
 
 type EditModify = (typeof editModify)[number];
@@ -211,7 +212,7 @@ export const runPPb = ({
   }
 
   cmdArr.push(opts.postcmd);
-  let postcmd: string = '';
+  let postcmd = '';
 
   if (cmdArr.length > 0) {
     const stay = c ? '-c ' : '-k ';
@@ -229,12 +230,13 @@ export const runPPb = ({
     PPx.Execute(`${runCmd} ${postcmd}%:*wait 500,2`);
   } catch (err) {
     resp = false;
-  } finally {
-    return resp;
   }
+
+  return resp;
 };
 
 /** @deprecated */
+// @ts-ignore
 export const stdout = ({cmdline, extract = false, startmsg = false, hide = false, utf8 = true, single, multi}: Stdout): Level_String => {
   const def = hide ? '-noppb -hide' : '-min';
   const msg = startmsg ? '' : '-nostartmsg';
@@ -257,18 +259,19 @@ type Stdout = {
   startmsg?: boolean;
   hide?: boolean;
   utf8?: boolean;
+  trim?: boolean;
   single?: string;
   multi?: string[];
 };
 
 const _setStdin = (s?: string, m?: string[]): string => {
-  if (!!s) {
+  if (s) {
     return `-io:string,"${s}"`;
-  } else if (!!m) {
+  } else if (m) {
     return `io:send,"${m.join('%bl')}"`;
   }
 
-  return ``;
+  return '';
 };
 
 export const runStdout = ({
@@ -277,7 +280,8 @@ export const runStdout = ({
   extract = false,
   startmsg = false,
   hide = false,
-  utf8 = true,
+  utf8 = false,
+  trim = false,
   single,
   multi
 }: Stdout): Level_String => {
@@ -292,8 +296,12 @@ export const runStdout = ({
     cmdline = `%(${cmdline}%)`;
   }
 
-  const data = PPx.Extract(`%OC %*run(${opts} ${cmdline})`);
+  let data = PPx.Extract(`%OC %*run(${opts} ${cmdline})`);
   const errorlevel = Number(PPx.Extract());
+
+  if (trim && !isEmptyStr(data)) {
+    data = data.trim();
+  }
 
   return [errorlevel, data];
 };

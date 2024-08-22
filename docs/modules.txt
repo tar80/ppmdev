@@ -367,6 +367,9 @@ withinRange<T extends number>(n: number, max: T): n is ZeroTo<T> => boolean
 ===============================================================================
 io.ts
 
+confirmFileEncoding(encspec: string) => FileEncode
+	<encspec>がFileEncode型かどうか確認し、違う場合は 'utf16le' を返す
+
 read({path: string, enc?: FileEncode = 'utf8'}) => Error_String
 	<path>で指定されたファイルの内容を<enc>で読み取って返す
 	戻り値は、[error: boolean, data: string]
@@ -775,12 +778,13 @@ type Stdout = {
   single: string,
   multi: string[]
 };
-runStdout({cmdline, wd, extract = false, startmsg = false, hide = false, utf8 = true, single, multi}: Stdout)
+runStdout({cmdline, wd, extract = false, startmsg = false, hide = false, utf8 = false, trim = false, single, multi}: Stdout)
 => Level_String
 	%*runを実行する
 	引数にはオブジェクトを渡す
 	<extract>に true を指定すると%macroが展開される
-	<utf8>は出力の文字コード(default:utf8)
+	<utf8>は出力の文字コードをutf8に設定する(default:system)
+	<trim>出力文字列の両端の空白を削除する
 	<single>,<multi>はそれぞれ、単一行、複数行の標準入力を指定できる
 	戻り値は[errorlevel, stdout]の配列
 
