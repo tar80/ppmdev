@@ -103,6 +103,7 @@ listfile.ts
 		cmd?: string;
 		ppm?: string;
 		mapkey?: string;
+		freq?: string;
 		[key in string]?: string
 	}
 		行情報からメタ情報を抽出して配列として返す

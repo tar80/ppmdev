@@ -2,7 +2,7 @@
 // Definitions by: tar80 (https://github.com/tar80)
 
 declare var PPx: PPx;
-type ZeroTo<T extends number, A extends number[] = []> = A['length'] extends T ? A[number] | T : ZeroTo<T, [...A, A['length']]>;
+type HighlightNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 interface PPxArguments {
   atEnd(): boolean;
@@ -17,7 +17,7 @@ interface PPxArguments {
 }
 
 declare namespace PPxEntry {
-  const enum Attribute {
+  enum Attribute {
     Normal = 0,
     ReadOnly = 1,
     Hidden = 2,
@@ -88,7 +88,7 @@ declare interface PPx {
   readonly EntryDisplayCount: number;
   readonly EntryDisplayFiles: number;
   readonly EntryDisplayDirectories: number;
-  EntryHighlight: ZeroTo<7>;
+  EntryHighlight: HighlightNumber;
   EntryIndex: number;
   readonly EntryName: string;
   EntryMark: number;
@@ -113,11 +113,10 @@ declare interface PPx {
 }
 
 declare namespace entry {
-  var Entry: Object;
   function atEnd(): typeof entry;
   function moveNext(): typeof entry;
   function Reset(): typeof entry;
-  function IndexFrom(name: string): number;
+  function IndexFrom(IDName: string): number;
   function Information(): string;
   function Item(index: number | string): typeof entry;
   function GetComment(id: number | string): string;
@@ -136,7 +135,7 @@ declare namespace entry {
   var DateLastModified: Date;
   var ExtColor: number;
   var Hide: number;
-  var Highlight: ZeroTo<7>;
+  var Highlight: HighlightNumber;
   var length: number;
   var Index: number;
   var Mark: number;
@@ -151,10 +150,10 @@ declare namespace pane {
   function moveNext(): number;
   function Reset(): number;
   function Item(index: number | string): typeof pane;
+  function IndexFrom(IDName: string): number;
   var Count: number;
   var length: number;
   var index: number;
-  var IndexFrom: void;
   var Tab: typeof tab;
 }
 
@@ -165,6 +164,7 @@ declare namespace tab {
   function item(index: number | string): number;
   function Execute(param: string): number;
   function Extract(param: string): string;
+  function IndexFrom(IDName: string): number;
   var BackColor: number;
   var Color: number;
   var Count: number;
@@ -172,7 +172,6 @@ declare namespace tab {
   var Lock: number;
   var IDName: string;
   var index: number;
-  var IndexFrom: void;
   var Name: string;
   var Pane: number;
   var TotalCount: number;
