@@ -32,7 +32,8 @@
       },
       "suspicious": {
         "noExplicitAny": "off",
-        "useIsArray": "off"
+        "noFallthroughSwitchClause": "warn",
+        "useIsArray": "warn"
       }
     }
   },
