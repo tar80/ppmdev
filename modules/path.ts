@@ -1,3 +1,4 @@
+import debug from '@ppmdev/modules/debug.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {entryAttribute} from '@ppmdev/modules/meta.ts';
 
@@ -19,7 +20,7 @@ export const pathSelf = (): {scriptName: string; parentDir: string} => {
   return {scriptName, parentDir: parentDir.replace(/\\$/, '')};
 };
 
-/** Join path with backslash delimiter. */
+/** Join path with backslash separator. */
 export const pathJoin = (...args: string[]): string => {
   const arr: string[] = [];
 
@@ -35,19 +36,19 @@ export const pathJoin = (...args: string[]): string => {
 };
 
 /**
- * Normaline path with specified delimiter.
- * @param delim slash|backslash
+ * Normaline path with specified separator.
+ * @param sep slash|backslash
  */
-export const pathNormalize = (path: string, delim: string): string => {
-  if (delim !== '\\' && delim !== '/') {
-    throw new Error('Incorrect delimiter');
+export const pathNormalize = (path: string, sep: string): string => {
+  if (sep !== '\\' && sep !== '/') {
+    throw new Error('Incorrect separator');
   }
 
   if (isEmptyStr(path)) {
     throw new Error('Path must be of type string, and not be an empty string');
   }
 
-  return path.replace(/[/\\]/g, delim);
+  return path.replace(/[/\\]/g, sep);
 };
 
 export const actualPaths = (): string[] => {
@@ -60,4 +61,23 @@ export const actualPaths = (): string[] => {
   }
 
   return paths;
+};
+
+export const actualParentDirectory = (debugPath?: string): string => {
+  const rgx = /^aux:(\/\/)?[MS]_[^/\\]+[/\\]/;
+  let macro = PPx.DirectoryType === 4 ? '%FDVN' : '%FDN';
+
+  if (debug.jestRun() && debugPath) {
+    macro = debugPath;
+  }
+
+  return PPx.Extract(macro).replace(rgx, '');
+};
+
+export const extractFileName = (path: string, sep = '\\'): string => {
+  if (sep !== '\\' && sep !== '/') {
+    sep = '\\';
+  }
+
+  return path.slice(path.lastIndexOf(sep) + 1);
 };

@@ -33,25 +33,16 @@ export const winsize = (target: string, width?: number, height?: number): string
 };
 
 /** Get Display size */
-export const getDisplaySize = (parent?: string): number[] => {
-  let ppmlib = parent ?? PPx.Extract('%sgu"ppmlib"');
+export const getDisplaySize = (): number[][] => {
+  const wmi = PPx.CreateObject('WbemScripting.SWbemLocator' as any).ConnectServer();
+  const results = wmi.ExecQuery('SELECT CurrentHorizontalResolution, CurrentVerticalResolution FROM Win32_VideoController');
+  const e = PPx.Enumerator(results);
+  let display: number[][] = [];
 
-  if (isEmptyStr(ppmlib)) {
-    ppmlib = PPx.Extract('%*getcust(S_ppm#global:ppm)\\dist\\lib');
+  while (!e.atEnd()) {
+    display.push([e.item().CurrentHorizontalResolution, e.item().CurrentVerticalResolution]);
+    e.moveNext();
   }
 
-  const seeProcess = `${ppmlib}\\seeProcess.js`;
-  const ielow = 'ielowutil.exe';
-  const pid = PPx.Extract(`%*script(${seeProcess},${ielow},0)`);
-  const ie = PPx.CreateObject('InternetExplorer.Application' as any);
-  ie.Navigate('about:blank');
-  const s = ie.Document.parentWindow.screen;
-  const size = [s.width, s.height];
-  ie.Quit();
-
-  if (pid === '0') {
-    PPx.Execute(`%Obd taskkill /F /IM ${ielow}`);
-  }
-
-  return size;
+  return display;
 };

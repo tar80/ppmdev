@@ -268,7 +268,7 @@ const _setStdin = (s?: string, m?: string[]): string => {
   if (s) {
     return `-io:string,"${s}"`;
   } else if (m) {
-    return `io:send,"${m.join('%bl')}"`;
+    return `-io:send,"${m.join('%bl')}"`;
   }
 
   return '';

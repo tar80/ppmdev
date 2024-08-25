@@ -1,6 +1,6 @@
 import PPx from '@ppmdev/modules/ppx';
 global.PPx = Object.create(PPx);
-import {semver, expandNlCode, checkUpdate, waitUntil, actualParentDirectory, windowID, codeToChar, hexToNum, numToHex} from '../util.ts';
+import {checkUpdate, codeToChar, expandNlCode, hexToNum, numToHex, semver, waitUntil, windowID} from '../util.ts';
 
 describe('expandNlCode()', function () {
   it('should return line break code "crlf"', () => {
@@ -39,9 +39,9 @@ describe('checkUpdate()', function () {
   it('1.12.0 is a higher version than 1.2', () => {
     expect(checkUpdate('1.12.0', '1.2')).toBeTruthy();
   });
-  if ('1.01.1 is a higher version than 1.1') {
+  it('1.01.1 is a higher version than 1.1', () => {
     expect(checkUpdate('1.01.1', '1.1')).toBeTruthy();
-  }
+  });
 });
 
 describe('waitUntil()', function () {
@@ -63,31 +63,17 @@ describe('waitUntil()', function () {
   });
 });
 
-describe('actualParentDirectory()', function () {
-  it('parent directory points to a file-system:path, must return the path as is', () => {
-    const resp = 'DRIVE:\\DIR'
-    expect(actualParentDirectory(resp)).toBe(resp);
-  });
-  it('parent directory points to a aux:path, the aux protocol must be omitted ', () => {
-    const resp = 'DRIVE:\\DIR'
-    let path = `aux:S_debug\\${resp}`
-    expect(actualParentDirectory(path)).toBe(resp);
-    path = `aux://M_debug/${resp}`
-    expect(actualParentDirectory(path)).toBe(resp);
-  });
-});
-
 describe('windowID()', function () {
   it('must return an object containing "id" and "uid". "uid" are separated by an underescore', () => {
     let id = 'CA';
-    let uid = 'C_A'
-    let spy = jest.spyOn(PPx, 'Extract').mockImplementation(() =>id);
-    expect(windowID()).toEqual({id, uid})
+    let uid = 'C_A';
+    let spy = jest.spyOn(PPx, 'Extract').mockImplementation(() => id);
+    expect(windowID()).toEqual({id, uid});
     id = 'CZaa';
-    uid = 'C_Zaa'
-    spy = jest.spyOn(PPx, 'Extract').mockImplementation(() =>id);
-    expect(windowID()).toEqual({id, uid})
-    spy.mockRestore()
+    uid = 'C_Zaa';
+    spy = jest.spyOn(PPx, 'Extract').mockImplementation(() => id);
+    expect(windowID()).toEqual({id, uid});
+    spy.mockRestore();
   });
 });
 
@@ -95,22 +81,22 @@ describe('codeToChar()', function () {
   it('the first character of the value is "x", the rest are considered a hexadecimal character code', () => {
     const value = 'x41';
     const resp = 'A';
-    expect(codeToChar(value)).toBe(resp)
+    expect(codeToChar(value)).toBe(resp);
   });
   it('the first character of the value is "u", the rest is considered a decimal character code', () => {
     const value = 'u65';
     const resp = 'A';
-    expect(codeToChar(value)).toBe(resp)
+    expect(codeToChar(value)).toBe(resp);
   });
   it('the first character of the value is "u". If the rest is not a number, return it as is', () => {
     const value = 'uabc';
     const resp = 'abc';
-    expect(codeToChar(value)).toBe(resp)
+    expect(codeToChar(value)).toBe(resp);
   });
   it('the first character of the value is neither  "x" nor "u". return it as is', () => {
     const value = '65';
     const resp = '65';
-    expect(codeToChar(value)).toBe(resp)
+    expect(codeToChar(value)).toBe(resp);
   });
 });
 
@@ -121,7 +107,7 @@ describe('hexToNum()', function () {
     // @ts-ignore
     expect(hexToNum(true)).toBeUndefined();
     // @ts-ignore
-    expect(hexToNum(NaN)).toBeUndefined();
+    expect(hexToNum(Number.NaN)).toBeUndefined();
     // @ts-ignore
     expect(hexToNum(null)).toBeUndefined();
     // @ts-ignore
@@ -134,13 +120,13 @@ describe('hexToNum()', function () {
 
 describe('numToHex()', function () {
   it('in case of NaN, undefined must be returned', () => {
-    expect(numToHex(NaN)).toBeUndefined();
+    expect(numToHex(Number.NaN)).toBeUndefined();
     // @ts-ignore
     expect(numToHex()).toBeUndefined();
     // @ts-ignore
     expect(hexToNum(true)).toBeUndefined();
     // @ts-ignore
-    expect(hexToNum(NaN)).toBeUndefined();
+    expect(hexToNum(Number.NaN)).toBeUndefined();
     // @ts-ignore
     expect(hexToNum(null)).toBeUndefined();
     // @ts-ignore

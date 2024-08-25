@@ -1,4 +1,3 @@
-import debug from '@ppmdev/modules/debug.ts';
 import type {NlCodes} from '@ppmdev/modules/types.ts';
 
 /** Extract and expand Newline code in `data`. */
@@ -75,17 +74,6 @@ export const isCV8 = (): boolean => PPx.ScriptEngineName === 'ClearScriptV8';
 
 /** Whether the library used by JavaScript is QuickJS */
 export const isQJS = (): boolean => PPx.ScriptEngineName === 'QuickJS';
-
-export const actualParentDirectory = (debugPath?: string): string => {
-  const rgx = /^aux:(\/\/)?[MS]_[^/\\]+[/\\]/;
-  let macro = PPx.DirectoryType === 4 ? '%FDVN' : '%FDN';
-
-  if (debug.jestRun() && debugPath) {
-    macro = debugPath;
-  }
-
-  return PPx.Extract(macro).replace(rgx, '');
-};
 
 export const windowID = (): {id: string; uid: string} => {
   const id = PPx.Extract('%n');

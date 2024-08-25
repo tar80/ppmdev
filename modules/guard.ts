@@ -25,9 +25,9 @@ export const isInteger = (value: unknown): value is number => {
   return typeof value === 'number' && Number.isFinite(value) && Math.floor(value) === value;
 };
 
-export const isBottom = (value: unknown): value is undefined | null  => value == null;
+export const isBottom = (value: unknown): value is undefined | null => value == null;
 
-export const isZero = (value: string | number): boolean => {
+export const isZero = (value: string | number): value is 0 | '0' => {
   if (value === null) {
     return false;
   }

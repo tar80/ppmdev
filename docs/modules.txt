@@ -340,12 +340,12 @@ isString(value:unknown): value is string => boolean
 isBottom(value:unknown): value is undefined|null => boolean
 	<value>がnullかundefinedなら<value>はundefined|null型
 
-isZero(value: string|number) => boolean
-	<value>が 0 か "0" なら true を返す
+isZero(value: string|number) => value is 0|'0'
+	<value>が 0 か "0" なら<value>は0|'0'型
 
 @deprecated
 isNonZero(value: string|number) => boolean
-	<value>が 0 か "0" か ""(空文字) 以外なら true を返す
+	<value>が 0 か "0" または ""(空文字) 以外なら true を返す
 
 isEmptyStr(value: string) => boolean
 	<value>が空文字なら true を返す
@@ -449,12 +449,20 @@ path.ts
 	pathJoin(...args: (string|number)[]) => string
 		引数で渡されたパスを"\"で区切って返す
 
-	pathNormalize(path: string, delim: string): string
-		引数で渡されたパスを"delim"で区切って返す
+	pathNormalize(path: string, sep: string) => string
+		引数で渡されたパスを<sep>で区切って返す
 
 	actualPaths() => string[]
 		カーソル(マーク)パスの実体パスを返す
 		リンクから実体パスに変換するとき短い名前に変換される場合がある
+
+	actualParentDirectory() => string
+		常にファイルシステムのディレクトリパスを返す
+		パスが存在するかどうかは問わない
+
+	extractFileName(path: string, sep? = '\\') => string
+		<path>のファイル名部分を返す
+		<sep>にはパス区切りを指定する
 
 ===============================================================================
 ppcust.ts
@@ -929,6 +937,7 @@ isCV8() => boolean
 isQJS() => boolean
 	現在使用しているJavaScriptライブラリが"QuickJS"なら true を返す
 
+@deprecated path.tsへ移動
 actualParentDirectory() => string
 	常にファイルシステムのディレクトリパスを返す
 	パスが存在するかどうかは問わない
@@ -966,6 +975,6 @@ winsize(target: string, width?: number, heithg?: number) => string
 	width, heigthは200が最低値
 	Number型以外なら空文字を返す
 
-getDisplaySize() => [width:number, height:number]
-	現在使用しているディスプレイの幅[横,縦]を取得する
+getDisplaySize() => [width:number, height:number][]
+	使用しているディスプレイの幅[横,縦]を取得する
 
