@@ -10,6 +10,7 @@ export type Letters = LowerLetters | UpperLetters;
 export type LowerLetters =  'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j'|'k'|'l'|'m'|'n'|'o'|'p'|'q'|'r'|'s'|'t'|'u'|'v'|'w'|'x'|'y'|'z';
 export type UpperLetters = 'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z';
 export type ScriptEngine = 'JScript' | 'ClearScriptV8' | 'QuickJS';
+export type AutoEvent = 'FIRSTEVENT' | 'CLOSEEVENT' | 'LOADEVENT' | 'ACTIVEEVENT' | 'SELECTEVENT' | 'RANGEEVENT' | 'COMMENTEVENT';
 export type HighlightNumber = ZeroTo<7>
 export type Mutable<T> = {-readonly [P in keyof T]: T[P]};
 export type Flatten<T> = T extends (infer Item)[] ? Item : T;

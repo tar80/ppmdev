@@ -101,6 +101,7 @@ declare interface PPx {
   readonly PointIndex: number;
   readonly PointType: number;
   readonly PPxVersion: number;
+  readonly ReentryCount: number;
   result: any;
   readonly ScriptEngineName: string;
   readonly ScriptEngineVersion: string;

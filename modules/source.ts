@@ -29,7 +29,7 @@ const parseSource = (name: string, source: string): typeof resp => {
 };
 
 /** Expand a S_ppm#sources:`name`. */
-export const expandSource = (name: string) => {
+export const expandSource = (name: string): undefined | Source => {
   const source = PPx.Extract(`%*getcust(S_ppm#sources:${name})`);
 
   return isEmptyStr(source) ? undefined : parseSource(name, source);

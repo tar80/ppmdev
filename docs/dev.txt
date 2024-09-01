@@ -72,7 +72,7 @@ JScriptでしか使えないオブジェクトは、JavaScriptでも使えるよ
 	  "npx jest --testMatch **/<filename>.test.ts"とする。
 
 	・"packadd"は、workspaceを追加する。
-	  "npm run packadd -name=<plugin-nam>"とする。
+	  "npm run packadd -name=<plugin-name>"とする。
 
 	・"build"は"src"ディレクトリ以下のファイルを一つ指定できる。
 	  対象ファイルの指定方法は"src/"からの相対パスとする。なお、
@@ -98,7 +98,7 @@ JScriptでしか使えないオブジェクトは、JavaScriptでも使えるよ
 ・ビルドしたコードは"dev/"以下に開発用、"dist/"以下に実装用が出力される。
 ・ビルドした開発用コードの先頭に、import文が追加されているときはES3では使えない
   コードが含まれている、または重複した呼び出し元を解決できなかった可能性がある。
-・実装用のコードは圧縮される。
+・実装用のコードはtree shaking後、圧縮される。
 
 ・ppmが用意しているModule、Parser、Polyfillを利用できる。
 
@@ -134,11 +134,11 @@ nodejsが必須。
 
 JScript.dll,JScript9.dll,chakra.dll,ppxcv8.dll,ppxqjs.dllのすべてで使えない
 関数・記述は使わない。若しくはinstallファイルの"SCRIPTTYPE_PERMISSION"で
-特定のdllに限定する。
+特定のライブラリに限定する。
 
 "WScript.CreateObject"、"ActiveXObject"はJScript(9).dll以外では使えない。
-代わりにPPx.CreateObjectを使用する。ただし、CreateObjectと完全に同様ではない
-ようなので、モジュールのドキュメントを参照し対応状況を確認すること。
+代わりにPPx.CreateObjectを使用する。ただし、WScript.CreateObjectと完全に同様
+ではないようなので、モジュールのドキュメントを参照し対応状況を確認すること。
 
 PPx.Enumerator関数が用意され、互換性の強化も行われているため、PPx1.97,
 ScriptModule21R1,CV8ModuleR3+3,QuickJSModuleT5以降はどのモジュールでも
@@ -174,7 +174,6 @@ ppm用プラグインは以下のファイルから構成される。
 	 │  └─patch.cfg	ユーザーが変更可能な設定値をまとめたファイル
 	 ├─sheet\	ppm\cache\xxx\listにコピーされるリストを配置
 	 ├─src\		ソースコード(TypeScript)を配置
-	 ├─t\		ppx用のテストスクリプト(JScript)を配置
 	 ├─userscript\	ppm\cache\xxx\userscriptにコピーするスクリプトを配置
 	 ├─install	ppmプラグインのインストール情報
 	 ├─readme.md	プロジェクトの説明書
@@ -198,7 +197,7 @@ dase.cfg
 
 patch.cfg
 	・必須。デフォルト設定のひな型。プラグインのインストール時に
-	  <plugin-name.cfg>としてcache\xxx\configにコピーされる
+	  <plugin-name.cfg>としてppmcache\xxx\configにコピーされる
 	・<plugin-name.cfg>は*ppmEditコマンドでユーザーが直接編集でき、
 	  base.cfgとマージされる。
 	・*ppmSetDefault, *ppmCompareなどに使用される
@@ -208,11 +207,13 @@ base.cfgとpatch.cfgの仕様
 
 ・用語
 	ID = {
-	SubID = 値(value)
+	SubID = value(値)
 	}
 
 	テーブルはID={}の全体を指す
-	フィールド・プロパティはSubID=valueの全体を指す
+	プロパティ(フィールド)はSubID=valueの全体を指す
+	※プロパティとフィールドは違う概念ですが、ppmのドキュメント類で
+	  フィールドと書かれている箇所は、プロパティと解釈してください
 
 ・コメントは行頭のセミコロン(;)のみ認識する
   行中・語尾のセミコロンはコメントと認識されない
