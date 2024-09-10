@@ -57,7 +57,16 @@ const uniqName = {
 const uniqID = {
   tempKey: 'K_ppmTemp',
   tempMenu: 'M_ppmTemp',
-  lfDset: 'ppmlfdset'
+  /** @deprecated */
+  lfDset: 'ppm_lfdset',
+  virtualEntry: 'ppm_ve'
+} as const;
+
+const staymodeID = {
+  storeData: 80000,  // reservation. currently unused
+  veHandler: 80001,
+  setsel: 80002,
+  stackPPb: 80003,
 } as const;
 
 const tmp = () => {
@@ -84,4 +93,4 @@ const uri = {
   rawGithub: 'https://raw.githubusercontent.com'
 } as const;
 
-export {info, useLanguage, mandatory, tmp, uri, uniqName, uniqID};
+export {info, useLanguage, mandatory, tmp, uri, uniqName, uniqID, staymodeID};

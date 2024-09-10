@@ -34,6 +34,8 @@ import type {type} from '@ppmdev/modules/types.ts'
 
 	echo.ts		色付きechoに関連する関数
 
+	event.ts	ユーザー定義イベントに関する関数
+
 	filesystem.ts	FileSystemObjectに関する関数
 
 	git.ts		git関連の関数
@@ -214,9 +216,23 @@ uniqID
 	.tempMenu: string
 		ppmが一時登録するメニュー設定のテーブル名
 
+	@deprecated
 	.lfDset: string
 		ppmが生成したリストファイルのメタ情報を一時保存する
 		_UserテーブルのID名
+
+	.virtualEntry: string
+		ppmが生成した仮想エントリリストで使用するID名
+
+stayModeID
+	.storeData: number
+		予約。現在未使用。
+	.veHandler: number
+		仮想エントリの裏で動作するタスクランナー
+	.setsel: number
+		正規表現で指定した文字列を選択する
+	.stackPPb: number
+		PPbの同時実行をサポートする
 
 tmp()
 	.dir: string
@@ -274,6 +290,27 @@ echoExe
 coloredEcho(ppbid: string, message: string, wait: boolean) => ErrorLevel
 	echoExeを経由して、PPb上に色付きメッセージを出力する
 	<wait>が true なら、%OWを設定する
+
+===============================================================================
+event.ts
+
+userEvent
+	.set(subid: string, cmdline: string) => void
+		S_ppm#event:<subid>=<cmdline>を設定する
+
+	.unset(subid: string) => void
+		S_ppm#event:<subid>を削除する
+
+	.do(subid: string) => void
+		S_ppm#event:<subid>を実行する
+
+	.once(subid: string) => void
+		S_ppm#event:<subid>を実行後、削除する
+
+onceEvent(subid: string, cmdline: string): () => void
+	S_ppm#event:<subid>=<cmdline>を設定し関数を返す
+	返された関数を実行するとS_ppm#:event:<subid>が実行され、
+	その後テーブルから<subid>を削除する
 
 ===============================================================================
 filesystem.ts
@@ -867,45 +904,87 @@ sourceComp
 
 ===============================================================================
 staymode.ts
+ppmではStayModeのインスタンス番号に80000番台を使用している
+予約番号は以下のとおり
+	ppm	80000-80099
+	ppm-grep	80100-80109
+	ppm-rclone	80110-80119
+	ppm-view	80120-80129
+	ppm-vilikekeys	80130-80139
+	ppm-adjacentdir	80140-80149
+	ppm-comppath	80150-80169
 
 @deprecated
 discardInstance(debounce: string, debug?: string) => void
 	atDebounce.holdへと変更
 
 ppx_Discard(debug?: string, info?: string) => void
-	atXXX関数を読み込んだときに自動的に設定される。
-	PPx.StayMode=0を設定しインスタンスを破棄する。
-	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
-	<info>にはデバッグメッセージの追加情報を指定する。
+	atXXX関数を読み込んだときに自動的に設定される
+	PPx.StayMode=0を設定しインスタンスを破棄する
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する
+	<info>にはデバッグメッセージの追加情報を指定する
 
 atDebounce = {
   hold(debounce: string, debug?: string) => void
 	非表示状態のPPb上で<debounce>ミリ秒待機したあと
 	%sgu'ppmlib'\discardStayMode.jsを実行する
-	discardStayMode.jsは<debounce>ミリ秒待機したあと、_User:ppm_sm<instance>
+	discardStayMode.jsは<debounce>ミリ秒待機したあと、_User:ppm_staymode<instance>
 	をチェックし、値が0ならppx_Discard経由でインスタンスを廃棄し、0以上で
 	あれば実行維持状態を<debounce>ミリ秒延期する
-	_User:ppm_sm<instance>は延期するごとに0に更新される
-	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+	_User:ppm_staymode<instance>は延期するごとに0に更新される
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する
 	使用例は、実行元のスクリプト内でatDebouncd(<debounce>)を実行し、
-	_User:ppm_sm<instance>=<debouce>を設定する。
+	_User:ppm_staymode<instance>=<debouce>を設定する
 	<debounce>ミリ秒内にスクリプトが再実行されれば実行維持状態が延期される
 	具体的な使用方法はadjacentDirのmoveDirectory.stay.tsを参照
 }
 
+type Event = 'ACTIVEEVENT' | 'LOADEVENT';
+type KeysTable = 'KC_main'|'KV_main'|'KV_img'|'KV_crt'|'KV_page'|'KB_edit'|'K_ppe'|'K_edit'
+type Condition = 'instantly' | 'once' | 'hold';
+type DiscardOptions = {table: KeysTable; label: string; mapkey?: string; cond?: Condition; debug?: string};
+
 atActiveEvent = {
-  hold(label: string, debug: string) => void
-	KC_main:ACTIVEEVENTにワンショットの*linecust <label>_%Nを設定する。
-	一行編集上で使用するスクリプトのStayMode解除を想定しており、
-	一行編集を閉じた(PPcがアクティブになった)ときにppx_Discardが実行される。
-	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+  @deprecated
+  hold(table: KeysTable, label: string, debug: string) => void
+	discardに変更
+  discard({table, label, mapkey, cond, debug}: DiscardOptions) => void
+	ACTIVEEVNET実行時に実行元の常駐インスタンスを破棄する
+	<table>:ACTIVEEVENTにワンショットの*linecust <label>%nを設定する
+	<mapkey>にはキーテーブルを指定できる。*mapkey use,<mapkey>を実行し、
+	  ACTIVEEVENTに*mapkey delete,<mapkey>を登録する
+	<cond>は'instantly'=無条件、'once'=PPxIDが同じ、'hold'=PPxIDが同じ、かつ
+	  ディレクトリが異なるときに発動する
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する
 }
 
 atLoadEvent = {
-  hold(label: string, debug: string) => void
-	KC_main:LOADEVENTにワンショットの*linecust <label>_%nを設定する。
-	ディレクトリ移動時にppx_Discardが実行される。
-	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する。
+  @deprecated
+  hold(table: KeysTable, label: string, debug: string) => void
+	@deprecated
+	discardに変更
+  discard({table, label, mapkey, cond, debug}: DiscardOptions) => void
+	LOADEVENT実行時に実行元の常駐インスタンスを破棄する
+	<table>:LOADEVENTにワンショットの*linecust <label>%nを設定する
+	<mapkey>にはキーテーブルを指定できる。*mapkey use,<mapkey>を実行し、
+	  LOADEVENTに*mapkey delete,<mapkey>を登録する
+	<cond>は'instantly'=無条件、'once'=PPxIDが同じ、'hold'=PPxIDが同じ、かつ
+	  ディレクトリが異なるときに発動する
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する
+}
+
+circular = <T>(array: T[]) => {
+  get() => T;
+	実行するごとに<array>の要素を一つ返す。要素は循環する
+  discard({table, label, cond, debug}: DiscardOptions) => void
+	<table>:LOADEVENTにワンショットの*linecust <label>%nを設定する
+	一行編集上で使用するスクリプトのStayMode解除を想定しており、
+	一行編集を閉じた(PPcがアクティブになった)ときにStayModeが解除される
+	<mapkey>にはキーテーブルを指定できる。*mapkey use,<mapkey>を実行し、
+	  LOADEVENTに*mapkey delete,<mapkey>を登録する
+	<cond>は'instantly'=無条件、'once'=PPxIDが同じ、'hold'=PPxIDが同じ、かつ
+	  ディレクトリが異なるときに発動する
+	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する
 }
 
 ===============================================================================
