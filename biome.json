@@ -23,6 +23,7 @@
         "noDefaultExport": "off",
         "noParameterAssign": "off",
         "noUselessElse": "off",
+        "noUnusedTemplateLiteral": "warn",
         "noVar": "off",
         "useConst": "off",
         "useDefaultParameterLast": "off",
@@ -31,6 +32,7 @@
         "useTemplate": "off"
       },
       "suspicious": {
+        "noConfusingVoidType": "off",
         "noExplicitAny": "off",
         "noFallthroughSwitchClause": "warn",
         "useIsArray": "warn"

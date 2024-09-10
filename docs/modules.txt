@@ -341,7 +341,7 @@ isString(value:unknown): value is string => boolean
 isBottom(value:unknown): value is undefined|null => boolean
 	<value>がnullかundefinedなら<value>はundefined|null型
 
-isZero(value: string|number) => value is 0|'0'
+isZero(value: string|number|undefined) => value is 0|'0'
 	<value>が 0 か "0" なら<value>は0|'0'型
 
 @deprecated

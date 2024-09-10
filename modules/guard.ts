@@ -27,8 +27,8 @@ export const isInteger = (value: unknown): value is number => {
 
 export const isBottom = (value: unknown): value is undefined | null => value == null;
 
-export const isZero = (value: string | number): value is 0 | '0' => {
-  if (value === null) {
+export const isZero = (value: string | number | undefined): value is 0 | '0' => {
+  if (value == null) {
     return false;
   }
 

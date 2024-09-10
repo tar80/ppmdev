@@ -9,7 +9,7 @@ export const pathSelf = (): {scriptName: string; parentDir: string} => {
   let parentDir: string;
 
   if (~sn.indexOf('\\')) {
-    scriptName = sn.replace(/^.*\\/, '');
+    scriptName = extractFileName(sn);
     parentDir = PPx.Extract(`%*name(DKN,${sn})`);
   } else {
     scriptName = sn;
