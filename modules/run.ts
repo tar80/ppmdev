@@ -5,16 +5,17 @@ import {colorlize} from '@ppmdev/modules/ansi.ts';
 import {echoExe} from '@ppmdev/modules/echo.ts';
 import {isEmptyStr} from '@ppmdev/modules/guard.ts';
 import {type Encodes, fileEnc} from '@ppmdev/modules/meta.ts';
-import {ppm} from '@ppmdev/modules/ppm.ts';
 import type {AnsiColors, Letters, Level_String, NlTypes} from '@ppmdev/modules/types.ts';
 import {winpos, winsize} from '@ppmdev/modules/window.ts';
-import {getEncoder} from 'iconv-lite';
+// import {getEncoder} from 'iconv-lite';
 
 type RunOptions = {
   startwith: '' | 'min' | 'max' | 'noactive' | 'bottom';
   wait: '' | 'wait' | 'idle' | 'later' | 'no';
   priority: 'low' | 'belownormal' | 'normal' | 'abovenormal' | 'high' | 'realtime';
-  job: 'breakjob' | 'newgroup';
+  startmsg: boolean,
+  breakjob: boolean,
+  newgroup: boolean,
   log: boolean;
   wd: string;
   x: number;
@@ -26,7 +27,20 @@ type RunOptions = {
  * run command details.
  * @return ["success or not", ["run details or error message"]]
  */
-const runCmdline = ({startwith = '', wait = '', priority, job, log, wd, x, y, width, height}: Partial<RunOptions>): [boolean, string[]] => {
+const _runCmdline = ({
+  startwith = '',
+  wait = '',
+  startmsg = true,
+  priority,
+  breakjob,
+  newgroup,
+  log,
+  wd,
+  x,
+  y,
+  width,
+  height
+}: Partial<RunOptions>): [boolean, string[]] => {
   const startwith_ = {'': '', min: '-min', max: '-max', noactive: '-noactive', bottom: '-noactive'}[startwith];
   const wait_ = {'': '', wait: '-wait', idle: '-wait:idle', later: '-wait:later', no: '-wait:no'}[wait];
   let wd_ = '';
@@ -37,30 +51,34 @@ const runCmdline = ({startwith = '', wait = '', priority, job, log, wd, x, y, wi
     if (fso.FolderExists(wd)) {
       wd_ = `-d:${wd}`;
     } else {
-      return [false, ['[WARNING] Specified working directory is not exist']];
+      return [false, ['[WARN] Specified working directory is not exist']];
     }
   }
 
+  const startmsg_ = startmsg ? '' : '-nostartmsg';
   const priority_ = priority ? `-${priority}` : '';
-  const job_ = job ? `-${job}` : '';
+  const job_ = breakjob ? '-breakjob' : '';
+  const group_ = newgroup ? '-newgroup' : '';
   const log_ = log ? '-log' : '';
+  const dispWidth = PPx.Extract('%*getcust(S_ppm#global:disp_width)');
+  const dispHeight = PPx.Extract('%*getcust(S_ppm#global:disp_height)');
 
-  if (x && x > Number(ppm.global('disp_width'))) {
+  if (x && x > Number(dispWidth)) {
     x = 0;
   }
-  if (y && y > Number(ppm.global('disp_height'))) {
+  if (y && y > Number(dispHeight)) {
     y = 0;
   }
 
   const pos = x && y ? `-pos:${x},${y}` : '';
   const size = width && height ? `-size:${width},${height}` : '';
 
-  return [true, ['*run', '-noppb', startwith_, wait_, priority_, job_, log_, wd_, pos, size]];
+  return [true, ['*run', '-noppb', startwith_, wait_, startmsg_, priority_, job_, group_, log_, wd_, pos, size]];
 };
 
 type Run = Partial<RunOptions> & {cmd: string};
-export const run = ({startwith = '', wait = '', priority, job, log, wd, x, y, width, height, cmd}: Run): boolean => {
-  const [ok, runCmd] = runCmdline({startwith, wait, priority, job, log, wd, x, y, width, height});
+export const run = ({startwith = '', wait = '', priority, breakjob, newgroup, log, wd, x, y, width, height, cmd}: Run): boolean => {
+  const [ok, runCmd] = _runCmdline({startwith, wait, priority, breakjob, newgroup, log, wd, x, y, width, height});
 
   if (!ok) {
     return false;
@@ -149,7 +167,7 @@ export const runPPe = ({
 
 type PPbOptionsSpec = {bootid?: Letters; bootmax?: Letters; q?: boolean; c?: string; k?: string};
 type PPbOptions = {readonly [key in 'id' | 'max' | 'quiet' | 'postcmd']: string};
-const ppbCmdline = ({bootid, bootmax, q, c, k}: PPbOptionsSpec): PPbOptions => {
+const _ppbCmdline = ({bootid, bootmax, q, c, k}: PPbOptionsSpec): PPbOptions => {
   const id = bootid ? `-bootid:${bootid}` : '';
   const max = bootmax ? `-bootmax:${bootmax}` : '';
   const quiet = q ? '-q' : '';
@@ -169,7 +187,8 @@ export const runPPb = ({
   startwith = '',
   wait = '',
   priority,
-  job,
+  breakjob,
+  newgroup,
   log,
   wd,
   x,
@@ -189,13 +208,13 @@ export const runPPb = ({
     }
   }
 
-  const [ok, run] = runCmdline({startwith, wait, priority, job, log, wd});
+  const [ok, run] = _runCmdline({startwith, wait, priority, breakjob, newgroup, log, wd});
 
   if (!ok) {
     return false;
   }
 
-  const opts = ppbCmdline({bootid, bootmax, q, c, k});
+  const opts = _ppbCmdline({bootid, bootmax, q, c, k});
   const cmdArr = [];
 
   if (startwith !== 'min' && startwith !== 'max' && !c) {

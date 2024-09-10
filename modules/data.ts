@@ -36,7 +36,7 @@ const mandatory: Mandatory = {
       'QuickJS': 0
     }[module];
   },
-  modules: ['ppxkey', 'ppxmes', 'ppxtext'],
+  modules: ['ppxkey', 'ppxmes', 'ppxtext', 'ppxwin'],
   executables: ['git']
 };
 

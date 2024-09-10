@@ -441,6 +441,9 @@ fileEnc = [
 ]
 	PPxで指定できるファイルエンコーディングの配列
 
+ppvMediaType = {[Key in <extention>]: 'dir'|'hex'|'image'|'doc'|'link'|'ppx'}
+	<extention>(:EXT)に対応するPPvのファイル判別
+
 ===============================================================================
 path.ts
 
@@ -721,7 +724,9 @@ type RunOptions = {
   startwith: '' | 'min' | 'max' | 'noactive' | 'bottom';
   wait: '' | 'wait' | 'idle' | 'later' | 'no';
   priority: 'low' | 'belownormal' | 'normal' | 'abovenormal' | 'high' | 'realtime';
-  job: 'breakjob' | 'newgroup';
+  startmsg: boolean,
+  breakjob: boolean,
+  newgroup: boolean,
   log: boolean;
   wd: string;
   x: number;
@@ -780,8 +785,10 @@ stdout({cmdline, extract = false, startmsg = false, hide = false}: Stdout)
  	runStdout()に改名した
 
 type Stdout = {
-  cmdline: string; wd?: string,
-  extract?: boolean; startmsg?: boolean,
+  cmdline: string;
+  wd?: string,
+  extract?: boolean;
+  startmsg?: boolean,
   hide?: boolean,
   utf8: boolean,
   single: string,

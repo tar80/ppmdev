@@ -77,7 +77,7 @@ export const isQJS = (): boolean => PPx.ScriptEngineName === 'QuickJS';
 
 export const windowID = (): {id: string; uid: string} => {
   const id = PPx.Extract('%n');
-  let uid = id.replace(/^(C)([^_]+)$/, '$1_$2');
+  let uid = id.replace(/^([CVB])([^_]+)$/, '$1_$2');
 
   return {id, uid};
 };
