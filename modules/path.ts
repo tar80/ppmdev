@@ -51,6 +51,12 @@ export const pathNormalize = (path: string, sep: string): string => {
   return path.replace(/[/\\]/g, sep);
 };
 
+export const actualPath = (path: string): string => {
+  const linkedpath = PPx.Extract(`*ifmatch "o:e,a:p","${path}"%:%*linkedpath(${path})`);
+
+  return linkedpath || path;
+};
+
 export const actualPaths = (): string[] => {
   const paths: string[] = [];
   let att: string;

@@ -11,7 +11,7 @@ const SCRIPT_PATH = "%sgu'ppmlib'\\discardStayMode.js";
 const _keysTable = ['KC_main', 'KV_main', 'KV_img', 'KV_crt', 'KV_page', 'KB_edit', 'K_ppe', 'K_edit'] as const;
 const _validTable = (name: KeysTable): KeysTable => (~_keysTable.indexOf(name) ? name : 'KC_main');
 
-const discard = (event: Event) => {
+const _discard = (event: Event) => {
   return ({table, label, mapkey, cond = 'instantly', debug = '0'}: DiscardOptions): void => {
     const instance = PPx.StayMode;
     const ppxid = PPx.Extract('%n');
@@ -38,6 +38,12 @@ const discard = (event: Event) => {
   };
 };
 
+export const getStaymodeId = (name: string): number | false => {
+  const id = Number(PPx.Extract(`%*getcust(S_ppm#staymode:${name})`));
+
+  return !Number.isNaN(id) && id > 10000 && id;
+};
+
 export const ppx_Discard = (debug?: string, info?: string) => {
   PPx.StayMode = 0;
   info = info ?? '';
@@ -59,7 +65,7 @@ export const atActiveEvent = {
     const cmd = `*script ":${instance},ppx_Discard",${debug},${label}`;
     _setEvent('KC_main', 'ACTIVEEVENT', `${label}_%N`, cmd, 'instantly');
   },
-  discard: discard('ACTIVEEVENT')
+  discard: _discard('ACTIVEEVENT')
 };
 
 export const atLoadEvent = {
@@ -69,7 +75,7 @@ export const atLoadEvent = {
     const cmd = `*script ":${instance},ppx_Discard",${debug},${label}`;
     _setEvent('KC_main', 'LOADEVENT', `${label}%n`, cmd, 'hold');
   },
-  discard: discard('LOADEVENT')
+  discard: _discard('LOADEVENT')
 };
 
 export const circular = <T>(array: T[]): {get(): T; discard({table, label, mapkey, cond, debug}: DiscardOptions): void} => {
@@ -82,7 +88,7 @@ export const circular = <T>(array: T[]): {get(): T; discard({table, label, mapke
 
       return value;
     },
-    discard: discard('LOADEVENT')
+    discard: _discard('LOADEVENT')
   };
 };
 

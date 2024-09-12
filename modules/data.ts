@@ -31,9 +31,9 @@ const mandatory: Mandatory = {
     const module = PPx.ScriptEngineName as ModuleName;
 
     return {
-      'JScript': 21,
-      'ClearScriptV8': 3,
-      'QuickJS': 0
+      JScript: 21,
+      ClearScriptV8: 3,
+      QuickJS: 0
     }[module];
   },
   modules: ['ppxkey', 'ppxmes', 'ppxtext', 'ppxwin'],
@@ -54,6 +54,14 @@ const uniqName = {
   }
 } as const;
 
+export const ppmTable = {
+  actions: 'S_ppm#actions',
+  global: 'S_ppm#global',
+  sources: 'S_ppm#sources',
+  staymode: 'S_ppm#staymode',
+  user: 'S_ppm#user'
+};
+
 const uniqID = {
   tempKey: 'K_ppmTemp',
   tempMenu: 'M_ppmTemp',
@@ -63,10 +71,10 @@ const uniqID = {
 } as const;
 
 const staymodeID = {
-  storeData: 80000,  // reservation. currently unused
+  storeData: 80000, // reservation. currently unused
   veHandler: 80001,
   setsel: 80002,
-  stackPPb: 80003,
+  stackPPb: 80003
 } as const;
 
 const tmp = () => {

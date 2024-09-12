@@ -181,6 +181,18 @@ mandatory
 	executables: string[]
 		必要とする実行ファイル
 
+ppmTable
+	.actions: string
+		仮想エントリリスト内で実行されるコマンド
+	.global:
+		ppmが設定するグローバル情報
+	.sources:
+		インストール済みのプラグイン情報
+	.staymode:
+		使用されているStayModeのインスタンス番号
+	.user:
+		ユーザーが変更可能な設定情報
+
 uniqName
 	.initialCfg: string
 		ppmインストール直前にPPxの設定を書き出すファイル名
@@ -492,6 +504,10 @@ path.ts
 
 	pathNormalize(path: string, sep: string) => string
 		引数で渡されたパスを<sep>で区切って返す
+
+	actualPath(path: string) => string
+		<path>の実体パスを返す
+		リンクから実体パスに変換するとき短い名前に変換される場合がある
 
 	actualPaths() => string[]
 		カーソル(マーク)パスの実体パスを返す
@@ -917,6 +933,10 @@ ppmではStayModeのインスタンス番号に80000番台を使用している
 @deprecated
 discardInstance(debounce: string, debug?: string) => void
 	atDebounce.holdへと変更
+
+getStaymodeId(name:string) => number|false
+	S_ppm#staymode:<name>に設定されたインスタンス番号を返す
+	値が 10000 以上でないときは undefined を返す
 
 ppx_Discard(debug?: string, info?: string) => void
 	atXXX関数を読み込んだときに自動的に設定される
