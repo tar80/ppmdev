@@ -22,7 +22,7 @@ export const isError = (error: boolean, value: unknown): value is string => erro
 export const isString = (value: unknown): value is string => typeof value === 'string';
 
 export const isInteger = (value: unknown): value is number => {
-  return typeof value === 'number' && Number.isFinite(value) && Math.floor(value) === value;
+  return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
 };
 
 export const isBottom = (value: unknown): value is undefined | null => value == null;

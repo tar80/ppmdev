@@ -35,6 +35,7 @@
         "noConfusingVoidType": "off",
         "noExplicitAny": "off",
         "noFallthroughSwitchClause": "warn",
+        "noGlobalIsFinite": "off",
         "useIsArray": "warn"
       }
     }
