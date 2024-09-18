@@ -25,6 +25,7 @@
         "useConst": "off",
         "useDefaultParameterLast": "off",
         "useFilenamingConvention": "off",
+        "useNumberNamespace": "off",
         "useNamingConvention": "off",
         "useTemplate": "off"
       },
@@ -33,6 +34,7 @@
         "noExplicitAny": "off",
         "noFallthroughSwitchClause": "warn",
         "noGlobalIsFinite": "off",
+        "noGlobalIsNan": "off",
         "useIsArray": "warn"
       }
     }

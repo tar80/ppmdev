@@ -46,7 +46,7 @@ export const getStaymodeId = (name: string): number | false => {
   name = name.indexOf('.') ? name.slice(0, name.indexOf('.')) : name;
   const id = Number(PPx.Extract(`%*getcust(S_ppm#staymode:${name})`));
 
-  return !Number.isNaN(id) && id > 10000 && id;
+  return !isNaN(id) && id > 10000 && id;
 };
 
 export const atDebounce = {

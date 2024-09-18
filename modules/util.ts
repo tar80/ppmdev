@@ -94,12 +94,12 @@ export const codeToChar = (v: string): string => {
 
 /** Convert hexadecimal to decimal */
 export const hexToNum = (hex: string): number | undefined => {
-  const num = Number.parseInt(hex, 16);
+  const num = parseInt(hex, 16);
 
-  return Number.isNaN(num) ? undefined : num;
+  return isNaN(num) ? undefined : num;
 };
 
 /** Convert decimal to hexadecimal */
-export const numToHex = (num: number): string | undefined => (Number.isNaN(num) ? undefined : num.toString(16));
+export const numToHex = (num: number): string | undefined => (isNaN(num) ? undefined : num.toString(16));
 
 
