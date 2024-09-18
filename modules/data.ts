@@ -56,6 +56,7 @@ const uniqName = {
 
 export const ppmTable = {
   actions: 'S_ppm#actions',
+  event: 'S_ppm#event',
   global: 'S_ppm#global',
   sources: 'S_ppm#sources',
   staymode: 'S_ppm#staymode',

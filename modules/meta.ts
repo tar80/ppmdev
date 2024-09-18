@@ -186,5 +186,6 @@ export const ppvMediaType = {
   ':TH2': 'ppx',
   ':XVBS': 'cmd',
   ':XJS': 'javascript',
-  ':XPLS': 'perl'
+  ':XPLS': 'perl',
+  ':XLF': 'json'
 } as const;

@@ -1,12 +1,16 @@
 import '@ppmdev/polyfills/arrayIndexOf.ts';
 import debug from '@ppmdev/modules/debug.ts';
 
+export const ppx_Discard = (debugMode?: string, info?: string) => {
+  PPx.StayMode = 0;
+  info = info ?? '';
+  debugMode === 'DEBUG' && PPx.linemessage(`[DEBUG] discard ${info}`);
+};
+
 type Event = 'ACTIVEEVENT' | 'LOADEVENT';
 type Condition = 'instantly' | 'once' | 'hold';
 type DiscardOptions = {table: KeysTable; label: string; mapkey?: string; cond?: Condition; debug?: string};
 type KeysTable = (typeof _keysTable)[number];
-
-const SCRIPT_PATH = "%sgu'ppmlib'\\discardStayMode.js";
 
 const _keysTable = ['KC_main', 'KV_main', 'KV_img', 'KV_crt', 'KV_page', 'KB_edit', 'K_ppe', 'K_edit'] as const;
 const _validTable = (name: KeysTable): KeysTable => (~_keysTable.indexOf(name) ? name : 'KC_main');
@@ -39,22 +43,16 @@ const _discard = (event: Event) => {
 };
 
 export const getStaymodeId = (name: string): number | false => {
+  name = name.indexOf('.') ? name.slice(0, name.indexOf('.')) : name;
   const id = Number(PPx.Extract(`%*getcust(S_ppm#staymode:${name})`));
 
   return !Number.isNaN(id) && id > 10000 && id;
 };
 
-export const ppx_Discard = (debug?: string, info?: string) => {
-  PPx.StayMode = 0;
-  info = info ?? '';
-  debug === 'DEBUG' && PPx.linemessage(`[DEBUG] discard ${info}`);
-};
-
 export const atDebounce = {
-  hold: (debounce: string, debug?: string): void => {
-    const instance = PPx.StayMode;
-    const propName = `ppm_staymode${instance}`;
-    PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script ${SCRIPT_PATH},${propName},${instance},${debug}`);
+  hold(instance: number, debugMode?: string): void {
+    const SCRIPT_NAME = 'discardStayMode.js';
+    PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *script %sgu'ppmlib'\\${SCRIPT_NAME},%n,${instance},${debugMode}`);
   }
 };
 
@@ -94,9 +92,10 @@ export const circular = <T>(array: T[]): {get(): T; discard({table, label, mapke
 
 /** @deprecated */
 export const discardInstance = (debounce: string, debug?: string): void => {
+  const SCRIPT_NAME = 'discardStayMode.js';
   const instance = PPx.StayMode;
   const propName = `ppm_staymode${instance}`;
-  PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script ${SCRIPT_PATH},${propName},${instance},${debug}`);
+  PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script %sgu'ppmlib'\\${SCRIPT_NAME},%n,${instance},${debug}`);
 };
 /** @deprecated */
 const _setEvent = (table: KeysTable, event: Event, label: string, cmd: string, cond: Condition): void => {

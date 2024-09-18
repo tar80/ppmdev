@@ -945,17 +945,14 @@ ppx_Discard(debug?: string, info?: string) => void
 	<info>にはデバッグメッセージの追加情報を指定する
 
 atDebounce = {
-  hold(debounce: string, debug?: string) => void
-	非表示状態のPPb上で<debounce>ミリ秒待機したあと
-	%sgu'ppmlib'\discardStayMode.jsを実行する
-	discardStayMode.jsは<debounce>ミリ秒待機したあと、_User:ppm_staymode<instance>
-	をチェックし、値が0ならppx_Discard経由でインスタンスを廃棄し、0以上で
-	あれば実行維持状態を<debounce>ミリ秒延期する
-	_User:ppm_staymode<instance>は延期するごとに0に更新される
+  hold(instance: string, debug?: string) => void
+	非表示状態のPPb上で%sgu'ppmlib'\discardStayMode.jsを実行する
+	discardStayMode.jsは<instance>に設定された"cache.debounce"をチェックし
+	値が"0"ならppx_Discard経由でインスタンスを廃棄する
+	値が"1000"以上なら"cache.debounce"を"0"に設定し、取得した値(ms)
+	待機し、"cache.debounce"が"0"を返すまでループを繰り返す
+	cache.debounceの値は実行元インスタンスppx_resume経由で更新する
 	<debug>の値が"DEBUG"のとき、デバッグメッセージを表示する
-	使用例は、実行元のスクリプト内でatDebouncd(<debounce>)を実行し、
-	_User:ppm_staymode<instance>=<debouce>を設定する
-	<debounce>ミリ秒内にスクリプトが再実行されれば実行維持状態が延期される
 	具体的な使用方法はadjacentDirのmoveDirectory.stay.tsを参照
 }
 
