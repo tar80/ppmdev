@@ -69,7 +69,7 @@ function configuration(dest, prod, ts, cv8) {
             },
             mangle: {
               keep_fnames: true,
-              reserved: ['ppx_resume', 'ppx_finally']
+              reserved: ['ppx_resume', 'ppx_finally', 'cache']
             },
             format: {
               comments: false,
