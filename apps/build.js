@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import {rollup} from 'rollup';
-import swc from '@rollup/plugin-swc';
-import strip from '@rollup/plugin-strip';
+import {readFile, readdir, writeFile} from 'node:fs/promises';
 import {getBabelOutputPlugin} from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
+import strip from '@rollup/plugin-strip';
+import swc from '@rollup/plugin-swc';
 import terser from '@rollup/plugin-terser';
-import {readFile, writeFile, readdir} from 'node:fs/promises';
+import {rollup} from 'rollup';
 
 const SOURCE_DIR = 'src';
 const DEV_DIR = 'dev';
@@ -56,7 +56,7 @@ function configuration(dest, prod, ts, cv8) {
           }),
         !cv8 &&
           getBabelOutputPlugin({
-            targets: {'ie': '8'},
+            targets: {ie: '8'},
             presets: [['@babel/preset-env', {loose: true, modules: false, useBuiltIns: false}]],
             plugins: [['@babel/plugin-transform-for-of', {assumeArray: true}]]
           }),
