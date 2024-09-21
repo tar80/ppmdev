@@ -12,22 +12,23 @@ type Condition = 'instantly' | 'once' | 'hold';
 type DiscardOptions = {table: KeysTable; label: string; mapkey?: string; cond?: Condition; debug?: string};
 type KeysTable = (typeof _keysTable)[number];
 
-const _keysTable = ['KC_main', 'KV_main', 'KV_img', 'KV_crt', 'KV_page', 'KB_edit', 'K_ppe', 'K_edit'] as const;
+const _keysTable = ['KC_main', 'KV_main', 'KV_img', 'KV_crt', 'KV_page', 'KB_edit', 'K_ppe', 'K_edit', 'K_lied'] as const;
 const _validTable = (name: KeysTable): KeysTable => (~_keysTable.indexOf(name) ? name : 'KC_main');
-
+const _linecust = (label: string, table: KeysTable, event: Event | 'CLOSEEVENT'): string => `*linecust ${label},${table}:${event},`;
 const _discard = (event: Event) => {
   return ({table, label, mapkey, cond = 'instantly', debug = '0'}: DiscardOptions): void => {
     const instance = PPx.StayMode;
     const ppxid = PPx.Extract('%n');
-    const parent = PPx.Extract('%FDV');
-    const _table = _validTable(table);
-    const _linecust = `*linecust ${label}${ppxid},${_table}:${event},`;
-    const _cond = {
+    const parent = PPx.Extract('%*name(C,"%FDV")');
+    const table_ = _validTable(table);
+    const atEvent = _linecust(`${label}${ppxid}`, table_, event);
+    const clearEvent = _linecust(`${label}${ppxid}`, table_, 'CLOSEEVENT');
+    const cond_ = {
       instantly: '',
       once: `*if("${ppxid}"=="%n")%:`,
-      hold: `*if("${ppxid}"=="%n")&&("${parent}"!="%FDV")%:`
-    }[cond];
-    const cmdline = [_linecust];
+      hold: `*if("${ppxid}"=="%n")&&("${parent}"!="%*name(C,"%FDV")")%:`
+    };
+    const cmdline = [atEvent, clearEvent];
 
     if (mapkey) {
       PPx.Execute(`*mapkey use,${mapkey}`);
@@ -35,15 +36,15 @@ const _discard = (event: Event) => {
     }
 
     cmdline.push(`*js ":${instance},ppx_Discard",${debug},${label}`);
-    PPx.Execute(`${_linecust}%(*if %*stayinfo(${instance})%:${_cond}${cmdline.join('%:')}%)`);
+    PPx.Execute(`${atEvent}%(*if %*stayinfo(${instance})%:${cond_[cond]}${cmdline.join('%:')}%)`);
+    PPx.Execute(`${clearEvent}%(${cond_.once}${clearEvent}%:${atEvent}%)`);
     /* NOTE: Executing LOADCUST directly resulted in a gray background in PPx198+3, so indirect execution is used. */
-    PPx.Execute(`*run -nostartmsg %0pptrayw.exe -c %%K"@LOADCUST"`);
-    // PPx.Execute('%K"@LOADCUST"');
+    PPx.Execute(`*run -breakjob -nostartmsg -wait:no %0pptrayw.exe -c %%K"@LOADCUST"`);
   };
 };
 
 export const getStaymodeId = (name: string): number | false => {
-  name = name.indexOf('.') ? name.slice(0, name.indexOf('.')) : name;
+  name = ~name.indexOf('.') ? name.slice(0, name.indexOf('.')) : name;
   const id = Number(PPx.Extract(`%*getcust(S_ppm#staymode:${name})`));
 
   return !isNaN(id) && id > 10000 && id;
@@ -95,7 +96,9 @@ export const discardInstance = (debounce: string, debug?: string): void => {
   const SCRIPT_NAME = 'discardStayMode.js';
   const instance = PPx.StayMode;
   const propName = `ppm_staymode${instance}`;
-  PPx.Execute(`*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script %sgu'ppmlib'\\${SCRIPT_NAME},%n,${instance},${debug}`);
+  PPx.Execute(
+    `*run -noppb -hide -nostartmsg %0ppbw.exe -c *wait ${debounce}%%:*script %sgu'ppmlib'\\${SCRIPT_NAME},%n,${instance},${debug}`
+  );
 };
 /** @deprecated */
 const _setEvent = (table: KeysTable, event: Event, label: string, cmd: string, cond: Condition): void => {
