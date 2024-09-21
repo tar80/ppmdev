@@ -1066,6 +1066,10 @@ numToHex(num: number) => undefined | string
 	数値を16進数に置き換えて返す
 	置き換えに失敗したときは undefined を返す
 
+tempValue(propName: string, valueSpec: string) => () => void
+	<propName>の値を取得し<valueSpec>と違ったときは<valueSpec>に更新する
+	戻り値には値を戻す(値が更新されていないときは空)の関数を返す
+
 ===============================================================================
 window.ts
 

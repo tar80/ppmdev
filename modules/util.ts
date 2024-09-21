@@ -102,4 +102,19 @@ export const hexToNum = (hex: string): number | undefined => {
 /** Convert decimal to hexadecimal */
 export const numToHex = (num: number): string | undefined => (isNaN(num) ? undefined : num.toString(16));
 
+/** Check property and update value if necessary
+ * @return `[updated, value before update]`
+ */
+export const tempValue = (propName: string, valueSpec: string): (() => void) => {
+  const propValue = PPx.Extract(`%*getcust(${propName})`);
 
+  if (propValue === valueSpec) {
+    return () => {};
+  }
+
+  PPx.Execute(`*setcust ${propName}=${valueSpec}`);
+
+  return () => {
+    PPx.Execute(`*setcust ${propName}=${propValue}`);
+  };
+};
