@@ -52,6 +52,8 @@ import type {type} from '@ppmdev/modules/types.ts'
 
 	ppm.ts		PPxオブジェクトのヘルパー関数
 
+	ppv.ts		PPv関連の関数
+
 	permission.ts	プラグインの動作条件を確認する関数
 
 	run.ts		*runコマンドのヘルパー関数
@@ -712,6 +714,25 @@ ppm
 		読み取れなかった場合は"void"を返す
 
 ===============================================================================
+ppv.ts
+
+withinPPv() => boolean
+	PPv上で実行されていれば true
+
+ppvExists(id: Letters | '') => [boolean, string]
+	PPv[<id>]が実行中かどうかを判定する
+	戻り値は、[isExist: boolean, id: string]
+
+hideTitlebar(xwin: string, idName: Letters, isExist: boolean) => string
+	PPvのタイトルバーを隠す。<isExist>がtrueなら、"*layout title"を実行し、
+	falseなら"*setcust X_win:V=B1${xwin.slice(2)}"を実行する
+	戻り値は変更された場合は<xwin>、変更されなかった場合は""(空文字)を返す
+
+capturePPv(idName: Letters, isExist: boolean, hasSync: boolean) => void
+	PPv[<idName>]を反対窓にキャプチャする。<isExist>がfalseの場合は、
+	起動後取り込む。<hasSync>がtrueの場合は起動後、連動ビューに指定する
+
+===============================================================================
 permission.ts
 
 permission
@@ -830,7 +851,7 @@ runPPb({
 	<startwith>に"bottom"を指定するとPPbのUIを実行元UIより下に配置する
 	<desc>には起動時に表示するメッセージを指定する
 	<fg>、<bg>は<desc>の文字色と背景白をAnsiColors型で指定する
-	戻り値は正常起動なら true 
+	戻り値は正常起動なら true
 
 @deprecated
 stdout({cmdline, extract = false, startmsg = false, hide = false}: Stdout)
