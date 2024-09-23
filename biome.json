@@ -32,6 +32,7 @@
       },
       "suspicious": {
         "noConfusingVoidType": "off",
+        "noControlCharactersInRegex": "warn",
         "noExplicitAny": "off",
         "noFallthroughSwitchClause": "warn",
         "noGlobalIsFinite": "off",
