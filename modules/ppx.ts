@@ -5,17 +5,17 @@ import {execSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-class DummyArguments implements PPxArguments {
+class DummyArguments implements PPx.PPxArguments {
   private num = 4;
   public length: number = process.argv.length - 4;
-  public Length: number = this.length;
-  public count: number = this.length;
   public Count: number = this.length;
+  public value: string = this.Item(this.num);
 
   constructor(index?: number) {
     this.num = index || this.num;
     this.length = process.argv.length - 4;
   }
+  // @ts-ignore
   Item(int?: number): string {
     this.num = int || this.num;
     return process.argv[this.num] || '';
@@ -24,13 +24,15 @@ class DummyArguments implements PPxArguments {
   atEnd(): boolean {
     return this.num === process.argv.length;
   }
+  moveFirst(): void {
+    this.num = 4;
+  }
   moveNext(): void {
     this.num++;
   }
   Reset(): void {
     this.num = 4;
   }
-  value: string = this.Item();
 }
 
 const fso = {
@@ -72,7 +74,7 @@ const PPx = {
   ScriptName: __dirname + '\\this-is-jest-mock.js',
   Argument: (num = 0): string => String(process.argv[num + 4] || ''),
   //FIXME! wakarimasen
-  Arguments: new DummyArguments(),
+  Arguments: DummyArguments,
   //FIXME! nanimowakarimasen
   CreateObject: (strProgID: string, strPrefix?: string): any => {
     strPrefix;

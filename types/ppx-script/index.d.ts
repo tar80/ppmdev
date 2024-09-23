@@ -1,23 +1,11 @@
 // Type definitions for PPx Script Module R21
 // Definitions by: tar80 (https://github.com/tar80)
 
-declare var PPx: PPx;
 type HighlightNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type CommentNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
-interface PPxArguments {
-  atEnd(): boolean;
-  moveNext(): void;
-  Reset(): void;
-  Item(int: number): string;
-  value: string;
-  length: number;
-  Length: number;
-  count: number;
-  Count: number;
-}
-
-declare namespace PPxEntry {
-  enum Attribute {
+declare namespace PPx {
+  enum FileAttribute {
     Normal = 0,
     ReadOnly = 1,
     Hidden = 2,
@@ -30,152 +18,159 @@ declare namespace PPxEntry {
     Reparse = 1024,
     Compressed = 2048,
     Offline = 4096,
-    NoIndex = 8192
+    NoIndex = 8192,
+    Encrypted = 16384
   }
-}
-declare interface PPx {
-  // Cursor();
-  Argument: PPxArguments['Item'];
-  Arguments: PPxArguments;
-  CreateObject<K extends keyof ActiveXObjectNameMap = any>(strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
-  ConnectObject(objEventSource: any, strPrefix: string): void;
-  DisconnectObject(object: any): void;
-  GetObject<K extends keyof ActiveXObjectNameMap>(strPathname: string, strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
-  GetObject(pathname: string, progid: string): object;
-  Echo(...args: any[]): void;
-  Include(): any;
-  linemessage(text: any): void;
-  log(text: any): void;
-  report(text: any): void;
-  //TODO: update later
-  Enumerator: any;
-  Entry: typeof entry;
-  EntryInsert(index: number, name: string): void;
-  EntryFirstMark(): number;
-  EntryNextMark(): number;
-  EntryPrevMark(): number;
-  EntryLastMark(): number;
-  Execute(param: string): number;
-  Extract(param?: string): string;
-  GetComboItemCount(id: number | undefined): number;
-  getValue(key: string): string;
-  setValue(key: string, value: string | number): void;
-  getIValue(key: string): string;
-  setIValue(key: string, value: string | number): void;
-  getProcessValue(key: string): string;
-  setProcessValue(key: string, value: string | number): void;
-  GetFileInformation(filename: string, mode?: number): string;
-  LoadCount(type: 0 | 1): number;
-  Pane: typeof pane;
-  SetPopLineMessage(message: any): void;
-  Sleep(intTime: number): void;
-  StayMode: number;
-  // Quit(exitcode?: number): void;
-  Quit: typeof process.exit;
-  Clipboard: string;
-  readonly CodeType: number;
-  readonly ComboIDName: string;
-  readonly DirectoryType: number;
-  readonly DriveVolumeLabel: string;
-  readonly DriveFreeSize: number;
-  readonly DriveTotalSize: number;
-  readonly EntryAllCount: number;
-  readonly EntryAttributes: number;
-  EntryComment: string;
-  readonly EntryDisplayX: number;
-  readonly EntryDisplayY: number;
-  readonly EntryDisplayTop: number;
-  readonly EntryDisplayCount: number;
-  readonly EntryDisplayFiles: number;
-  readonly EntryDisplayDirectories: number;
-  EntryHighlight: HighlightNumber;
-  EntryIndex: number;
-  readonly EntryName: string;
-  EntryMark: number;
-  readonly EntryMarkCount: number;
-  readonly EntryMarkSize: number;
-  EntryState: number;
-  EntryExtColor: number;
-  readonly ModuleVersion: number;
-  readonly EntrySize: number;
-  readonly PointIndex: number;
-  readonly PointType: number;
-  readonly PPxVersion: number;
-  readonly ReentryCount: number;
-  result: any;
-  readonly ScriptEngineName: string;
-  readonly ScriptEngineVersion: string;
-  readonly ScriptFullName: string;
-  readonly ScriptName: string;
-  SlowMode: number;
-  SyncView: number;
-  readonly WindowDirection: number;
-  WindowIDName: string;
-}
 
-declare namespace entry {
-  function atEnd(): typeof entry;
-  function moveNext(): typeof entry;
-  function Reset(): typeof entry;
-  function IndexFrom(IDName: string): number;
-  function Information(): string;
-  function Item(index: number | string): typeof entry;
-  function GetComment(id: number | string): string;
-  function SetComment(id: number | string, value: string): void;
-  function FirstMark(): number;
-  function NextMark(): number;
-  function PrevMark(): number;
-  function LastMark(): number;
-  var AllEntry: typeof entry;
-  var AllMark: typeof entry;
-  var Attributes: PPxEntry.Attribute;
-  var Comment: string;
-  var Count: number;
-  var DateCreated: Date;
-  var DateLastAccessed: Date;
-  var DateLastModified: Date;
-  var ExtColor: number;
-  var Hide: number;
-  var Highlight: HighlightNumber;
-  var length: number;
-  var Index: number;
-  var Mark: number;
-  var Name: string;
-  var ShortName: string;
-  var Size: number;
-  var State: number;
-}
+  interface PPxEnum {
+    moveNext(): void;
+    atEnd(): boolean;
+    Reset(): void;
+  }
 
-declare namespace pane {
-  function atEnd(): number;
-  function moveNext(): number;
-  function Reset(): number;
-  function Item(index: number | string): typeof pane;
-  function IndexFrom(IDName: string): number;
-  var Count: number;
-  var length: number;
-  var index: number;
-  var Tab: typeof tab;
-}
+  interface PPxArguments extends PPxEnum {
+    Item(int?: number): PPxArguments;
+    readonly length: number;
+    readonly Count: number;
+    readonly value: string;
+  }
 
-declare namespace tab {
-  function atEnd(): number;
-  function moveNext(): number;
-  function Reset(): number;
-  function item(index: number | string): number;
+  interface PPxEntry extends PPxEnum {
+    Item(index: number | string): PPxEntry;
+    readonly Count: number;
+    readonly length: number;
+    Index: number;
+    IndexFrom(filename: string): number;
+    Mark: number;
+    FirstMark(): number;
+    NextMark(): number;
+    PrevMark(): number;
+    LastMark(): number;
+    readonly Name: string;
+    readonly ShortName: string;
+    readonly Attributes: FileAttribute;
+    readonly Size: number;
+    readonly DateCreated: Date;
+    readonly DateLastAccessed: Date;
+    readonly DateLastModified: Date;
+    State: number;
+    ExtColor: number;
+    Highlight: HighlightNumber;
+    Comment: string;
+    GetComment(id: CommentNumber | string): string;
+    SetComment(id: CommentNumber | string, value: string): void;
+    Information: string;
+    readonly Hide: number;
+    readonly AllEntry: PPxEntry;
+    readonly AllMark: PPxEntry;
+  }
+
+  interface PPxPane extends PPxEnum {
+    (index: number | string): PPxPane;
+    Item(index: number | string): PPxPane;
+    readonly Count: number;
+    readonly length: number;
+    index: number;
+    IndexFrom(IDName: string): number;
+    readonly Tab: PPxTab;
+    GroupIndex: number;
+    GroupName: string;
+    readonly GroupCount: number;
+    GroupList: string;
+  }
+
+  interface PPxTab extends PPxEnum {
+    Item(index: number | string): PPxTab;
+    readonly Count: number;
+    readonly length: number;
+    index: number;
+    IndexFrom(IDName: string): number;
+    readonly Pane: number;
+    readonly IDName: string;
+    readonly Name: string;
+    Type: number;
+    Lock: number;
+    TotalCount: number;
+    TotalPPcCount: number;
+    BackColor: number;
+    Color: number;
+    Execute(param: string): number;
+    Extract(param: string): string;
+  }
+
+  const Arguments: PPxArguments;
+  const Entry: PPxEntry;
+  const Pane: PPxPane;
+  const Tab: PPxTab;
+  const Enumerator: EnumeratorConstructor;
+  function Argument(int: number): string;
+  function CreateObject<K extends keyof ActiveXObjectNameMap = any>(strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
+  function ConnectObject(objEventSource: any, strPrefix: string): void;
+  function DisconnectObject(object: any): void;
+  function GetObject<K extends keyof ActiveXObjectNameMap>(strPathname: string, strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
+  function GetObject(pathname: string, progid: string): object;
+  function Echo(...args: any[]): void;
+  function Sleep(intTime: number): void;
+  const Quit: typeof process.exit;
+  const CodeType: number;
+  const ModuleVersion: number;
+  const PPxVersion: number;
+  const ScriptName: string;
+  const ScriptFullName: string;
+  const ScriptEngineName: string;
+  const ScriptEngineVersion: string;
+  var result: string | number;
+  const ReentryCount: number;
+  var StayMode: number;
   function Execute(param: string): number;
-  function Extract(param: string): string;
-  function IndexFrom(IDName: string): number;
-  var BackColor: number;
-  var Color: number;
-  var Count: number;
-  var length: number;
-  var Lock: number;
-  var IDName: string;
-  var index: number;
-  var Name: string;
-  var Pane: number;
-  var TotalCount: number;
-  var TotalPPcCount: number;
-  var Type: number;
+  function Extract(param?: string): string;
+  function SetPopLineMessage(message: any): void;
+  function linemessage(message: any): void;
+  function log(message: any): void;
+  function report(message: any): void;
+  function GetFileInformation(filename: string, mode?: number): string;
+  var Clipboard: any;
+  function setValue(key: string, value: string | number): void;
+  function getValue(key: string): string;
+  function setProcessValue(key: string, value: string | number): void;
+  function getProcessValue(key: string): string;
+  function setIValue(key: string, value: string | number): void;
+  function getIValue(key: string): string;
+  function Include(filename: string): void;
+  var WindowIDName: string;
+  const WindowDirection: number;
+  const EntryDisplayTop: number;
+  const EntryDisplayX: number;
+  const EntryDisplayY: number;
+  function GetComboItemCount(id?: number): number;
+  const ComboIDName: string;
+  var SlowMode: number;
+  var SyncView: number;
+  const DriveVolumeLabel: string;
+  const DriveTotalSize: number;
+  const DriveFreeSize: number;
+  const DirectoryType: number;
+  function LoadCount(type?: 0 | 1): number;
+  const EntryAllCount: number;
+  const EntryDisplayCount: number;
+  const EntryMarkCount: number;
+  const EntryMarkSize: number;
+  const EntryDisplayDirectories: number;
+  const EntryDisplayFiles: number;
+  function EntryInsert(index: number, name: string): void;
+  var EntryIndex: number;
+  var EntryMark: number;
+  const EntryName: string;
+  const EntryAttributes: number;
+  const EntrySize: number;
+  var EntryState: number;
+  var EntryExtColor: number;
+  var EntryHighlight: HighlightNumber;
+  var EntryComment: string;
+  function EntryFirstMark(): number;
+  function EntryNextMark(): number;
+  function EntryPrevMark(): number;
+  function EntryLastMark(): number;
+  const PointType: number;
+  const PointIndex: number;
 }

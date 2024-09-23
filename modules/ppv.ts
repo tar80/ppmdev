@@ -1,5 +1,5 @@
-import {isEmptyStr, isZero} from './guard';
-import type {Letters} from './types';
+import {isEmptyStr, isZero} from './guard.ts';
+import type {Letters} from './types.ts';
 
 export const withinPPv = (): boolean => PPx.Extract('%n').indexOf('V') === 0;
 

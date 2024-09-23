@@ -1,4 +1,4 @@
-import {isEmptyStr} from './guard';
+import {isEmptyStr} from './guard.ts';
 
 const TABLE_ID = 'S_ppm#event';
 
