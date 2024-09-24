@@ -1,11 +1,11 @@
-<plugin-name>
+Support for git operations on aux:
 
-Author: 
-License: 
-Repository: 
+Author: tar80
+License: MIT
+Repository: tar80/ppm-gitmode
 ===============================================================================
 
-<前書き>
+WIP
 
 ===============================================================================
 動作環境
