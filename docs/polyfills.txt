@@ -28,6 +28,9 @@ stringPrecedes.ts (独自)
 stringRepeat.ts
 	String.prototype.repeat();
 
+stringPadStart.ts
+	String.prototype.padStart();
+
 Array
 
 arrayIsArray.ts

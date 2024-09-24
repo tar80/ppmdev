@@ -10,7 +10,7 @@ declare global {
 
 if (!String.prototype.precedes) {
   String.prototype.precedes = function (str: string): string {
-    const len = this.indexOf(str);
+    var len = this.indexOf(str);
 
     if (!~len) {
       return this;
