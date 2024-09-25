@@ -1,4 +1,4 @@
-import {isEmptyStr, isInteger} from '@ppmdev/modules/guard.ts';
+import {isInteger} from '@ppmdev/modules/guard.ts';
 
 /**
  * Set specified window postion

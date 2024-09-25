@@ -35,6 +35,10 @@ declare namespace PPx {
     readonly value: string;
   }
 
+  interface PPxEnumerator extends Enumerator {
+    <T = any>(collection: { Item(index: any): T }): Enumerator<T>;
+  }
+
   interface PPxEntry extends PPxEnum {
     Item(index: number | string): PPxEntry;
     readonly Count: number;
@@ -102,7 +106,7 @@ declare namespace PPx {
   const Entry: PPxEntry;
   const Pane: PPxPane;
   const Tab: PPxTab;
-  const Enumerator: EnumeratorConstructor;
+  const Enumerator: PPxEnumerator;
   function Argument(int: number): string;
   function CreateObject<K extends keyof ActiveXObjectNameMap = any>(strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
   function ConnectObject(objEventSource: any, strPrefix: string): void;
