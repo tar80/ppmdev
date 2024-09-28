@@ -227,7 +227,7 @@ export const runPPb = ({
   }
 
   if (desc && !isEmptyStr(desc)) {
-    cmdArr.push(`${echoExe} -e "${colorlize({esc: true, message: desc, fg, bg})} \\n"`);
+    cmdArr.push(`${echoExe} -e "${colorlize({esc: true, message: desc, fg, bg})}"`);
   }
 
   cmdArr.push(opts.postcmd);

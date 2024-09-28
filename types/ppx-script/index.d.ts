@@ -22,25 +22,25 @@ declare namespace PPx {
     Encrypted = 16384
   }
 
-  interface PPxEnum {
-    moveNext(): void;
+  interface PPxEnum<T> {
+    [Symbol.iterator](): Iterator<T>;
+    Item<U extends this>(index?: string | number): PPxEnum<U>;
+    moveNext(): IteratorResult<T>;
     atEnd(): boolean;
     Reset(): void;
   }
 
-  interface PPxArguments extends PPxEnum {
-    Item(int?: number): PPxArguments;
+  interface PPxArguments<T> extends PPxEnum<PPxArguments<T>> {
     readonly length: number;
     readonly Count: number;
     readonly value: string;
   }
 
   interface PPxEnumerator extends Enumerator {
-    <T = any>(collection: { Item(index: any): T }): Enumerator<T>;
+    <T = any>(collection: {Item(index: any): T}): Enumerator<T>;
   }
 
-  interface PPxEntry extends PPxEnum {
-    Item(index: number | string): PPxEntry;
+  interface PPxEntry<T> extends PPxEnum<PPxEntry<T>> {
     readonly Count: number;
     readonly length: number;
     Index: number;
@@ -65,26 +65,32 @@ declare namespace PPx {
     SetComment(id: CommentNumber | string, value: string): void;
     Information: string;
     readonly Hide: number;
-    readonly AllEntry: PPxEntry;
-    readonly AllMark: PPxEntry;
+    readonly AllEntry: PPxEntry<T>;
+    readonly AllMark: PPxEntry<T>;
   }
 
-  interface PPxPane extends PPxEnum {
-    (index: number | string): PPxPane;
-    Item(index: number | string): PPxPane;
+  interface PPxPaneEnum<T> {
+    [Symbol.iterator](): Iterator<T>;
+    Item<U extends this>(index?: string | number): PPxPaneEnum<U>;
+    //FIXME! I didn't know how to type
+    Tab: any;
+    moveNext(): IteratorResult<T>;
+    atEnd(): boolean;
+    Reset(): void;
+  }
+
+  interface PPxPane<T> extends PPxPaneEnum<PPxPane<T>> {
     readonly Count: number;
     readonly length: number;
     index: number;
     IndexFrom(IDName: string): number;
-    readonly Tab: PPxTab;
     GroupIndex: number;
     GroupName: string;
     readonly GroupCount: number;
     GroupList: string;
   }
 
-  interface PPxTab extends PPxEnum {
-    Item(index: number | string): PPxTab;
+  interface PPxPaneTab<T> extends PPxPaneEnum<PPxPaneTab<T>> {
     readonly Count: number;
     readonly length: number;
     index: number;
@@ -102,10 +108,10 @@ declare namespace PPx {
     Extract(param: string): string;
   }
 
-  const Arguments: PPxArguments;
-  const Entry: PPxEntry;
-  const Pane: PPxPane;
-  const Tab: PPxTab;
+  const Arguments: PPxArguments<string | number>;
+  const Entry: PPxEntry<string | number>;
+  const Pane: PPxPane<string | number>;
+  const Tab: PPxPaneTab<string|number>
   const Enumerator: PPxEnumerator;
   function Argument(int: number): string;
   function CreateObject<K extends keyof ActiveXObjectNameMap = any>(strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
