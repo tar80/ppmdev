@@ -72,8 +72,8 @@ declare namespace PPx {
   interface PPxPaneEnum<T> {
     [Symbol.iterator](): Iterator<T>;
     Item<U extends this>(index?: string | number): PPxPaneEnum<U>;
-    //FIXME! I didn't know how to type
-    Tab: any;
+    //FIXME: its's probably incorrect
+    Tab: PPxTab<string|number>
     moveNext(): IteratorResult<T>;
     atEnd(): boolean;
     Reset(): void;
@@ -90,7 +90,12 @@ declare namespace PPx {
     GroupList: string;
   }
 
-  interface PPxPaneTab<T> extends PPxPaneEnum<PPxPaneTab<T>> {
+  interface PPxTab<T>  {
+    [Symbol.iterator](): Iterator<T>;
+    Item<U extends this>(index?: T): PPxTab<U>;
+    moveNext(): IteratorResult<T>;
+    atEnd(): boolean;
+    Reset(): void;
     readonly Count: number;
     readonly length: number;
     index: number;
@@ -111,7 +116,7 @@ declare namespace PPx {
   const Arguments: PPxArguments<string | number>;
   const Entry: PPxEntry<string | number>;
   const Pane: PPxPane<string | number>;
-  const Tab: PPxPaneTab<string|number>
+  const Tab: PPxTab<string | number>;
   const Enumerator: PPxEnumerator;
   function Argument(int: number): string;
   function CreateObject<K extends keyof ActiveXObjectNameMap = any>(strProgID: K, strPrefix?: string): ActiveXObjectNameMap[K];
