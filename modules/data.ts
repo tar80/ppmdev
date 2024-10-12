@@ -9,8 +9,17 @@ const info = {
   ppmSubID: 'Q'
 } as const;
 
+export const ppmTable = {
+  actions: 'S_ppm#actions',
+  event: 'S_ppm#event',
+  global: 'S_ppm#global',
+  sources: 'S_ppm#sources',
+  staymode: 'S_ppm#staymode',
+  user: 'S_ppm#user'
+};
+
 const useLanguage = (): 'en' | 'ja' => {
-  let lang = PPx.Extract('%*getcust(S_ppm#global:lang)') as 'en' | 'ja';
+  let lang = PPx.Extract(`%*getcust(${ppmTable.global}:lang)`) as 'en' | 'ja';
   return lang === 'en' || lang === 'ja' ? lang : info.language;
 };
 
@@ -24,7 +33,7 @@ type Mandatory = {
   readonly executables: string[];
 };
 const mandatory: Mandatory = {
-  ppxVersion: 19700,
+  ppxVersion: 19900,
   codeType: 1,
   scriptType: 0,
   scriptModule() {
@@ -53,15 +62,6 @@ const uniqName = {
     return `cache\\${PPx.Extract('%0').slice(3).replace(/\\/g, '@')}`;
   }
 } as const;
-
-export const ppmTable = {
-  actions: 'S_ppm#actions',
-  event: 'S_ppm#event',
-  global: 'S_ppm#global',
-  sources: 'S_ppm#sources',
-  staymode: 'S_ppm#staymode',
-  user: 'S_ppm#user'
-};
 
 const uniqID = {
   tempKey: 'K_ppmTemp',

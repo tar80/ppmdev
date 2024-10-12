@@ -39,7 +39,7 @@ const _discard = (event: Event) => {
     PPx.Execute(`${atEvent}%(*if %*stayinfo(${instance})%:${cond_[cond]}${cmdline.join('%:')}%)`);
     PPx.Execute(`${clearEvent}%(${cond_.once}${clearEvent}%:${atEvent}%)`);
     /* NOTE: Executing LOADCUST directly resulted in a gray background in PPx198+3, so indirect execution is used. */
-    PPx.Execute(`*run -breakjob -nostartmsg -wait:no %0pptrayw.exe -c %%K"@LOADCUST"`);
+    PPx.Execute(`*launch -breakjob -nostartmsg -wait:no %0pptrayw.exe -c %%K"@LOADCUST"`);
   };
 };
 
