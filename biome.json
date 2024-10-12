@@ -35,6 +35,7 @@
         "noControlCharactersInRegex": "warn",
         "noExplicitAny": "off",
         "noFallthroughSwitchClause": "warn",
+        "noFocusedTests": "warn",
         "noGlobalIsFinite": "off",
         "noGlobalIsNan": "off",
         "useIsArray": "warn"

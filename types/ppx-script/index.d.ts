@@ -134,7 +134,7 @@ declare namespace PPx {
   const ScriptFullName: string;
   const ScriptEngineName: string;
   const ScriptEngineVersion: string;
-  var result: string | number;
+  var result: any;
   const ReentryCount: number;
   var StayMode: number;
   function Execute(param: string): number;

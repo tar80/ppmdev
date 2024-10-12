@@ -5,7 +5,7 @@ import {execSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-class DummyArguments implements PPx.PPxArguments {
+class DummyArguments {
   private num = 4;
   public length: number = process.argv.length - 4;
   public Count: number = this.length;
