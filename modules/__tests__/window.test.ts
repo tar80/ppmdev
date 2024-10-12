@@ -1,4 +1,4 @@
-import {winpos, winsize} from '../window'
+import {winpos, winsize} from '../window.ts'
 
 describe('winpos()', function () {
   it('do not specify position. the return position value must be an empty string', () => {

@@ -1,7 +1,7 @@
-import PPx from '@ppmdev/modules/ppx';
+import PPx from '@ppmdev/modules/ppx.ts';
 global.PPx = Object.create(PPx);
-import {ppm} from '@ppmdev/modules/ppm';
 import {execSync} from 'node:child_process';
+import {ppm} from '@ppmdev/modules/ppm.ts';
 import {expandSource} from '@ppmdev/modules/source.ts';
 
 jest.mock('@ppmdev/modules/io');
@@ -10,8 +10,12 @@ const ppxe = PPx.Execute;
 const ppxt = PPx.Extract;
 
 describe('ppm.echo() and ppm.question()', function () {
-  beforeEach(() => (PPx.Execute = jest.fn()));
-  afterAll(() => (PPx.Execute = ppxe));
+  beforeEach(() => {
+    PPx.Execute = jest.fn();
+  });
+  afterAll(() => {
+    PPx.Execute = ppxe;
+  });
   it('pass an empty string in the title. the return title must be "ppm"', function () {
     ppm.echo('', 'test');
     expect(PPx.Execute).toHaveBeenCalledWith(`%"ppm" %OC %I"test"`);
@@ -39,8 +43,12 @@ describe('ppm.echo() and ppm.question()', function () {
 // });
 
 describe('ppm.execute()', function () {
-  beforeEach(() => (PPx.Execute = jest.fn()));
-  afterAll(() => (PPx.Execute = ppxe));
+  beforeEach(() => {
+    PPx.Execute = jest.fn();
+  });
+  afterAll(() => {
+    PPx.Execute = ppxe;
+  });
   it('passed an empty string to the command. the return level must be 1', () => {
     const errorlevel = ppm.execute('c', '');
     expect(1).toBe(errorlevel);
@@ -50,23 +58,23 @@ describe('ppm.execute()', function () {
     // @ts-ignore
     global.ppm_test_run = 2;
     ppm.execute('.', '*clearchange');
-    expect(PPx.Execute).toHaveBeenLastCalledWith(`*execute B,*linemessage %%bx1b[2F[Execute] .,%(*clearchange%)`);
+    expect(PPx.Execute).toHaveBeenLastCalledWith('*execute B,*linemessage %%bx1b[2F[Execute] .,%(*clearchange%)');
     // @ts-ignore
     global.ppm_test_run = undefined;
   });
   it('specify self id', () => {
     ppm.execute('.', '*clearchange');
-    expect(PPx.Execute).toHaveBeenLastCalledWith(`*clearchange`);
+    expect(PPx.Execute).toHaveBeenLastCalledWith('*clearchange');
     expect(PPx.Execute).toHaveBeenCalledTimes(1);
   });
   it('specify an empty id', () => {
     ppm.execute('', '*clearchange');
-    expect(PPx.Execute).toHaveBeenLastCalledWith(`*execute ,*clearchange`);
+    expect(PPx.Execute).toHaveBeenLastCalledWith('*execute ,*clearchange');
     expect(PPx.Execute).toHaveBeenCalledTimes(1);
   });
   it('specify id', () => {
     ppm.execute('CB', '*clearchange');
-    expect(PPx.Execute).toHaveBeenLastCalledWith(`*execute CB,*clearchange`);
+    expect(PPx.Execute).toHaveBeenLastCalledWith('*execute CB,*clearchange');
     expect(PPx.Execute).toHaveBeenCalledTimes(1);
   });
 });
@@ -94,7 +102,7 @@ describe('ppm.extract()', function () {
   it('performing replacements', () => {
     let str = 'test test test';
     let rgx = '\\s';
-    let rep = `\\\\ `;
+    let rep = '\\\\ ';
 
     expect(ppm.extract('.', `%*regexp("${str}","/${rgx}/${rep}/g")`)).toEqual([0, 'test\\ test\\ test']);
     expect(ppm.extract('CA', `%(%*regexp("${str}","/${rgx}/${rep}/")%)`)).toEqual([0, 'test\\ test test']);
@@ -145,8 +153,12 @@ describe('ppm.getcust()', function () {
 });
 
 describe('deletecust()', function () {
-  beforeEach(() => (PPx.Execute = jest.fn()));
-  afterAll(() => (PPx.Execute = ppxe));
+  beforeEach(() => {
+    PPx.Execute = jest.fn();
+  });
+  afterAll(() => {
+    PPx.Execute = ppxe;
+  });
 
   it('pass invalid id. the return level must be 13', () => {
     expect(ppm.deletecust('Jest_mock')).toBe(13);
@@ -190,7 +202,9 @@ describe('deletecust()', function () {
 // });
 
 describe('ppm.getvalue()', function () {
-  afterAll(() => (PPx.Execute = ppxe));
+  afterAll(() => {
+    PPx.Execute = ppxe;
+  });
   it('pass an empty string. the return level must be 1', () => {
     expect(ppm.getvalue('.', 'i', '')).toEqual([1, '']);
   });
@@ -210,7 +224,9 @@ describe('ppm.getvalue()', function () {
 });
 
 describe('ppm.setvalue()', function () {
-  afterAll(() => (PPx.Execute = ppxe));
+  afterAll(() => {
+    PPx.Execute = ppxe;
+  });
   it('check the returns', () => {
     jest.spyOn(PPx, 'Execute').mockImplementation((param) => {
       const ppc = `${process.env.PPX_DIR}\\ppcw.exe`;

@@ -1,6 +1,6 @@
-import PPx from '@ppmdev/modules/ppx';
+import PPx from '@ppmdev/modules/ppx.ts';
 global.PPx = Object.create(PPx);
-import {read, readLines, stdout} from '../io';
+import {read, readLines, stdout} from '../io.ts';
 
 jest.mock('@ppmdev/modules/io');
 

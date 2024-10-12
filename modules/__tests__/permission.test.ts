@@ -1,7 +1,7 @@
-import PPx from '@ppmdev/modules/ppx';
+import PPx from '@ppmdev/modules/ppx.ts';
 global.PPx = Object.create(PPx);
-import {permission, existence} from '../permission';
-import {colorlize} from '../ansi';
+import {permission, existence} from '../permission.ts';
+import {colorlize} from '../ansi.ts';
 
 const pass = colorlize({esc: false, message: ' PASS ', fg: 'green'});
 const drop = colorlize({esc: false, message: ' DROP ', fg: 'red'});

@@ -1,4 +1,4 @@
-import {isEmptyObj, isEmptyStr, isError, isInteger, isBottom, isZero, withinRange} from '../guard';
+import {isEmptyObj, isEmptyStr, isError, isInteger, isBottom, isZero, withinRange} from '../guard.ts';
 
 describe('isEmptyStr()', function () {
   it('must return true for an empty string', function () {

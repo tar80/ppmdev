@@ -1,7 +1,7 @@
-import PPx from '@ppmdev/modules/ppx';
+import PPx from '@ppmdev/modules/ppx.ts';
 global.PPx = Object.create(PPx);
-import {type Source, expandSource, setSource, owSource, sourceComp} from '@ppmdev/modules/source';
-import {execSync} from 'child_process';
+import {type Source, expandSource, owSource, setSource, sourceComp} from '@ppmdev/modules/source.ts';
+import {execSync} from 'node:child_process';
 
 const ppxe = PPx.Execute;
 
@@ -27,7 +27,9 @@ describe('expandSource()', function () {
 });
 
 describe('owSource()', function () {
-  afterAll(() => (PPx.Execute = ppxe));
+  afterAll(() => {
+    PPx.Execute = ppxe;
+  });
   it('change some of the values', () => {
     jest.spyOn(PPx, 'Execute').mockImplementation((param) => {
       const ppc = `${process.env.PPX_DIR}\\ppcw.exe`;
@@ -48,8 +50,8 @@ describe('setSource()', function () {
   const name = 'ppx-plugin-manager';
   const path = 'c:\\bin\\ppm\\repo';
   let spy: any;
-  beforeEach(() => (spy = jest.spyOn(PPx, 'Execute')));
-  afterAll(() => (PPx.Execute = ppxe));
+  beforeEach(() => {spy = jest.spyOn(PPx, 'Execute')});
+  afterAll(() => {PPx.Execute = ppxe});
   it('set remote plugin', () => {
     const source: Source = {name, enable: true, setup: false, version: '0.1.0', location: 'remote', path};
     setSource(source);
@@ -82,5 +84,5 @@ describe('sourceComp.getPrefix()', function () {
 });
 
 // describe('sourceComp.fix()', function () {
-//   
+//
 // });

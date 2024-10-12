@@ -1,6 +1,6 @@
-import PPx from '@ppmdev/modules/ppx';
+import PPx from '@ppmdev/modules/ppx.ts';
 global.PPx = Object.create(PPx);
-import {safeArgs} from '../argument';
+import {safeArgs} from '../argument.ts';
 
 describe('safeArgs()', function () {
   it('no arguments. must return the default value', () => {

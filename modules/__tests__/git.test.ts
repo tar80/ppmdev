@@ -1,9 +1,9 @@
-import PPx from '@ppmdev/modules/ppx';
+import PPx from '@ppmdev/modules/ppx.ts';
 global.PPx = Object.create(PPx);
-import {gitCmd, repoRoot, branchHead, branchName} from '../git';
-import {execSync} from 'child_process';
-import fs from 'fs';
-import os from 'os';
+import {execSync} from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import {branchHead, branchName, gitCmd, repoRoot} from '../git.ts';
 
 jest.mock('@ppmdev/modules/io');
 
@@ -27,9 +27,7 @@ describe('gitCmd()', function () {
       subcmd: 'log',
       opts: '-10 --online'
     };
-    expect(gitCmd(obj)).toBe(
-      'git -C "c:\\ppmdev" -c core.quotepath=false -c core.editor=false -c core.ignorecase=false log -10 --online'
-    );
+    expect(gitCmd(obj)).toBe('git -C "c:\\ppmdev" -c core.quotepath=false -c core.editor=false -c core.ignorecase=false log -10 --online');
   });
 });
 
@@ -50,7 +48,7 @@ describe('repoRoot()', function () {
 
 describe('branchName()', function () {
   const tempDir = `${os.tmpdir()}\\ppmdevtest`;
-  const detachedHead = 'head~'
+  const detachedHead = 'head~';
   beforeAll(() => {
     !fs.existsSync(tempDir) && fs.mkdirSync(tempDir);
     execSync(`git -C ${tempDir} init`);
@@ -68,7 +66,7 @@ describe('branchName()', function () {
     expect(branchName(root)).toEqual(['main', '']);
   });
   it('pass the temp repository root path. the return value meust be ["<detached head>", "Detached"]', () => {
-    expect(branchName(tempDir)).toEqual([detachedHead, 'Detached'])
+    expect(branchName(tempDir)).toEqual([detachedHead, 'Detached']);
   });
 });
 

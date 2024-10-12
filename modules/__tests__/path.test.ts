@@ -1,6 +1,6 @@
-import PPx from '@ppmdev/modules/ppx';
+import PPx from '@ppmdev/modules/ppx.ts';
 global.PPx = Object.create(PPx);
-import {actualParentDirectory, extractFileName, pathJoin, pathNormalize, pathSelf} from '../path';
+import {actualParentDirectory, extractFileName, pathJoin, pathNormalize, pathSelf} from '../path.ts';
 
 describe('pathSelf()', function () {
   it('PPx.ScriptName returned the full path', () => {
