@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import process from 'node:process'
 import {readFile, readdir, writeFile} from 'node:fs/promises';
 import {getBabelOutputPlugin} from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';

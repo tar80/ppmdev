@@ -4,7 +4,7 @@
     "lib": ["esnext"],
     "module": "esnext",
     "moduleDetection": "legacy",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "allowJs": true,
     "sourceMap": true,

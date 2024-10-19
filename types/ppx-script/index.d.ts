@@ -24,7 +24,7 @@ declare namespace PPx {
 
   interface PPxEnum<T> {
     [Symbol.iterator](): Iterator<T>;
-    Item<U extends this>(index?: string | number): PPxEnum<U>;
+    Item<U extends this>(index?: string | number): PPxArguments<U>['value'];
     moveNext(): IteratorResult<T>;
     atEnd(): boolean;
     Reset(): void;

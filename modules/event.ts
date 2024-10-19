@@ -1,6 +1,7 @@
+import {ppmTable} from './data.ts';
 import {isEmptyStr} from './guard.ts';
 
-const TABLE_ID = 'S_ppm#event';
+const TABLE_ID = ppmTable.event;
 
 export const onceEvent = (subid: string, cmdline: string): (() => void) => {
   PPx.Execute(`*setcust ${TABLE_ID}:${subid}=%(${cmdline}%)`);
