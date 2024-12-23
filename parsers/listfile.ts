@@ -49,6 +49,17 @@ export const getFiletime = (data: string): string => {
   return `${bit.high}.${bit.low}`;
 };
 
+const _localDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${year},${month},${day},${hours},${minutes},${seconds}`;
+};
+
 const _rangeProp = (prop: 'H' | 'M', num: HighlightNumber | MarkRange | undefined, min: number, max: number) => {
   if (!isInteger(num)) {
     return '';
@@ -74,7 +85,8 @@ export const buildLfItem = ({name, sname = '', att = 0, date, ext, hl, mark, com
   }
 
   if (!date) {
-    date = new Date().toLocaleString().replace(/\D+/g, ',');
+    date = _localDate(new Date())
+    // date = new Date().toLocaleString().replace(/\D+/g, ',');
   }
 
   if (Number.isNaN(att)) {
@@ -240,7 +252,7 @@ export const createLfMeta = ({
   return meta;
 };
 
-export type LfMetadata = ReturnType<typeof getLfMeta>
+export type LfMetadata = ReturnType<typeof getLfMeta>;
 
 export const getLfMeta = (
   lines: string[]
